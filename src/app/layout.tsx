@@ -10,6 +10,8 @@ import FloatingPetals from "@/components/FloatingPetals";
 import { JsonLd } from "@/components/JsonLd";
 import { getLocalBusinessSchema } from "@/lib/structured-data";
 import PostHogProvider from "@/components/PostHogProvider";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -109,6 +111,8 @@ export default function RootLayout({
           </div>
           <CartDrawer />
         </PostHogProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
