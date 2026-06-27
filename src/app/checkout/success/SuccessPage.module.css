@@ -1,0 +1,239 @@
+.main {
+  padding: 100px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  background: #fff;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 64px 48px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  text-align: center;
+}
+
+/* ── Animated checkmark ── */
+.checkWrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2.5px solid var(--rose-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 28px;
+}
+
+@keyframes checkPop {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.checkmark {
+  font-size: 2.4rem;
+  line-height: 1;
+  color: var(--rose-500);
+  animation: checkPop 0.4s ease both;
+  display: block;
+}
+
+/* ── Title ── */
+.title {
+  font-family: var(--ff-display);
+  font-size: 2.2rem;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--rose-600), var(--rose-400));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  margin-bottom: 28px;
+}
+
+/* ── Order number row ── */
+.orderNumRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--rose-600);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+/* ── Copy button ── */
+.copyBtn {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1.5px solid var(--rose-500);
+  color: var(--rose-600);
+  background: transparent;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.copyBtn:hover {
+  background: var(--rose-500);
+  color: #fff;
+}
+
+/* ── Items list ── */
+.itemsList {
+  list-style: decimal;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* ── Next steps / scheduling box (reused) ── */
+.nextSteps {
+  text-align: left;
+  margin-bottom: 16px;
+  padding: 24px;
+  border: 1px solid rgba(45, 10, 30, 0.05);
+  border-radius: var(--radius);
+}
+
+.nextSteps h3 {
+  font-size: 1rem;
+  margin-bottom: 16px;
+  color: var(--text-main);
+}
+
+.nextSteps ul {
+  list-style: disc;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nextSteps li {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* ── Whish payment box ── */
+.whishBox {
+  background: rgba(233, 30, 140, 0.06);
+  border: 1.5px solid var(--rose-400, #f472b6);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: left;
+  margin-top: 20px;
+}
+
+.whishTitle {
+  color: var(--rose-700, #be185d);
+  font-weight: 600;
+  margin-bottom: 12px;
+  font-size: 1rem;
+}
+
+.whishStep {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  align-items: flex-start;
+}
+
+.whishStep span:first-child {
+  color: var(--rose-500);
+  font-weight: 700;
+  flex-shrink: 0;
+  min-width: 18px;
+}
+
+/* ── WhatsApp link ── */
+.whatsappLink {
+  color: #25D366;
+  font-weight: 600;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: opacity 0.15s;
+}
+
+.whatsappLink:hover {
+  opacity: 0.8;
+}
+
+/* ── No order state ── */
+.noOrder {
+  text-align: center;
+  padding: 48px 0;
+  color: var(--text-muted);
+}
+
+.noOrder p {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+/* ── CTA buttons ── */
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 36px;
+}
+
+/* ── Preserved legacy classes ── */
+.orderInfo {
+  background: var(--cream-100);
+  padding: 16px;
+  border-radius: var(--radius);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.orderInfo strong {
+  color: var(--rose-700);
+  letter-spacing: 1px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .card {
+    padding: 40px 24px;
+    box-shadow: none;
+    border: none;
+    background: transparent;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .orderNumRow {
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+  }
+}

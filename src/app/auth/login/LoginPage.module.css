@@ -1,0 +1,128 @@
+.main {
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: calc(var(--nav-h) + 40px) 0 80px;
+}
+
+.blob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(233, 30, 140, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: -1;
+  filter: blur(40px);
+}
+
+.contentWrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.loginCard {
+  background: #fff;
+  width: min(440px, 100%);
+  padding: 48px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid rgba(233, 30, 140, 0.05);
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  margin-bottom: 32px;
+}
+
+.logo {
+  font-size: 2.5rem;
+  color: var(--rose-500);
+  margin-bottom: 16px;
+  display: inline-block;
+}
+
+.title {
+  font-family: var(--ff-display);
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.body {
+  margin-bottom: 32px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.6;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(45, 10, 30, 0.1);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  border-top: 1px solid rgba(45, 10, 30, 0.06);
+  padding-top: 24px;
+}
+
+.link {
+  color: var(--rose-500);
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.link:hover {
+  color: var(--rose-700);
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .loginCard {
+    padding: 36px 24px;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+    background: transparent;
+  }
+  
+  .main {
+    background: #fff;
+    padding: 40px 0;
+  }
+}

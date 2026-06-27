@@ -1,0 +1,38 @@
+/* GoogleSignInButton.module.css */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.loading {
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.error {
+  font-size: 0.82rem;
+  color: #dc2626;
+  background: #fee2e2;
+  border-left: 3px solid #ef4444;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  line-height: 1.5;
+}
+
+.disclaimer {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.55;
+}
+
+.link {
+  color: var(--rose-500);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--transition);
+}
+.link:hover { color: var(--rose-700); }

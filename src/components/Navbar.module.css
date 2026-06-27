@@ -1,0 +1,240 @@
+/* Navbar.module.css — scoped styles for the Navbar component */
+
+.navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  height: var(--nav-h);
+  background: transparent;
+  transition: background var(--transition), box-shadow var(--transition);
+}
+
+/* Scrolled = frosted glass */
+.scrolled {
+  background: rgba(15, 6, 8, 0.94);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow: 0 2px 28px rgba(0, 0, 0, 0.35);
+}
+
+/* Interior pages — always solid */
+.solid {
+  background: rgba(15, 6, 8, 0.96);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--px);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+/* ── Logo ── */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.logoFlower {
+  color: var(--rose-400);
+  font-size: 1.35rem;
+  animation: spinSlow 12s linear infinite;
+  display: inline-block;
+  will-change: transform;
+}
+@keyframes spinSlow { to { transform: rotate(360deg); } }
+
+.logoText {
+  font-family: var(--ff-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -0.01em;
+}
+
+/* ── Desktop Links ── */
+.links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.link {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.88rem;
+  font-weight: 400;
+  padding: 8px 13px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+  position: relative;
+  white-space: nowrap;
+}
+.link::after {
+  content: '';
+  position: absolute;
+  bottom: 4px; left: 13px; right: 13px;
+  height: 1.5px;
+  background: var(--rose-400);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition);
+  border-radius: 2px;
+}
+.link:hover { color: #fff; }
+.link:hover::after { transform: scaleX(1); }
+.active { color: #fff !important; }
+.active::after { transform: scaleX(1) !important; }
+
+/* ── Auth Slot ── */
+.authSlot {
+  display: contents;
+}
+
+/* ── Right Actions ── */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+/* Cart button */
+.cartBtn {
+  position: relative;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.cartBtn:hover {
+  background: rgba(233, 30, 140, 0.2);
+  color: #fff;
+  border-color: rgba(233, 30, 140, 0.4);
+}
+
+.badge {
+  position: absolute;
+  top: -4px; right: -4px;
+  min-width: 18px; height: 18px;
+  background: var(--rose-500);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: var(--radius-xl);
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 4px;
+  line-height: 1;
+  border: 2px solid rgba(15, 6, 8, 0.9);
+  animation: badgePop 0.3s var(--ease);
+}
+@keyframes badgePop {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+/* CTA button — inherits .btn .btn-primary from globals */
+.cta {
+  font-size: 0.875rem;
+  padding: 10px 22px;
+  min-height: 40px;
+  text-decoration: none;
+}
+
+/* ── Hamburger ── */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 44px; height: 44px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 6px;
+}
+.hamburger span {
+  display: block;
+  width: 22px; height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  transition: var(--transition);
+  transform-origin: center;
+}
+
+/* Animated X */
+.barTop  { transform: translateY(7px) rotate(45deg); }
+.barMid  { opacity: 0; transform: scaleX(0); }
+.barBot  { transform: translateY(-7px) rotate(-45deg); }
+
+/* ── Mobile Backdrop ── */
+.mobileBackdrop {
+  position: fixed; inset: 0; z-index: 990;
+  background: rgba(15, 6, 8, 0.65);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── Mobile Menu ── */
+.mobileMenu {
+  position: fixed;
+  top: var(--nav-h); left: 0; right: 0;
+  z-index: 995;
+  background: rgba(15, 6, 8, 0.97);
+  backdrop-filter: blur(20px);
+  padding: 16px 20px 28px;
+  display: flex; flex-direction: column; gap: 4px;
+  transform: translateY(-10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.3s var(--ease), opacity 0.3s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.mobileOpen {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobileLink {
+  display: block;
+  padding: 13px 16px;
+  border-radius: var(--radius);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+  font-weight: 400;
+  transition: var(--transition);
+}
+.mobileLink:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
+.mobileLinkActive { color: #fff !important; background: rgba(233, 30, 140, 0.12) !important; }
+
+.mobileCta {
+  margin-top: 12px;
+  text-decoration: none;
+  justify-content: center;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .links { display: none; }
+  .cta   { display: none; }
+  .hamburger { display: flex; }
+}
+
+@media (max-width: 480px) {
+  .logoText { font-size: 1.3rem; }
+}

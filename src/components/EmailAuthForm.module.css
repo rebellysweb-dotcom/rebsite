@@ -1,0 +1,100 @@
+.wrap {
+  width: 100%;
+}
+
+.tabs {
+  display: flex;
+  border-radius: var(--radius-md);
+  background: rgba(45, 10, 30, 0.05);
+  padding: 4px;
+  margin-bottom: 20px;
+  gap: 4px;
+}
+
+.tab,
+.tabActive {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 12px;
+  border-radius: calc(var(--radius-md) - 2px);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-muted);
+}
+
+.tabActive {
+  background: #fff;
+  color: var(--rose-600, #e91e8c);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.tab:hover {
+  color: var(--text-main);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.error {
+  font-size: 0.85rem;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm, 6px);
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.successBox {
+  text-align: center;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.successIcon {
+  font-size: 2.5rem;
+  margin-bottom: 4px;
+}
+
+.successBox strong {
+  font-size: 1.1rem;
+  color: var(--text-main);
+}
+
+.successBox p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  max-width: 280px;
+}
+
+.successBox em {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--rose-600, #e91e8c);
+}
+
+.resend {
+  margin-top: 8px;
+  background: none;
+  border: none;
+  color: var(--rose-500);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 4px;
+}
+
+.resend:hover {
+  color: var(--rose-700);
+}
