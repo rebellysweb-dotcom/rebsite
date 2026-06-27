@@ -153,8 +153,8 @@ export async function POST(request: Request) {
     const randomStr = randomBytes(4).toString('hex').toUpperCase();
     const order_number = `REB-${dateStr}-${randomStr}`;
 
-    // Insert order
-    const { data: orderData, error: orderError } = await supabase
+    // Insert order — use service role so RLS doesn't block (public INSERT policy removed)
+    const { data: orderData, error: orderError } = await adminClient
       .from('orders')
       .insert({
         order_number,
@@ -197,13 +197,13 @@ export async function POST(request: Request) {
       event_id: item.event_id || null,
     }));
 
-    const { error: itemsError } = await supabase
+    const { error: itemsError } = await adminClient
       .from('order_items')
       .insert(orderItems);
 
     if (itemsError) {
       console.error('Order items insertion error:', itemsError);
-      await supabase.from('orders').delete().eq('id', orderData.id);
+      await adminClient.from('orders').delete().eq('id', orderData.id);
       return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
     }
 
@@ -223,8 +223,7 @@ export async function POST(request: Request) {
     }
 
     if (emailResult.status === 'fulfilled' && emailResult.value === true) {
-      const updateClient = await createClient();
-      await updateClient.from('orders').update({ email_sent: true }).eq('id', orderData.id);
+      await adminClient.from('orders').update({ email_sent: true }).eq('id', orderData.id);
     }
 
     return NextResponse.json({
