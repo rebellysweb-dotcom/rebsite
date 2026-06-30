@@ -129,27 +129,30 @@ function SuccessContent() {
         </div>
       )}
 
-      {/* Whish payment instructions */}
-      {isWhish && (
-        <div className={styles.whishBox}>
-          <p className={styles.whishTitle}>Whish Payment Instructions</p>
-          <div className={styles.whishStep}>
-            <span>1.</span>
-            <span>Open your Whish app</span>
-          </div>
-          <div className={styles.whishStep}>
-            <span>2.</span>
-            <span>Send payment to <strong>+961 76 585 028</strong> (Rebelly&apos;s)</span>
-          </div>
+      {/* Payment info */}
+      <div className={styles.whishBox}>
+        <p className={styles.whishTitle}>What happens next?</p>
+        <div className={styles.whishStep}>
+          <span>1.</span>
+          <span>Check your email for your order confirmation</span>
+        </div>
+        <div className={styles.whishStep}>
+          <span>2.</span>
+          <span>Our team will contact you to confirm the final price &amp; delivery details</span>
+        </div>
+        {isWhish && (
           <div className={styles.whishStep}>
             <span>3.</span>
-            <span>Include your order number <strong>{snapshot.orderNumber}</strong> as the payment note</span>
+            <span>Pay via Whish to <strong>+961 76 585 028</strong> — include order # <strong>{snapshot.orderNumber}</strong></span>
           </div>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '12px' }}>
-            Our team will confirm once payment is received via WhatsApp.
-          </p>
-        </div>
-      )}
+        )}
+        {!isWhish && (
+          <div className={styles.whishStep}>
+            <span>3.</span>
+            <span>Pay cash upon {snapshot.fulfillment === 'pickup' ? 'pickup' : 'delivery'}</span>
+          </div>
+        )}
+      </div>
 
       {/* WhatsApp link */}
       <div style={{ marginTop: '28px' }}>

@@ -52,7 +52,10 @@ export async function sendOrderConfirmationEmail(order: Order): Promise<boolean>
           <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,#e91e8c,#c2185b);padding:40px 40px 32px;text-align:center;">
-              <div style="font-size:2rem;margin-bottom:8px;">✿</div>
+              ${process.env.LOGO_EMAIL_URL
+                ? `<img src="${process.env.LOGO_EMAIL_URL}" alt="Rebelly's Flower Shop" width="140" height="auto" style="display:block;margin:0 auto 16px;max-height:60px;object-fit:contain;" />`
+                : `<div style="font-size:2rem;margin-bottom:8px;">✿</div>`
+              }
               <h1 style="margin:0;color:#fff;font-size:1.6rem;font-weight:600;letter-spacing:0.5px;">Order Confirmed</h1>
               <p style="margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:0.95rem;">Thank you for choosing Rebelly's Flower Shop</p>
             </td>
@@ -69,7 +72,7 @@ export async function sendOrderConfirmationEmail(order: Order): Promise<boolean>
             <td style="padding:32px 40px;">
               <p style="margin:0 0 24px;color:#4a2c3d;font-size:1rem;">Hi <strong>${esc(order.customer_name)}</strong>,</p>
               <p style="margin:0 0 24px;color:#6b4a5a;line-height:1.6;">
-                We've received your order and our team will review it shortly. You'll receive a confirmation via WhatsApp with the final price, delivery details, and payment instructions.
+                We've received your order and our team will be in touch shortly to confirm the final price, delivery details, and payment.
               </p>
 
               <!-- Items Table -->
@@ -191,7 +194,10 @@ export async function sendAdminNewOrderEmail(order: Order, adminEmail: string): 
           <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,#e91e8c,#c2185b);padding:36px 40px 28px;text-align:center;">
-              <div style="font-size:1.8rem;margin-bottom:8px;">✿</div>
+              ${process.env.LOGO_EMAIL_URL
+                ? `<img src="${process.env.LOGO_EMAIL_URL}" alt="Rebelly's Flower Shop" width="120" height="auto" style="display:block;margin:0 auto 14px;max-height:50px;object-fit:contain;" />`
+                : `<div style="font-size:1.8rem;margin-bottom:8px;">✿</div>`
+              }
               <h1 style="margin:0;color:#fff;font-size:1.4rem;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;">New Order</h1>
               <p style="margin:8px 0 0;color:rgba(255,255,255,0.9);font-size:1.1rem;font-weight:600;letter-spacing:2px;">Invoice #${esc(order.order_number)}</p>
             </td>

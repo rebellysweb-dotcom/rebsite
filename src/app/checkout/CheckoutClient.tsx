@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/cart';
-import WhishModal from '@/components/WhishModal';
 import styles from './CheckoutClient.module.css';
 
 interface CheckoutClientProps {
@@ -11,14 +10,11 @@ interface CheckoutClientProps {
   settings: any;
 }
 
-export default function CheckoutClient({ products, settings }: CheckoutClientProps) {
+export default function CheckoutClient({ products }: CheckoutClientProps) {
   const router = useRouter();
-  const { items, addItem, updateQuantity, removeItem, clearCart, totalUsd } = useCartStore();
-  
+  const { items, addItem, updateQuantity, removeItem, clearCart } = useCartStore();
+
   const [loading, setLoading] = useState(false);
-  const [showWhishModal, setShowWhishModal] = useState(false);
-  const [orderNumber, setOrderNumber] = useState('');
-  const [whatsappFallback, setWhatsappFallback] = useState('');
 
   const [formData, setFormData] = useState({
     customer_name: '',
@@ -29,12 +25,20 @@ export default function CheckoutClient({ products, settings }: CheckoutClientPro
     delivery_date: '',
     delivery_time: '',
     notes: '',
+    payment_method: 'whish' as 'whish' | 'cash',
   });
+
+  // Products not already in cart — shown as suggestions
+  const cartIds = useMemo(() => new Set(items.map(i => i.id)), [items]);
+  const suggestions = useMemo(
+    () => products.filter(p => !cartIds.has(p.id)).slice(0, 3),
+    [products, cartIds]
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) {
-      alert('Please add at least one item before sending your order.');
+      alert('Please add at least one item to your order.');
       return;
     }
 
@@ -46,7 +50,6 @@ export default function CheckoutClient({ products, settings }: CheckoutClientPro
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          payment_method: 'whish',
           items: items.map(i => ({
             id: i.id,
             name: i.name,
@@ -59,41 +62,12 @@ export default function CheckoutClient({ products, settings }: CheckoutClientPro
       });
 
       const result = await response.json();
-      
       if (!response.ok) throw new Error(result.error);
 
-      // Save order number for the success page
-      setOrderNumber(result.orderNumber);
-
-      // Open WhatsApp
-      const whatsappNum = settings?.whatsapp_number || '96176585028';
-      const itemLines = items.map(i => `- ${i.name} x${i.quantity}`).join('\n');
-      
-      const message = [
-        "Hello Rebelly's, I would like to place an order:",
-        '',
-        itemLines,
-        '',
-        `Name: ${formData.customer_name}`,
-        `Phone: ${formData.customer_phone}`,
-        `Fulfillment: ${formData.fulfillment}`,
-        formData.delivery_address ? `Area/address: ${formData.delivery_address}` : 'Area/address: To be confirmed',
-        formData.delivery_date ? `Requested date: ${formData.delivery_date}` : 'Date: As soon as possible',
-        formData.delivery_time ? `Preferred time: ${formData.delivery_time}` : '',
-        formData.notes ? `Notes: ${formData.notes}` : 'Notes: None',
-        '',
-        'Please confirm availability, final price, delivery fee, and payment method.'
-      ].filter(l => l !== '').join('\n');
-
-      const waUrl = `https://wa.me/${whatsappNum}?text=${encodeURIComponent(message)}`;
-      const waWindow = window.open(waUrl, '_blank', 'noopener,noreferrer');
-      if (!waWindow) setWhatsappFallback(waUrl);
-
-      // Store order snapshot before clearing cart
       const snapshot = {
         orderNumber: result.orderNumber,
         items: items.map(i => ({ name: i.name, quantity: i.quantity })),
-        paymentMethod: 'whish',
+        paymentMethod: formData.payment_method,
         customerName: formData.customer_name,
         fulfillment: formData.fulfillment,
         deliveryDate: formData.delivery_date,
@@ -101,19 +75,12 @@ export default function CheckoutClient({ products, settings }: CheckoutClientPro
       };
       sessionStorage.setItem('rebellys_order_snapshot', JSON.stringify(snapshot));
 
-      setShowWhishModal(true);
-      setLoading(false);
-      
+      clearCart();
+      router.push(`/checkout/success?order=${result.orderNumber}`);
     } catch (err: any) {
       alert(err.message || 'Failed to submit order. Please try again.');
       setLoading(false);
     }
-  };
-
-  const closeWhishModal = () => {
-    setShowWhishModal(false);
-    clearCart();
-    router.push(`/checkout/success?order=${orderNumber}`);
   };
 
   return (
@@ -123,15 +90,15 @@ export default function CheckoutClient({ products, settings }: CheckoutClientPro
           <div>
             <h1 className="section-title">Build Your <em>Flower Order</em></h1>
             <p className="section-subtitle" style={{ maxWidth: '680px' }}>
-              Choose from Rebelly's current collections, add delivery or pickup details, and send the order to WhatsApp. The shop confirms freshness, price, delivery fee, and local payment method before preparing it.
+              Choose your arrangements, fill in delivery details, and place your order — you'll receive a confirmation email and our team will be in touch to finalise everything.
             </p>
           </div>
           <div className={styles.checkoutNote}>
             <strong>Order Process</strong>
-            <span>1. Build your order here</span>
-            <span>2. Send request via WhatsApp</span>
-            <span>3. Confirm details & pay</span>
-            <span>4. Flowers are arranged & sent!</span>
+            <span>1. Add items to your order</span>
+            <span>2. Fill in your details</span>
+            <span>3. Place order — get email confirmation</span>
+            <span>4. Flowers arranged &amp; delivered!</span>
           </div>
         </div>
       </section>
@@ -181,7 +148,7 @@ export default function CheckoutClient({ products, settings }: CheckoutClientPro
                   <div key={item.id} className={styles.cartItem}>
                     <div>
                       <strong>{item.name}</strong>
-                      <span>Price confirmed by WhatsApp</span>
+                      <span>Price confirmed by shop</span>
                     </div>
                     <div className="qty-ctrl">
                       <button type="button" className="qty-btn" disabled={item.quantity <= 1} onClick={() => updateQuantity(item.id, item.quantity - 1)}>−</button>
@@ -193,6 +160,33 @@ export default function CheckoutClient({ products, settings }: CheckoutClientPro
                 ))
               )}
             </div>
+
+            {/* Product suggestions */}
+            {suggestions.length > 0 && items.length > 0 && (
+              <div style={{ marginBottom: '20px' }}>
+                <p style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--rose-500)', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: '10px' }}>
+                  People also add
+                </p>
+                <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
+                  {suggestions.map(p => (
+                    <div key={p.id} style={{ minWidth: '130px', background: 'var(--surface-alt, #fdf6f9)', borderRadius: '10px', padding: '10px', border: '1px solid rgba(233,30,140,.1)', flexShrink: 0 }}>
+                      {p.image_url && (
+                        <img src={p.image_url} alt={p.name} style={{ width: '100%', height: '72px', objectFit: 'cover', borderRadius: '6px', marginBottom: '8px' }} loading="lazy" />
+                      )}
+                      <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px', lineHeight: 1.3 }}>{p.name}</p>
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        style={{ width: '100%', fontSize: '0.75rem', padding: '6px 0', justifyContent: 'center' }}
+                        onClick={() => addItem(p)}
+                      >
+                        + Add
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className={styles.checkoutForm}>
               <div className="form-group" style={{ marginBottom: '16px' }}>
@@ -312,6 +306,34 @@ export default function CheckoutClient({ products, settings }: CheckoutClientPro
                 </p>
               </div>
 
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label className="form-label">Payment Method <span className="required">*</span></label>
+                <div className="radio-group">
+                  <div className="radio-pill">
+                    <input
+                      type="radio"
+                      id="pm-whish"
+                      name="payment_method"
+                      value="whish"
+                      checked={formData.payment_method === 'whish'}
+                      onChange={() => setFormData({ ...formData, payment_method: 'whish' })}
+                    />
+                    <label htmlFor="pm-whish">📱 Whish</label>
+                  </div>
+                  <div className="radio-pill">
+                    <input
+                      type="radio"
+                      id="pm-cash"
+                      name="payment_method"
+                      value="cash"
+                      checked={formData.payment_method === 'cash'}
+                      onChange={() => setFormData({ ...formData, payment_method: 'cash' })}
+                    />
+                    <label htmlFor="pm-cash">💵 Cash</label>
+                  </div>
+                </div>
+              </div>
+
               <div className="form-group" style={{ marginBottom: '24px' }}>
                 <label className="form-label" htmlFor="notes">Special Notes (Optional)</label>
                 <textarea
@@ -325,28 +347,16 @@ export default function CheckoutClient({ products, settings }: CheckoutClientPro
               </div>
 
               <button type="submit" className="btn btn-primary" style={{ width: '100%', fontSize: '1rem' }} disabled={loading || items.length === 0}>
-                {loading ? <span className="spinner"></span> : 'Send via WhatsApp'}
+                {loading ? <span className="spinner"></span> : 'Place Order'}
               </button>
-              {whatsappFallback && (
-                <p style={{ marginTop: '12px', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-                  Popup blocked.{' '}
-                  <a href={whatsappFallback} target="_blank" rel="noopener noreferrer">
-                    Tap here to send via WhatsApp
-                  </a>
-                </p>
-              )}
+              <p style={{ marginTop: '10px', fontSize: '0.78rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+                You'll receive a confirmation email. Our team will contact you to confirm details.
+              </p>
             </form>
           </div>
         </div>
       </section>
 
-      <WhishModal
-        isOpen={showWhishModal}
-        onClose={closeWhishModal}
-        settings={settings || { whish_number: '96176585028', lbp_rate: '89500', whatsapp_number: '96176585028', shop_phone: '96176585028' }}
-        totalUsd={0}
-        orderNumber={orderNumber}
-      />
     </main>
   );
 }
