@@ -18,7 +18,18 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      const forwardedHost = request.headers.get('x-forwarded-host'); // Original hostname
+      const ALLOWED_HOSTS = new Set([
+        'rebellys.com',
+        'www.rebellys.com',
+        ...(process.env.NEXT_PUBLIC_SITE_URL
+          ? [new URL(process.env.NEXT_PUBLIC_SITE_URL).host]
+          : []),
+      ])
+
+      const rawForwardedHost = request.headers.get('x-forwarded-host')
+      const forwardedHost =
+        rawForwardedHost && ALLOWED_HOSTS.has(rawForwardedHost) ? rawForwardedHost : null
+
       const isLocalEnv = process.env.NODE_ENV === 'development';
       if (isLocalEnv) {
         // we can be sure that next-url and origin are the same

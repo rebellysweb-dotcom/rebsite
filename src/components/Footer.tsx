@@ -111,7 +111,7 @@ export default function Footer() {
             </address>
 
             <a
-              href="https://maps.app.goo.gl/rebellys"
+              href="https://maps.app.goo.gl/aq7CZ26re22c4KQx7"
               target="_blank"
               rel="noopener noreferrer"
               className={`btn btn-sm ${styles.mapsBtn}`}

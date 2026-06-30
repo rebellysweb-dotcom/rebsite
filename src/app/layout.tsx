@@ -6,10 +6,12 @@ import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import EventBanner from "@/components/EventBanner";
 import ScrollAnimations from "@/components/ScrollAnimations";
-import FloatingPetals from "@/components/FloatingPetals";
+import dynamic from "next/dynamic";
 import { JsonLd } from "@/components/JsonLd";
 import { getLocalBusinessSchema } from "@/lib/structured-data";
 import PostHogProvider from "@/components/PostHogProvider";
+
+const FloatingPetals = dynamic(() => import("@/components/FloatingPetals"), { ssr: false });
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -39,10 +41,10 @@ export const metadata: Metadata = {
     default: "Rebelly's Flower Shop | Florist in Zalka, Lebanon",
   },
   description:
-    "Order fresh bouquets, floral gift boxes, wedding flowers, and event arrangements from Rebelly's Flower Shop on Saydeh Street in Zalka, Lebanon. Delivery across nearby Metn areas.",
+    "Order fresh bouquets, wedding flowers, and gift arrangements from Rebelly's Flower Shop in Zalka, Lebanon. Delivery across the Metn area.",
   keywords: [
     "flower shop Lebanon", "florist Zalka", "bouquets Beirut", "floral arrangements",
-    "wedding flowers Lebanon", "gift flowers", "Rebellys", "محل زهور لبنان",
+    "wedding flowers Lebanon", "gift flowers", "Rebellys",
   ],
   robots: { index: true, follow: true },
   openGraph: {

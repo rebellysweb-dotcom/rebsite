@@ -4,6 +4,20 @@ import { requireAdmin } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
+const SLUG_RE = /^[a-z0-9-]{1,100}$/
+
+function isAllowedImageUrl(url: string): boolean {
+  try {
+    const u = new URL(url)
+    return (
+      u.protocol === 'https:' &&
+      (u.hostname.endsWith('.supabase.co') || u.hostname === 'lh3.googleusercontent.com')
+    )
+  } catch {
+    return false
+  }
+}
+
 // GET /api/admin/products — list all products (including inactive)
 export async function GET() {
   try {
@@ -39,6 +53,14 @@ export async function POST(request: Request) {
 
     if (!name || !slug) {
       return NextResponse.json({ error: 'name and slug are required' }, { status: 400 });
+    }
+
+    if (!SLUG_RE.test(slug)) {
+      return NextResponse.json({ error: 'slug must be lowercase alphanumeric with hyphens only' }, { status: 400 });
+    }
+
+    if (image_url && !isAllowedImageUrl(image_url)) {
+      return NextResponse.json({ error: 'image_url must be from an allowed domain' }, { status: 400 });
     }
 
     const { data: product, error } = await supabase

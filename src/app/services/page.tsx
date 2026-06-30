@@ -1,12 +1,20 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
+import { JsonLd } from '@/components/JsonLd';
+import { getBreadcrumbSchema } from '@/lib/structured-data';
 
 export const metadata: Metadata = {
   title: 'Flower Delivery, Weddings & Events | Rebelly\'s Zalka',
-  description: 'Rebelly\'s provides flower delivery, in-store pickup, custom orders, wedding flowers, and event floral installations around Zalka, Jal El Dib, Antelias, Dbayeh, Dora, and Metn.',
+  description: 'Rebelly\'s offers flower delivery, in-store pickup, custom orders, wedding flowers, and event floral installations across Zalka, Antelias, Dbayeh, and Metn.',
   alternates: {
     canonical: 'https://rebellys.com/services',
+  },
+  openGraph: {
+    title: 'Flower Delivery, Weddings & Events | Rebelly\'s Zalka',
+    description: 'Rebelly\'s offers flower delivery, in-store pickup, custom orders, wedding flowers, and event floral installations across Zalka, Antelias, Dbayeh, and Metn.',
+    images: [{ url: 'https://rebellys.com/images/shop_interior.png', width: 1200, height: 630, alt: "Rebelly's flower shop" }],
+    type: 'website',
   },
 };
 
@@ -16,6 +24,10 @@ export const revalidate = 3600;
 export default function ServicesPage() {
   return (
     <div style={{ padding: '6rem var(--px) 8rem', background: 'var(--cream)', minHeight: '100vh' }}>
+      <JsonLd data={getBreadcrumbSchema([
+        { name: 'Home', url: 'https://rebellys.com' },
+        { name: 'Services', url: 'https://rebellys.com/services' },
+      ])} />
       <section className="container" aria-label="Our Services">
         <div className="section-header" data-animate="fadeUp">
           <span className="section-tag">How We Serve You</span>

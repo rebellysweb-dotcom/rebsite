@@ -6,6 +6,8 @@ import type { Order } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
+// TODO: Replace with Upstash Redis for persistence across Lambda cold starts
+// npm i @upstash/ratelimit @upstash/redis + set UPSTASH_REDIS_REST_URL/TOKEN in Vercel env
 // Simple in-memory rate limiter — ephemeral per Lambda warm instance.
 // Prevents trivial scripted abuse; a persistent store (Upstash KV) would cover cold starts.
 const _ipBucket = new Map<string, { count: number; ts: number }>();
@@ -27,7 +29,10 @@ function checkRateLimit(ip: string): boolean {
 export async function POST(request: Request) {
   try {
     // H-2: Rate limit by IP
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown';
+    const ip =
+      request.headers.get('x-real-ip') ??
+      request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
+      'unknown';
     if (!checkRateLimit(ip)) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
@@ -60,6 +65,14 @@ export async function POST(request: Request) {
       payment_method,
       // total_usd intentionally NOT accepted from client — computed server-side (H-1)
     } = body;
+
+    // Email validation
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+    if (customer_email !== null && customer_email !== undefined) {
+      if (typeof customer_email !== 'string' || !EMAIL_RE.test(customer_email) || customer_email.length > 254) {
+        return NextResponse.json({ error: 'customer_email is invalid' }, { status: 400 })
+      }
+    }
 
     // Input validation
     if (typeof customer_name !== 'string' || customer_name.length < 1 || customer_name.length > 200) {
@@ -184,6 +197,21 @@ export async function POST(request: Request) {
     }
 
     // Insert order items with server-verified prices
+    for (const item of items) {
+      if (typeof item.name !== 'string' || item.name.length < 1 || item.name.length > 200) {
+        return NextResponse.json({ error: 'item.name must be a string between 1 and 200 characters' }, { status: 400 })
+      }
+      if (item.image_url) {
+        try {
+          const u = new URL(item.image_url)
+          if (u.protocol !== 'https:' || !u.hostname.endsWith('.supabase.co')) {
+            return NextResponse.json({ error: 'item image_url must be a Supabase storage URL' }, { status: 400 })
+          }
+        } catch {
+          return NextResponse.json({ error: 'item image_url is not a valid URL' }, { status: 400 })
+        }
+      }
+    }
     const orderItems = items.map((item: {
       id: string; name: string; quantity: number;
       image_url?: string; is_event_product?: boolean; event_id?: string;

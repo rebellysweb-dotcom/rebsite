@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return {
       title: `${event.name} Menu | Rebelly's Flower Shop`,
       description: `Exclusive menu for ${event.name} at Rebelly's Flower Shop.`,
-      robots: { index: false, follow: false },
+      robots: { index: true, follow: true },
     };
   } catch {
     return { title: "Event | Rebelly's Flower Shop" };

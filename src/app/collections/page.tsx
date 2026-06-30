@@ -3,13 +3,19 @@ import { Suspense } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import ProductCard from '@/components/ProductCard';
 import { JsonLd } from '@/components/JsonLd';
-import { getProductSchema } from '@/lib/structured-data';
+import { getProductSchema, getBreadcrumbSchema } from '@/lib/structured-data';
 
 export const metadata: Metadata = {
   title: 'Flower Collections | Bouquets & Gift Boxes in Zalka',
   description: 'Explore Rebelly\'s romantic bouquets, floral gift boxes, mixed arrangements, and heart-shaped rose displays for delivery or pickup in Zalka and nearby areas.',
   alternates: {
     canonical: 'https://rebellys.com/collections',
+  },
+  openGraph: {
+    title: 'Flower Collections | Bouquets & Gift Boxes in Zalka',
+    description: 'Explore Rebelly\'s romantic bouquets, floral gift boxes, mixed arrangements, and heart-shaped rose displays for delivery or pickup in Zalka and nearby areas.',
+    images: [{ url: 'https://rebellys.com/images/mixed_bouquet.png', width: 1200, height: 630, alt: "Rebelly's flower collections" }],
+    type: 'website',
   },
 };
 
@@ -78,6 +84,10 @@ function GridSkeleton() {
 export default function CollectionsPage() {
   return (
     <div style={{ padding: '6rem var(--px) 8rem', background: 'var(--cream)', minHeight: '100vh' }}>
+      <JsonLd data={getBreadcrumbSchema([
+        { name: 'Home', url: 'https://rebellys.com' },
+        { name: 'Collections', url: 'https://rebellys.com/collections' },
+      ])} />
       <div className="container">
         <div className="section-header" data-animate="fadeUp">
           <span className="section-tag">What We Offer</span>

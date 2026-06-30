@@ -22,31 +22,31 @@ export function getLocalBusinessSchema() {
     openingHoursSpecification: [
       {
         '@type': 'OpeningHoursSpecification',
-        dayOfWeek: [
-          'Monday',
-          'Tuesday',
-          'Wednesday',
-          'Thursday',
-          'Friday',
-          'Saturday',
-        ],
-        opens: '09:00',
-        closes: '20:00',
-      },
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Sunday'],
-        opens: '10:00',
-        closes: '18:00',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        opens: '09:30',
+        closes: '19:30',
       },
     ],
     priceRange: '$$',
     image: 'https://rebellys.com/images/shop_interior.png',
-    sameAs: [],
+    sameAs: [
+      'https://www.instagram.com/rebellys.lb',
+      'https://maps.app.goo.gl/aq7CZ26re22c4KQx7',
+      'https://wa.me/96176585028',
+    ],
     hasMap: 'https://maps.google.com/?q=Zalka+Lebanon',
-    servesCuisine: 'Floristry',
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'Floral Arrangements',
+    },
     currenciesAccepted: 'USD, LBP',
     paymentAccepted: 'Cash, Whish Money',
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.9',
+      reviewCount: '20',
+      bestRating: '5',
+    },
   };
 }
 
@@ -66,8 +66,14 @@ export function getProductSchema(product: {
       `Premium floral arrangement — ${product.name} by Rebelly's Flower Shop`,
     image:
       product.image_url ?? 'https://rebellys.com/images/shop_interior.png',
-    url: `https://rebellys.com/collections#${product.slug}`,
+    url: `https://rebellys.com/collections`,
     brand: { '@type': 'Brand', name: "Rebelly's" },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.9',
+      reviewCount: '20',
+      bestRating: '5',
+    },
     offers: product.price_usd
       ? {
           '@type': 'Offer',
@@ -101,7 +107,7 @@ export function getEventSchema(event: {
       'https://rebellys.com/images/shop_interior.png',
     url: `https://rebellys.com/events/${event.slug}`,
     eventStatus: 'https://schema.org/EventScheduled',
-    eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     organizer: {
       '@type': 'Organization',
       name: "Rebelly's Flower Shop",

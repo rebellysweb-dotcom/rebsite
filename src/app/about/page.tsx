@@ -7,6 +7,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://rebellys.com/about',
   },
+  openGraph: {
+    title: 'Our Story | Rebelly\'s Flower Shop Zalka',
+    description: 'Meet Rebelly\'s, a family-owned flower shop in Zalka with over 30 years of floral experience, custom bouquets, wedding flowers, and local delivery.',
+    images: [{ url: 'https://rebellys.com/images/heart_roses.png', width: 1200, height: 630, alt: "Rebelly's flower arrangements" }],
+    type: 'website',
+  },
 };
 
 // Revalidate every hour
@@ -20,10 +26,11 @@ export default function AboutPage() {
           
           <div data-animate="fadeLeft" style={{ position: 'relative' }}>
             <div style={{ position: 'relative', width: '100%', aspectRatio: '1/1' }}>
-              <Image 
-                src="/images/heart_roses.png" 
-                alt="Heart-shaped rose arrangement" 
+              <Image
+                src="/images/heart_roses.png"
+                alt="Heart-shaped rose arrangement"
                 fill
+                priority
                 className="card"
                 style={{ objectFit: 'cover', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-lg)' }} 
                 sizes="(max-width: 768px) 100vw, 50vw"

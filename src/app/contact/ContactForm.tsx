@@ -25,14 +25,23 @@ export default function ContactForm() {
     setStatus('submitting');
     setGlobalError('');
     
-    // Simulate API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error ?? 'Failed to send message')
+      }
+
       setStatus('success');
       setFormData({ name: '', email: '', message: '' });
-    } catch {
+    } catch (err) {
       setStatus('error');
-      setGlobalError('Something went wrong. Please try again later.');
+      setGlobalError(err instanceof Error ? err.message : 'Something went wrong. Please try again later.');
     }
   };
 

@@ -16,7 +16,12 @@ export async function createClient() {
       setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
         try {
           cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
+            cookieStore.set(name, value, {
+              ...options,
+              sameSite: 'strict' as const,
+              httpOnly: true,
+              secure: process.env.NODE_ENV === 'production',
+            })
           );
         } catch {
           // Called from Server Component — cookies are read-only, ignore

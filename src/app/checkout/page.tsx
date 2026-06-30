@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Order Flowers | Rebelly\'s Flower Shop Zalka',
   description: 'Build a manual flower order and send it to Rebelly\'s by WhatsApp for confirmation, delivery, pickup, and local payment options.',
+  robots: { index: false, follow: false },
 };
 
 export default async function CheckoutPage() {

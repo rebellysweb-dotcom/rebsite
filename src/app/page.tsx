@@ -7,14 +7,14 @@ import ProductCard from '@/components/ProductCard';
 import { getBlurDataUrl } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'Home | Rebelly\'s Flower Shop',
+  title: 'Fresh Flowers & Bouquets | Rebelly\'s Zalka',
   description: 'Welcome to Rebelly\'s Flower Shop in Zalka, Lebanon. Discover our fresh bouquets, wedding florals, and event arrangements.',
   alternates: {
     canonical: 'https://rebellys.com/',
   },
 };
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 
 async function FeaturedProducts() {
   const { MOCK_PRODUCTS } = await import('@/lib/mock-data');

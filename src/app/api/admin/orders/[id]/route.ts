@@ -4,6 +4,8 @@ import { requireAdmin } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 // GET /api/admin/orders/:id
 export async function GET(
   _request: Request,
@@ -15,6 +17,9 @@ export async function GET(
     if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { id } = await params;
+    if (!UUID_RE.test(id)) {
+      return NextResponse.json({ error: 'Invalid id' }, { status: 400 })
+    }
     const { data: order, error } = await supabase
       .from('orders')
       .select('*, order_items(*)')
@@ -44,6 +49,9 @@ export async function PATCH(
     if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { id } = await params;
+    if (!UUID_RE.test(id)) {
+      return NextResponse.json({ error: 'Invalid id' }, { status: 400 })
+    }
     const body = await request.json();
 
     const allowedFields = ['order_status', 'payment_status', 'whatsapp_sent'];

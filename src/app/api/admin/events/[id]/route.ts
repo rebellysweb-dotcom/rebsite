@@ -4,6 +4,10 @@ import { requireAdmin } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const SLUG_RE = /^[a-z0-9-]{1,100}$/
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{3,8}$/
+
 // GET /api/admin/events/:id (includes event_products)
 export async function GET(
   _request: Request,
@@ -15,6 +19,9 @@ export async function GET(
     if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { id } = await params;
+    if (!UUID_RE.test(id)) {
+      return NextResponse.json({ error: 'Invalid id' }, { status: 400 })
+    }
     const { data: event, error } = await supabase
       .from('events')
       .select('*, event_products(*)')
@@ -43,6 +50,9 @@ export async function PATCH(
     if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { id } = await params;
+    if (!UUID_RE.test(id)) {
+      return NextResponse.json({ error: 'Invalid id' }, { status: 400 })
+    }
     const body = await request.json();
 
     const allowedFields = [
@@ -57,6 +67,16 @@ export async function PATCH(
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+    }
+
+    const slug = updates.slug as string | undefined;
+    if (slug && !SLUG_RE.test(slug)) {
+      return NextResponse.json({ error: 'slug must be lowercase alphanumeric with hyphens only' }, { status: 400 });
+    }
+
+    const banner_color = updates.banner_color as string | undefined;
+    if (banner_color && !HEX_COLOR_RE.test(banner_color)) {
+      return NextResponse.json({ error: 'banner_color must be a valid hex color' }, { status: 400 });
     }
 
     const { data: event, error } = await supabase
@@ -88,6 +108,9 @@ export async function DELETE(
     if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { id } = await params;
+    if (!UUID_RE.test(id)) {
+      return NextResponse.json({ error: 'Invalid id' }, { status: 400 })
+    }
 
     const { error } = await supabase
       .from('events')

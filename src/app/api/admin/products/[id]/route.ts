@@ -4,6 +4,21 @@ import { requireAdmin } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const SLUG_RE = /^[a-z0-9-]{1,100}$/
+
+function isAllowedImageUrl(url: string): boolean {
+  try {
+    const u = new URL(url)
+    return (
+      u.protocol === 'https:' &&
+      (u.hostname.endsWith('.supabase.co') || u.hostname === 'lh3.googleusercontent.com')
+    )
+  } catch {
+    return false
+  }
+}
+
 // GET /api/admin/products/:id
 export async function GET(
   _request: Request,
@@ -15,6 +30,9 @@ export async function GET(
     if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { id } = await params;
+    if (!UUID_RE.test(id)) {
+      return NextResponse.json({ error: 'Invalid id' }, { status: 400 })
+    }
     const { data: product, error } = await supabase
       .from('products')
       .select('*')
@@ -43,6 +61,9 @@ export async function PATCH(
     if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { id } = await params;
+    if (!UUID_RE.test(id)) {
+      return NextResponse.json({ error: 'Invalid id' }, { status: 400 })
+    }
     const body = await request.json();
 
     const allowedFields = ['name', 'slug', 'tag', 'description', 'image_url', 'price_usd', 'is_active', 'sort_order'];
@@ -54,6 +75,16 @@ export async function PATCH(
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+    }
+
+    const slug = updates.slug as string | undefined;
+    if (slug && !SLUG_RE.test(slug)) {
+      return NextResponse.json({ error: 'slug must be lowercase alphanumeric with hyphens only' }, { status: 400 });
+    }
+
+    const image_url = updates.image_url as string | undefined;
+    if (image_url && !isAllowedImageUrl(image_url)) {
+      return NextResponse.json({ error: 'image_url must be from an allowed domain' }, { status: 400 });
     }
 
     updates.updated_at = new Date().toISOString();
@@ -87,6 +118,9 @@ export async function DELETE(
     if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { id } = await params;
+    if (!UUID_RE.test(id)) {
+      return NextResponse.json({ error: 'Invalid id' }, { status: 400 })
+    }
 
     // Soft delete — set is_active to false
     const { data: product, error } = await supabase

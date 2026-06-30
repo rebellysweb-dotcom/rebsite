@@ -49,6 +49,11 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
     }
 
+    const PHONE_RE = /^\d{7,15}$/
+    if ('whatsapp_number' in body && !PHONE_RE.test(String(body.whatsapp_number))) {
+      return NextResponse.json({ error: 'whatsapp_number must be digits only, 7-15 chars' }, { status: 400 });
+    }
+
     // site_settings is a singleton row — update whichever row exists
     const { data, error } = await supabase
       .from('site_settings')
