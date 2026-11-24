@@ -10,7 +10,7 @@ import styles from './page.module.css';
 
 export const metadata: Metadata = {
   title: 'Fresh Flowers & Bouquets | Rebelly\'s Zalka',
-  description: 'Welcome to Rebelly\'s Flower Shop in Zalka, Lebanon. Discover our fresh bouquets, wedding florals, and event arrangements.',
+  description: 'Flower shop on Saydeh Street, Zalka, since 1990. Bouquets, wedding and event flowers, Christmas baskets, same-day delivery across the Metn. Order by WhatsApp.',
   alternates: {
     canonical: 'https://rebellys.com/',
   },
@@ -27,7 +27,7 @@ const toProduct = (r: ProductRow): Product => ({
   image_urls: JSON.parse(r.image_urls || '[]'),
 });
 
-const HEADLINE = ['Fresh.', 'Grown.', 'Gifted.'];
+const HEADLINE = ['Flowers', 'from', 'Zalka.'];
 
 const CATEGORIES = [
   {
@@ -79,19 +79,19 @@ const CATEGORIES = [
 const SERVICES = [
   {
     name: 'Weddings and events',
-    text: 'Bespoke floral design for the day itself, shaped around your vision.',
+    text: 'Bridal bouquets, church and venue flowers. Visit the shop to plan it with us.',
     href: '/services',
     cta: 'See our services',
   },
   {
     name: 'Custom arrangements',
-    text: 'Something specific in mind? Our florists will build the bouquet you are picturing.',
+    text: 'Send a photo or a colour on WhatsApp and we will build it.',
     href: '/contact',
     cta: 'Talk to a florist',
   },
   {
     name: 'Local delivery',
-    text: 'Fresh to the door across Zalka and the surrounding Metn.',
+    text: 'Same-day delivery in Zalka, Antelias, Dbayeh and across the Metn.',
     href: '/checkout',
     cta: 'Order for delivery',
   },
@@ -147,7 +147,7 @@ export default function HomePage() {
           </h1>
 
           <p className={`${styles.sub} ${styles.fadeIn}`}>
-            Arranged by hand in Zalka since 1990 — Christmas gifting, delivered to your door across the Metn.
+            Arranged by hand in Zalka since 1990. Christmas gifts delivered across the Metn.
           </p>
 
           <div className={`${styles.ctas} ${styles.fadeIn}`}>
@@ -196,11 +196,10 @@ export default function HomePage() {
       {/* ── STORY ────────────────────────────────────────────── */}
       <section className={styles.section} aria-labelledby="story-title">
         <div className={styles.story}>
-          <h2 id="story-title" className={styles.h2} data-animate="fade-up">Rooted in passion</h2>
-          <div data-animate="fade-left">
+          <h2 id="story-title" className={styles.h2}>Same shop on Saydeh Street since 1990</h2>
+          <div>
             <p className={styles.storyLede}>
-              What started as a small neighbourhood florist has blossomed into a beloved local
-              landmark. We pour our heart into every arrangement, and treat your moments as our own.
+              Every bouquet is built by hand in our Zalka shop. Walk in, call, or send us a WhatsApp photo of what you have in mind.
             </p>
             <Link href="/about" className={styles.textLink}>Read our story</Link>
           </div>
@@ -209,7 +208,7 @@ export default function HomePage() {
 
       {/* ── FEATURED ─────────────────────────────────────────── */}
       <section className={styles.section} aria-labelledby="featured-title">
-        <div className={styles.featuredHead} data-animate="fade-up">
+        <div className={styles.featuredHead}>
           <h2 id="featured-title" className={styles.h2}>Featured collections</h2>
           <Link href="/collections" className={styles.textLink}>View all flowers</Link>
         </div>
@@ -221,8 +220,8 @@ export default function HomePage() {
 
       {/* ── SERVICES ─────────────────────────────────────────── */}
       <section className={styles.section} aria-labelledby="services-title">
-        <h2 id="services-title" className={styles.h2} data-animate="fade-up">What we do</h2>
-        <ul className={styles.services} data-animate="stagger">
+        <h2 id="services-title" className={styles.h2}>Weddings, custom orders, delivery</h2>
+        <ul className={styles.services}>
           {SERVICES.map((s) => (
             <li key={s.name} className={`${styles.service} stagger-item`}>
               <h3 className={styles.serviceName}>{s.name}</h3>
@@ -233,24 +232,12 @@ export default function HomePage() {
         </ul>
       </section>
 
-      {/* ── VOICE ────────────────────────────────────────────── */}
-      <section className={styles.voice} aria-label="What customers say">
-        <figure className={styles.voiceInner} data-animate="fade-up">
-          <blockquote className={styles.quote}>
-            &ldquo;Rebelly&apos;s never disappoints. The flowers are always so fresh, and the
-            arrangements are absolutely stunning. They truly made my wedding day magical.&rdquo;
-          </blockquote>
-          <figcaption className={styles.cite}>Sarah M.</figcaption>
-          <Link href="/reviews" className={styles.voiceLink}>Read more reviews</Link>
-        </figure>
-      </section>
-
       {/* ── CLOSE ────────────────────────────────────────────── */}
       <section className={`${styles.section} ${styles.close}`} aria-labelledby="close-title">
-        <div data-animate="scale-in">
-          <h2 id="close-title" className={styles.h2}>Ready to bring joy?</h2>
-          <p>Whether it is a celebration or a simple gesture, we are here to help you say it with flowers.</p>
-          <Link href="/checkout" className="btn btn-primary">Start your order</Link>
+        <div>
+          <h2 id="close-title" className={styles.h2}>Need flowers today?</h2>
+          <p>Same-day delivery across the Metn, or message us on WhatsApp and we will put it together.</p>
+          <a href="https://wa.me/96176585028" target="_blank" rel="noopener noreferrer" className="btn btn-primary">Order on WhatsApp</a>
         </div>
       </section>
     </>

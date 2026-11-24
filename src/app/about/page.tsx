@@ -21,16 +21,15 @@ export const metadata: Metadata = {
 export const revalidate = 3600;
 
 const facts = [
-  { value: '30+', label: 'Years in Zalka' },
-  { value: '1990', label: 'The year it began' },
-  { value: 'Saydeh St', label: 'Where to find us' },
-  { value: 'Same-day', label: 'Local delivery' },
+  { value: '1990', label: 'Opened on Saydeh St' },
+  { value: 'Mon–Sat', label: '9:30–19:30' },
+  { value: 'Same-day', label: 'Delivery across the Metn' },
 ];
 
 export default function AboutPage() {
   return (
     <div className={styles.wrap}>
-      <section className={styles.section} aria-labelledby="about-title" data-animate="fade-up">
+      <section className={styles.section} aria-labelledby="about-title">
         <div className={styles.story}>
           <div className={styles.frame}>
             <Image
@@ -48,13 +47,13 @@ export default function AboutPage() {
             <p className={styles.eyebrow}>Our Story</p>
             <h1 id="about-title" className={styles.pageTitle}>A Family Craft</h1>
             <p className={styles.lede}>
-              On Saydeh Street in Zalka, in the same shopfront since 1990, Rebelly's has been arranging flowers for weddings, funerals, and everything in between. It started as a family passion — and that's exactly what it still is.
+              On Saydeh Street in Zalka, in the same shopfront since 1990, Rebelly's has been arranging flowers for weddings, funerals, and everything in between. It started as a family business, and it still is.
             </p>
             <p className={styles.body}>
-              Every bouquet is assembled by hand, in-house. We source the freshest stock available each week, and our florists have thirty years of practice reading what each occasion actually needs.
+              Every bouquet is assembled by hand, in-house, by florists who have been reading occasions for thirty years.
             </p>
             <div className={styles.cta}>
-              <Link href="/collections" className="btn btn-primary">Shop the collection</Link>
+              <Link href="/collections" className="btn btn-primary">See this week&apos;s bouquets</Link>
             </div>
           </div>
         </div>
@@ -62,7 +61,7 @@ export default function AboutPage() {
 
       <hr className={styles.divider} />
 
-      <section className={styles.section} aria-label="Key facts" data-animate="fade-up">
+      <section className={styles.section} aria-label="Key facts">
         <div className={styles.facts}>
           {facts.map((fact) => (
             <div key={fact.label} className={styles.fact}>

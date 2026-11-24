@@ -11,8 +11,6 @@ export const metadata: Metadata = {
 };
 
 type Review = {
-  initial: string;
-  tone: 'rose' | 'blue' | 'violet' | 'red' | 'green';
   name: string;
   stars: 1 | 2 | 3 | 4 | 5;
   text: string;
@@ -20,36 +18,26 @@ type Review = {
 
 const REVIEWS: Review[] = [
   {
-    initial: 'T',
-    tone: 'rose',
     name: 'Tatiana Semaan',
     stars: 5,
     text: '"Wonderful flower shop! They prepared a perfect bouquet full of flowers for my special occasion. The arrangement was breathtaking and exactly what I envisioned. Highly recommend!"',
   },
   {
-    initial: 'P',
-    tone: 'blue',
     name: 'Patrick Baroud',
     stars: 3,
     text: '"The delivery via Toters arrived on time which I appreciated. The shop has beautiful arrangements to choose from. Would recommend calling directly for best results."',
   },
   {
-    initial: 'E',
-    tone: 'violet',
     name: 'Elie Chahine',
     stars: 4,
     text: '"The bouquets at Rebelly\'s are always gorgeous and unique. The family who runs it clearly has a passion for flowers. Been coming here for years for all my special occasions."',
   },
   {
-    initial: 'M',
-    tone: 'red',
     name: 'Maya Khoury',
     stars: 5,
     text: '"Got a stunning bridal bouquet from Rebelly\'s. They really listened to what I wanted and delivered something even more beautiful than I imagined. 30 years of expertise shows!"',
   },
   {
-    initial: 'R',
-    tone: 'green',
     name: 'Rima Nassar',
     stars: 5,
     text: '"My go-to flower shop in Zalka. Always fresh, always beautiful. The owners are so kind and helpful. They remembered my favorite flowers from my last visit — that personal touch is rare!"',
@@ -81,28 +69,24 @@ export default function ReviewsPage() {
           reviewBody: r.text.replace(/^"|"$/g, ''),
         })),
       }} />
-      <section className={`container ${styles.header}`} aria-label="Customer reviews summary" data-animate="fade-up">
-        <span className={styles.eyebrow}>What people say</span>
+      <section className={`container ${styles.header}`} aria-label="Customer reviews summary">
         <h1 className={styles.title}>Voices from Zalka</h1>
         <p className={styles.aggregate}>
-          <span className={styles.score}>4.9</span>
+          <span className={styles.score}>{avgRating.toFixed(1)}</span>
           <span
             className={styles.stars}
-            data-stars="5"
+            data-stars={Math.round(avgRating)}
             role="img"
-            aria-label="Rated 4.9 out of 5 stars"
+            aria-label={`Rated ${avgRating.toFixed(1)} out of 5 stars`}
           />
-          <span>Based on 20 Google reviews</span>
+          <span>{`From ${REVIEWS.length} Google reviews`}</span>
         </p>
       </section>
 
       <section className={`container ${styles.grid}`} aria-label="Customer reviews">
         {REVIEWS.map((review) => (
-          <article key={review.name} className={styles.card} data-animate="fade-up">
+          <article key={review.name} className={styles.card}>
             <div className={styles.cardTop}>
-              <div className={styles.avatar} data-tone={review.tone} aria-hidden="true">
-                {review.initial}
-              </div>
               <div className={styles.reviewer}>
                 <h3 className={styles.name}>{review.name}</h3>
                 <span

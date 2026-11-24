@@ -25,7 +25,7 @@ const services = [
   { name: 'Delivery', description: 'Same day, across the Metn', href: '/contact' },
   { name: 'In-Store Pickup', description: 'Order ahead. Collect same day', href: '/collections' },
   { name: 'Weddings & Events', description: 'Custom installations from start to finish', href: '/contact' },
-  { name: 'Custom Orders', description: 'Tell us the occasion, we do the rest', href: '/contact' },
+  { name: 'Custom Orders', description: 'Send a photo or a budget on WhatsApp', href: '/contact' },
 ];
 
 const hours = [
@@ -42,9 +42,8 @@ export default function ServicesPage() {
         { name: 'Services', url: 'https://rebellys.com/services' },
       ])} />
 
-      <section className={styles.section} aria-labelledby="services-title" data-animate="fade-up">
+      <section className={styles.section} aria-labelledby="services-title">
         <header className={styles.header}>
-          <p className={styles.eyebrow}>Services</p>
           <h1 id="services-title" className={styles.pageTitle}>How We Work</h1>
         </header>
 
@@ -63,7 +62,7 @@ export default function ServicesPage() {
 
       <hr className={styles.divider} />
 
-      <section className={styles.section} aria-labelledby="hours-title" data-animate="fade-up">
+      <section className={styles.section} aria-labelledby="hours-title">
         <h2 id="hours-title" className={styles.h2}>Hours and location</h2>
         <table className={styles.hours}>
           <tbody>
@@ -77,7 +76,7 @@ export default function ServicesPage() {
         </table>
 
         <div className={styles.cta}>
-          <Link href="/contact" className="btn btn-primary">Get in touch</Link>
+          <Link href="/contact" className="btn btn-primary">Call or WhatsApp us</Link>
         </div>
       </section>
     </div>

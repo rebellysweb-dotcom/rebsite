@@ -13,13 +13,13 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <div className={styles.page}>
-      <section className={`container ${styles.header}`} aria-label="Contact us" data-animate="fade-up">
+      <section className={`container ${styles.header}`} aria-label="Contact us">
         <span className={styles.eyebrow}>Find us</span>
         <h1 className={styles.title}>Come and say hello</h1>
       </section>
 
       <section className={`container ${styles.layout}`} aria-label="Contact details and form">
-        <div className={styles.info} data-animate="fade-left">
+        <div className={styles.info}>
           <div className={styles.block}>
             <span className={styles.label}>Address</span>
             <p className={styles.value}>
@@ -69,7 +69,7 @@ export default function ContactPage() {
           </div>
         </div>
 
-        <div className={styles.right} data-animate="fade-up">
+        <div className={styles.right}>
           <div className={styles.formCard}>
             <h2 className={styles.formTitle}>Send a message</h2>
             <ContactForm />
