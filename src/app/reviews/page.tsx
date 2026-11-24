@@ -20,27 +20,27 @@ const REVIEWS: Review[] = [
   {
     name: 'Tatiana Semaan',
     stars: 5,
-    text: '"Wonderful flower shop! They prepared a perfect bouquet full of flowers for my special occasion. The arrangement was breathtaking and exactly what I envisioned. Highly recommend!"',
+    text: 'Great flower shop! I just told them the occasion and what I am looking for, and they prepared the perfect bouquet—full of fresh, beautiful flowers and nicely packaged. Fast, professional, and very friendly. Highly recommended!',
   },
   {
-    name: 'Patrick Baroud',
-    stars: 3,
-    text: '"The delivery via Toters arrived on time which I appreciated. The shop has beautiful arrangements to choose from. Would recommend calling directly for best results."',
-  },
-  {
-    name: 'Elie Chahine',
-    stars: 4,
-    text: '"The bouquets at Rebelly\'s are always gorgeous and unique. The family who runs it clearly has a passion for flowers. Been coming here for years for all my special occasions."',
-  },
-  {
-    name: 'Maya Khoury',
+    name: 'Christian Hobeika',
     stars: 5,
-    text: '"Got a stunning bridal bouquet from Rebelly\'s. They really listened to what I wanted and delivered something even more beautiful than I imagined. 30 years of expertise shows!"',
+    text: 'I ordered a bouquet from Rebellys, and it was fresh, and long-lasting! The owners were friendly and helpful, and delivery was fast. They even included a sweet handwritten note. Highly recommend for gorgeous flowers and plants!',
   },
   {
-    name: 'Rima Nassar',
+    name: 'Erash',
     stars: 5,
-    text: '"My go-to flower shop in Zalka. Always fresh, always beautiful. The owners are so kind and helpful. They remembered my favorite flowers from my last visit — that personal touch is rare!"',
+    text: 'Beautiful flower shop, charming and extremely helpful owners, incredible prices, variety in flowers, balloons etc. Do check if u pass by zalka!',
+  },
+  {
+    name: 'qosai ghawanmeh',
+    stars: 5,
+    text: 'Thank you so much for your kindness and warm hospitality! The flowers were beautiful, and your friendly service made the whole experience even better.',
+  },
+  {
+    name: 'sam haddad',
+    stars: 5,
+    text: 'Flowers are fresh and look great. Amazing service, very helpful and kind.',
   },
 ];
 

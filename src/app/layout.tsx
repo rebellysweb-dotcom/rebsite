@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Cormorant_Garamond, Inter } from "next/font/google";
+import { Playfair_Display, Manrope } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -18,14 +18,7 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["300", "400", "600"],
-  variable: "--ff-serif",
-  display: "swap",
-});
-
-const inter = Inter({
+const manrope = Manrope({
   subsets: ["latin"],
   variable: "--ff-sans",
   display: "swap",
@@ -97,7 +90,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${cormorant.variable} ${inter.variable}`}
+      className={`${playfair.variable} ${manrope.variable}`}
     >
       <head>
         {/* GEO meta tags — invisible to users, visible to bots */}
