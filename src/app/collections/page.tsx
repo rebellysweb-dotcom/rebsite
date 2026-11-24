@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { dbQuery } from '@/lib/db';
 import type { Product } from '@/types';
-import ProductCard from '@/components/ProductCard';
 import { JsonLd } from '@/components/JsonLd';
+import CollectionsClient from './CollectionsClient';
 import { getProductSchema, getBreadcrumbSchema } from '@/lib/structured-data';
 
 export const metadata: Metadata = {
@@ -63,11 +63,7 @@ async function ProductGrid() {
     <>
       {itemListSchema && <JsonLd data={itemListSchema} />}
       {products && products.length > 0 ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))', gap: 'clamp(16px, 3vw, 32px)' }}>
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <CollectionsClient products={products} />
       ) : (
         <div style={{ textAlign: 'center', padding: '4rem', background: '#fff', borderRadius: 'var(--radius-lg)' }}>
           <p style={{ color: 'var(--text-muted)' }}>No products available at the moment. Please check back later!</p>
