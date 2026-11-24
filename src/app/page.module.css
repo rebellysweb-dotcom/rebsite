@@ -313,7 +313,17 @@
   background: rgba(233, 30, 140, .04);
   transform: translateY(-2px);
 }
-.catEmoji { font-size: 1.6rem; line-height: 1; }
+.catIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  color: var(--rose-500);
+  flex-shrink: 0;
+  transition: color .2s ease, transform .2s ease;
+}
+.catTile:hover .catIcon { color: var(--rose-500); transform: scale(1.12); }
 .catName {
   font-size: .72rem;
   font-weight: 600;
@@ -322,7 +332,7 @@
   letter-spacing: .01em;
 }
 @media (min-width: 480px) {
-  .catEmoji { font-size: 2rem; }
+  .catIcon { width: 2.3rem; height: 2.3rem; }
   .catName { font-size: .8rem; }
   .catTile { padding: 18px 8px; }
 }
@@ -330,7 +340,7 @@
   .catSection { padding-top: 40px; }
   .catGrid { gap: 16px; }
   .catTile { padding: 22px 12px; }
-  .catEmoji { font-size: 2.4rem; }
+  .catIcon { width: 2.6rem; height: 2.6rem; }
   .catName { font-size: .9rem; }
 }
 

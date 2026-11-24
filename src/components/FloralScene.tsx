@@ -178,7 +178,7 @@ export default function FloralScene({
 
     // ── Animation loop ────────────────────────────────────────────────────
     const dummy = new THREE.Object3D();
-    const sim = { t: 0, swirl: 0, swirlV: 0, spin: 0, lastY: -1 };
+    const sim = { t: 0, swirl: 0, swirlV: 0, spin: 0, lastY: -1, camZOffset: 0, camZV: 0 };
     let raf = 0;
     let last = 0;
     const FPS = 60;
@@ -194,12 +194,25 @@ export default function FloralScene({
       if (sim.lastY < 0) sim.lastY = scroll.y;
       const vel = (scroll.y - sim.lastY) / Math.max(dt, 1e-3);
       sim.lastY = scroll.y;
-      const target = THREE.MathUtils.clamp(vel / 1800, -1, 1);
+      const target = THREE.MathUtils.clamp(vel / 900, -1, 1);
       const k = 18, c = 7;
       sim.swirlV += (k * (target - sim.swirl) - c * sim.swirlV) * dt;
       sim.swirl += sim.swirlV * dt;
       sim.spin += sim.swirl * dt * 0.8;
       sim.t += dt;
+
+      // Camera Y parallax: as the page scrolls down, the camera drifts with the
+      // absolute scroll position. Lerped for smoothness.
+      const docH = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollNorm = docH > 0 ? scroll.y / docH : 0;
+      const camTargetY = -scrollNorm * 1.4;
+      camera.position.y += (camTargetY - camera.position.y) * Math.min(dt * 3, 1);
+
+      // Camera Z push: fast scroll pushes the camera, then a damped spring returns it.
+      const camZTarget = -Math.abs(sim.swirl) * 0.6;
+      sim.camZV += ((camZTarget - sim.camZOffset) * 12 - sim.camZV * 6) * dt;
+      sim.camZOffset += sim.camZV * dt;
+      camera.position.z = FOCUS_DEPTH + sim.camZOffset;
 
       const t = sim.t;
       const vFov = (camera.fov * Math.PI) / 180;
@@ -211,7 +224,7 @@ export default function FloralScene({
       for (let i = 0; i < count; i++) {
         const o = i * 10;
         const ph = base[o + 3];
-        let ny = base[o + 1] - t * base[o + 4];
+        let ny = base[o + 1] - t * base[o + 4] - sim.swirl * 0.08 * (i % 3 === 0 ? 1.4 : 0.8);
         ny = ((((ny + 1) % 2) + 2) % 2) - 1;
         let x = base[o] * hw + Math.sin(t * 0.32 + ph) * base[o + 5] + Math.sin(ny * 3.1 + ph * 0.7) * 0.28;
         let y = ny * hh + Math.sin(t * 0.21 + ph * 1.3) * 0.12;

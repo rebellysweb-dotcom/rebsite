@@ -30,10 +30,50 @@ const toProduct = (r: ProductRow): Product => ({
 const HEADLINE = ['Fresh.', 'Grown.', 'Gifted.'];
 
 const CATEGORIES = [
-  { emoji: '🎄', name: 'Christmas', href: '/collections' },
-  { emoji: '👶', name: 'New Born', href: '/collections' },
-  { emoji: '💐', name: 'Bouquets', href: '/collections' },
-  { emoji: '🌹', name: 'Events', href: '/services' },
+  {
+    name: 'Christmas',
+    href: '/collections',
+    icon: (
+      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 3l3 5h3l-3 3 1.5 5L12 14l-4.5 2L9 11l-3-3h3z"/>
+        <line x1="12" y1="14" x2="12" y2="21"/>
+        <line x1="9" y1="21" x2="15" y2="21"/>
+      </svg>
+    ),
+  },
+  {
+    name: 'New Born',
+    href: '/collections',
+    icon: (
+      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 2C9.5 2 7.5 4 7.5 6.5S9.5 11 12 11s4.5-2 4.5-4.5S14.5 2 12 2z"/>
+        <path d="M4.5 22c0-3.5 3.4-6 7.5-6s7.5 2.5 7.5 6"/>
+        <circle cx="12" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+      </svg>
+    ),
+  },
+  {
+    name: 'Bouquets',
+    href: '/collections',
+    icon: (
+      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <circle cx="12" cy="7" r="3"/>
+        <circle cx="7" cy="10.5" r="2.5"/>
+        <circle cx="17" cy="10.5" r="2.5"/>
+        <line x1="12" y1="10" x2="12" y2="20"/>
+        <path d="M9 20h6"/>
+      </svg>
+    ),
+  },
+  {
+    name: 'Events',
+    href: '/services',
+    icon: (
+      <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 2l2.5 7H22l-6 4.5 2.3 7-6.3-4-6.3 4 2.3-7L2 9h7.5z"/>
+      </svg>
+    ),
+  },
 ];
 
 const SERVICES = [
@@ -136,7 +176,7 @@ export default function HomePage() {
           {CATEGORIES.map((cat) => (
             <li key={cat.name}>
               <Link href={cat.href} className={styles.catTile}>
-                <span className={styles.catEmoji} aria-hidden="true">{cat.emoji}</span>
+                <span className={styles.catIcon} aria-hidden="true">{cat.icon}</span>
                 <span className={styles.catName}>{cat.name}</span>
               </Link>
             </li>
@@ -146,10 +186,10 @@ export default function HomePage() {
 
       <section className={styles.trustStrip} aria-label="Trust signals">
         <ul className={styles.trustList}>
-          <li>🏪 Est. 1990</li>
-          <li>🚚 Same-day delivery</li>
-          <li>💵 Cash on delivery</li>
-          <li>💬 WhatsApp confirmed</li>
+          <li>Est. 1990</li>
+          <li>Same-day delivery</li>
+          <li>Cash on delivery</li>
+          <li>WhatsApp orders</li>
         </ul>
       </section>
 
