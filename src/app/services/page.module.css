@@ -1,0 +1,147 @@
+/* Services page: layout and type only. Colour, type and motion tokens come from globals.css. */
+
+.wrap {
+  padding: calc(var(--nav-h) + 56px) var(--px) 8rem;
+  min-height: 100dvh;
+  background: var(--cream);
+}
+
+.section {
+  max-width: var(--max-w);
+  margin: 0 auto;
+}
+
+.eyebrow {
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+  margin-bottom: 12px;
+}
+
+.pageTitle {
+  font-family: var(--ff-display);
+  font-size: clamp(2.4rem, 7vw, 4rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.h2 {
+  font-family: var(--ff-display);
+  font-size: clamp(1.9rem, 5vw, 2.8rem);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--text-main);
+  margin: 0 0 32px;
+}
+
+.header {
+  margin-bottom: 56px;
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  margin: 56px 0;
+}
+
+/* ═══════════════════════ SERVICE ROWS ═══════════════════════ */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.serviceRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: 16px 32px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--hairline);
+  text-decoration: none;
+  color: inherit;
+  transition: color .2s;
+}
+
+.serviceRow:focus-visible {
+  outline: 2px solid var(--rose-500);
+  outline-offset: 4px;
+}
+
+.serviceRow:hover .serviceArrow {
+  transform: translateX(4px);
+  color: var(--rose-500);
+}
+
+.serviceName {
+  font-family: var(--ff-display);
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.serviceDesc {
+  font-family: var(--ff-serif);
+  font-style: italic;
+  font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+  color: var(--text-muted);
+}
+
+.serviceArrow {
+  font-size: 1.2rem;
+  color: var(--rose-500);
+  transition: transform .2s;
+}
+
+/* Narrow screens: name on the first line, arrow on its right, description beneath. */
+@media (max-width: 640px) {
+  .serviceRow {
+    grid-template-columns: 1fr auto;
+  }
+  .serviceName { grid-column: 1; grid-row: 1; }
+  .serviceArrow { grid-column: 2; grid-row: 1; }
+  .serviceDesc { grid-column: 1 / -1; grid-row: 2; }
+}
+
+/* ═══════════════════════ HOURS ═══════════════════════ */
+.hours {
+  width: 100%;
+  max-width: 640px;
+  border-collapse: collapse;
+}
+
+.hours th,
+.hours td {
+  text-align: left;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 1.1rem;
+  vertical-align: baseline;
+}
+
+.hours th {
+  width: 50%;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.hours td {
+  color: var(--text-muted);
+}
+
+.cta {
+  margin-top: 64px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .serviceRow,
+  .serviceArrow {
+    transition: none;
+  }
+}

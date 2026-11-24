@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCartStore } from '@/store/cart';
 import NavAuth from './NavAuth';
+import LogoMark from './LogoMark';
 import styles from './Navbar.module.css';
 
 const NAV_LINKS = [
@@ -86,7 +87,8 @@ export default function Navbar() {
       >
         <div className={styles.inner}>
           <Link href="/" className={styles.logo} aria-label="Rebelly's, home">
-            Rebelly&apos;s
+            <LogoMark size={28} className={styles.logoMark} />
+            <span className={styles.logoText}>Rebelly&apos;s</span>
           </Link>
 
           <nav className={styles.links} aria-label="Main">

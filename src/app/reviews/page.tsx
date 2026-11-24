@@ -1,4 +1,6 @@
 import { Metadata } from 'next';
+import { JsonLd } from '@/components/JsonLd';
+import styles from './page.module.css';
 
 export const metadata: Metadata = {
   title: 'Customer Reviews | Rebelly\'s Flower Shop',
@@ -8,85 +10,117 @@ export const metadata: Metadata = {
   },
 };
 
-const REVIEWS = [
+type Review = {
+  initial: string;
+  tone: 'rose' | 'blue' | 'violet' | 'red' | 'green';
+  name: string;
+  stars: 1 | 2 | 3 | 4 | 5;
+  text: string;
+};
+
+const REVIEWS: Review[] = [
   {
     initial: 'T',
-    color: 'linear-gradient(135deg, #e91e8c, #ff6b9d)',
+    tone: 'rose',
     name: 'Tatiana Semaan',
-    stars: '★★★★★',
+    stars: 5,
     text: '"Wonderful flower shop! They prepared a perfect bouquet full of flowers for my special occasion. The arrangement was breathtaking and exactly what I envisioned. Highly recommend!"',
   },
   {
     initial: 'P',
-    color: 'linear-gradient(135deg, #1e3a8a, #3b82f6)',
+    tone: 'blue',
     name: 'Patrick Baroud',
-    stars: '★★★☆☆',
+    stars: 3,
     text: '"The delivery via Toters arrived on time which I appreciated. The shop has beautiful arrangements to choose from. Would recommend calling directly for best results."',
   },
   {
     initial: 'E',
-    color: 'linear-gradient(135deg, #7c3aed, #a78bfa)',
+    tone: 'violet',
     name: 'Elie Chahine',
-    stars: '★★★★☆',
+    stars: 4,
     text: '"The bouquets at Rebelly\'s are always gorgeous and unique. The family who runs it clearly has a passion for flowers. Been coming here for years for all my special occasions."',
   },
   {
     initial: 'M',
-    color: 'linear-gradient(135deg, #dc2626, #f87171)',
+    tone: 'red',
     name: 'Maya Khoury',
-    stars: '★★★★★',
+    stars: 5,
     text: '"Got a stunning bridal bouquet from Rebelly\'s. They really listened to what I wanted and delivered something even more beautiful than I imagined. 30 years of expertise shows!"',
   },
   {
     initial: 'R',
-    color: 'linear-gradient(135deg, #059669, #34d399)',
+    tone: 'green',
     name: 'Rima Nassar',
-    stars: '★★★★★',
+    stars: 5,
     text: '"My go-to flower shop in Zalka. Always fresh, always beautiful. The owners are so kind and helpful. They remembered my favorite flowers from my last visit — that personal touch is rare!"',
   },
 ];
 
 export default function ReviewsPage() {
-  return (
-    <div style={{ padding: '6rem var(--px) 8rem', background: 'var(--cream)', minHeight: '100vh' }}>
-      <section className="container" aria-label="Customer Reviews">
-        <div className="section-header" data-animate="fadeUp">
-          <span className="section-tag">What People Say</span>
-          <h1 className="section-title">Blooming with<br/><em>Happy Customers</em></h1>
-          <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', marginTop: '1rem', background: '#fff', padding: '1rem 2rem', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-sm)' }}>
-            <div style={{ color: '#fbbf24', fontSize: '1.5rem', letterSpacing: '2px', marginBottom: '4px' }}>
-              ★★★★<span style={{ position: 'relative' }}>★<span style={{ position: 'absolute', left: 0, top: 0, width: '90%', overflow: 'hidden', color: '#fbbf24' }}></span><span style={{ color: '#e5e7eb' }}>★</span></span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)' }}>
-              <strong style={{ fontSize: '1.2rem', color: 'var(--text-main)' }}>4.9</strong>
-              <span>Based on 20 Google Reviews</span>
-            </div>
-          </div>
-        </div>
+  // Aggregate computed from the reviews rendered on this page, so the markup matches what is visible.
+  const avgRating = REVIEWS.reduce((sum, r) => sum + r.stars, 0) / REVIEWS.length;
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-          {REVIEWS.map((review, i) => (
-            <div key={i} className="card" data-animate="fadeUp" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: review.color, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                    {review.initial}
-                  </div>
-                  <div>
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: 600, margin: 0 }}>{review.name}</h3>
-                    <div style={{ color: '#fbbf24', fontSize: '1rem' }}>{review.stars}</div>
-                  </div>
-                </div>
-                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#4285F4', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }} title="Google Review">
-                  G
-                </div>
+  return (
+    <div className={styles.page}>
+      <JsonLd data={{
+        '@context': 'https://schema.org',
+        '@type': 'LocalBusiness',
+        '@id': 'https://rebellys.com/#business',
+        name: "Rebelly's Flower Shop",
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: avgRating.toFixed(1),
+          reviewCount: String(REVIEWS.length),
+          bestRating: '5',
+          worstRating: '1',
+        },
+        review: REVIEWS.map((r) => ({
+          '@type': 'Review',
+          author: { '@type': 'Person', name: r.name },
+          reviewRating: { '@type': 'Rating', ratingValue: String(r.stars), bestRating: '5', worstRating: '1' },
+          reviewBody: r.text.replace(/^"|"$/g, ''),
+        })),
+      }} />
+      <section className={`container ${styles.header}`} aria-label="Customer reviews summary" data-animate="fade-up">
+        <span className={styles.eyebrow}>What people say</span>
+        <h1 className={styles.title}>Voices from Zalka</h1>
+        <p className={styles.aggregate}>
+          <span className={styles.score}>4.9</span>
+          <span
+            className={styles.stars}
+            data-stars="5"
+            role="img"
+            aria-label="Rated 4.9 out of 5 stars"
+          />
+          <span>Based on 20 Google reviews</span>
+        </p>
+      </section>
+
+      <section className={`container ${styles.grid}`} aria-label="Customer reviews">
+        {REVIEWS.map((review) => (
+          <article key={review.name} className={styles.card} data-animate="fade-up">
+            <div className={styles.cardTop}>
+              <div className={styles.avatar} data-tone={review.tone} aria-hidden="true">
+                {review.initial}
               </div>
-              <p style={{ color: 'var(--text-muted)', fontStyle: 'italic', lineHeight: 1.6 }}>
-                {review.text}
-              </p>
+              <div className={styles.reviewer}>
+                <h3 className={styles.name}>{review.name}</h3>
+                <span
+                  className={styles.stars}
+                  data-stars={review.stars}
+                  role="img"
+                  aria-label={`${review.stars} out of 5 stars`}
+                />
+              </div>
             </div>
-          ))}
-        </div>
+            <p className={styles.text}>{review.text}</p>
+            <div className={styles.cardFoot}>
+              <span className={styles.googleBadge} title="Google review" aria-label="Google review">
+                G
+              </span>
+            </div>
+          </article>
+        ))}
       </section>
     </div>
   );

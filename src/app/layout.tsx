@@ -34,20 +34,30 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://rebellys.com"),
   title: {
-    template: "%s | Rebelly's Flower Shop",
-    default: "Rebelly's Flower Shop | Florist in Zalka, Lebanon",
+    template: "%s | Rebelly's Florist — Zalka, Lebanon",
+    default: "Rebelly's Flower Shop | Fresh Flowers & Gifts in Zalka, Lebanon",
   },
   description:
-    "Order fresh bouquets, wedding flowers, and gift arrangements from Rebelly's Flower Shop in Zalka, Lebanon. Delivery across the Metn area.",
+    "Rebelly's has been arranging flowers in Zalka since 1990. Fresh bouquets, Christmas gifting, New Born flowers, wedding arrangements, and same-day delivery across the Metn region. Order by WhatsApp.",
   keywords: [
-    "flower shop Lebanon", "florist Zalka", "bouquets Beirut", "floral arrangements",
-    "wedding flowers Lebanon", "gift flowers", "Rebellys",
+    "flower shop Lebanon", "florist Zalka", "florist Metn", "florist Antelias",
+    "bouquets Beirut", "Christmas flowers Lebanon", "New Born flowers Lebanon",
+    "wedding flowers Lebanon", "flower delivery Zalka", "gift flowers Lebanon",
+    "محل زهور لبنان", "ورود زلقا", "باقات ورد لبنان",
+    "Rebellys flowers", "Rebellys florist", "Zalka flowers",
+    "Same day flower delivery Lebanon", "Metn flower shop",
   ],
-  robots: { index: true, follow: true },
+  applicationName: "Rebelly's Flower Shop",
+  category: "florist",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+  },
   openGraph: {
-    title: "Rebelly's Flower Shop | Florist in Zalka, Lebanon",
+    title: "Rebelly's Flower Shop | Fresh Flowers in Zalka, Lebanon",
     description:
-      "Order fresh bouquets, floral gift boxes, wedding flowers, and event arrangements from Rebelly's Flower Shop on Saydeh Street in Zalka, Lebanon.",
+      "Fresh bouquets, Christmas gifting, New Born gifts, and wedding flowers from Zalka's most trusted florist since 1990. Same-day delivery across the Metn.",
     url: "https://rebellys.com",
     siteName: "Rebelly's Flower Shop",
     images: [
@@ -55,7 +65,7 @@ export const metadata: Metadata = {
         url: "/images/shop_interior.png",
         width: 1200,
         height: 630,
-        alt: "Rebelly's Flower Shop Interior",
+        alt: "Rebelly's Flower Shop in Zalka, Lebanon",
       },
     ],
     locale: "en_US",
@@ -63,18 +73,20 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rebelly's Flower Shop | Florist in Zalka, Lebanon",
+    title: "Rebelly's Flower Shop | Zalka, Lebanon",
     description:
-      "Order fresh bouquets, floral gift boxes, wedding flowers, and event arrangements from Rebelly's Flower Shop on Saydeh Street in Zalka, Lebanon.",
+      "Fresh bouquets, Christmas gifting, wedding flowers. Same-day delivery across the Metn. Order by WhatsApp.",
     images: ["/images/shop_interior.png"],
   },
   alternates: {
     canonical: "https://rebellys.com",
+    // Site content is English only, so no "ar" alternate: pointing ar at the English page is a wrong hreflang signal.
     languages: {
-      "en": "https://rebellys.com",
+      en: "https://rebellys.com",
       "x-default": "https://rebellys.com",
     },
   },
+  // Google site verification omitted: the placeholder token was not a real verification code.
 };
 
 export default function RootLayout({
@@ -89,13 +101,15 @@ export default function RootLayout({
     >
       <head>
         {/* GEO meta tags — invisible to users, visible to bots */}
-        <meta name="geo.region" content="LB" />
-        <meta name="geo.placename" content="Zalka" />
-        <meta name="geo.position" content="33.904;35.580" />
-        <meta name="ICBM" content="33.904, 35.580" />
-        {/* hreflang for international bots */}
-        <link rel="alternate" hrefLang="en" href="https://rebellys.com" />
-        <link rel="alternate" hrefLang="x-default" href="https://rebellys.com" />
+        <meta name="geo.region" content="LB-JL" />
+        <meta name="geo.placename" content="Zalka, Mount Lebanon, Lebanon" />
+        <meta name="geo.position" content="33.9040;35.5800" />
+        <meta name="ICBM" content="33.9040, 35.5800" />
+        <meta name="DC.title" content="Rebelly's Flower Shop" />
+        <meta name="DC.description" content="Fresh flowers and gift arrangements in Zalka, Lebanon since 1990" />
+        <meta name="DC.subject" content="flowers, florist, Zalka, Lebanon, bouquets" />
+        <meta name="DC.language" content="en" />
+        {/* hreflang is emitted from metadata.alternates above (en + x-default only) */}
         {/* Scroll-reveal content must stay visible when scripting is off */}
         <noscript>
           <style>{`[data-animate],[data-animate] .stagger-item{opacity:1!important;transform:none!important}`}</style>

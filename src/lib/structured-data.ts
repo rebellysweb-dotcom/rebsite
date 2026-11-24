@@ -1,24 +1,39 @@
 export function getLocalBusinessSchema() {
+  // No aggregateRating here on purpose: the only reviews in the codebase are the
+  // five on /reviews (average 4.4). A hardcoded 4.9 / 20 is not backed by anything
+  // on the site and risks a Google structured-data penalty.
   return {
     '@context': 'https://schema.org',
-    '@type': 'Florist',
+    '@type': ['LocalBusiness', 'Florist'],
+    '@id': 'https://rebellys.com/#business',
     name: "Rebelly's Flower Shop",
+    alternateName: 'Rebellys',
     description:
-      "Premium handcrafted floral arrangements for weddings, occasions, and everyday beauty. Delivery across Lebanon.",
+      'Family-owned flower shop in Zalka, Lebanon, arranging fresh bouquets, wedding flowers, and gift arrangements since 1990.',
     url: 'https://rebellys.com',
     telephone: '+96176585028',
+    image: [
+      'https://rebellys.com/images/shop_interior.png',
+      'https://rebellys.com/images/heart_roses.png',
+    ],
+    logo: 'https://rebellys.com/favicon.svg',
+    foundingDate: '1990',
+    priceRange: '$$',
+    paymentAccepted: 'Cash, Whish Money, WhatsApp Order',
+    currenciesAccepted: 'LBP, USD',
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'Saydeh Street',
       addressLocality: 'Zalka',
-      addressRegion: 'Metn',
+      addressRegion: 'Mount Lebanon',
       addressCountry: 'LB',
     },
     geo: {
       '@type': 'GeoCoordinates',
-      latitude: '33.904',
-      longitude: '35.580',
+      latitude: 33.904,
+      longitude: 35.58,
     },
+    // Sunday omitted = closed (a 00:00-00:00 entry is not a documented closed convention).
     openingHoursSpecification: [
       {
         '@type': 'OpeningHoursSpecification',
@@ -27,25 +42,22 @@ export function getLocalBusinessSchema() {
         closes: '19:30',
       },
     ],
-    priceRange: '$$',
-    image: 'https://rebellys.com/images/shop_interior.png',
+    hasMap: 'https://maps.app.goo.gl/aq7CZ26re22c4KQx7',
     sameAs: [
       'https://www.instagram.com/rebellys.lb',
-      'https://maps.app.goo.gl/aq7CZ26re22c4KQx7',
       'https://wa.me/96176585028',
     ],
-    hasMap: 'https://maps.google.com/?q=Zalka+Lebanon',
+    areaServed: [
+      { '@type': 'City', name: 'Zalka' },
+      { '@type': 'City', name: 'Antelias' },
+      { '@type': 'City', name: 'Dbayeh' },
+      { '@type': 'City', name: 'Jdeideh' },
+      { '@type': 'City', name: 'Naccache' },
+      { '@type': 'AdministrativeArea', name: 'Metn' },
+    ],
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
       name: 'Floral Arrangements',
-    },
-    currenciesAccepted: 'USD, LBP',
-    paymentAccepted: 'Cash, Whish Money',
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.9',
-      reviewCount: '20',
-      bestRating: '5',
     },
   };
 }

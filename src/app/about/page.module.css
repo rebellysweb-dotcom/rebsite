@@ -1,0 +1,129 @@
+/* About page: layout and type only. Colour, type and motion tokens come from globals.css. */
+
+.wrap {
+  padding: calc(var(--nav-h) + 56px) var(--px) 8rem;
+  min-height: 100dvh;
+  background: var(--cream);
+}
+
+.section {
+  max-width: var(--max-w);
+  margin: 0 auto;
+}
+
+/* ═══════════════════════ STORY ═══════════════════════ */
+.story {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 48px;
+  align-items: center;
+}
+@media (min-width: 900px) {
+  .story { grid-template-columns: 1.1fr 1fr; gap: 80px; }
+}
+
+.frame {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  background: var(--rose-200);
+}
+
+.photo {
+  object-fit: cover;
+}
+
+.badge {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  margin: 0;
+  padding: 14px 20px;
+  border-radius: var(--radius-lg);
+  background: var(--cream-100);
+  box-shadow: var(--shadow-card);
+  font-family: var(--ff-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--rose-500);
+}
+
+.eyebrow {
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+  margin-bottom: 12px;
+}
+
+.pageTitle {
+  font-family: var(--ff-display);
+  font-size: clamp(2.4rem, 7vw, 4rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.lede {
+  font-family: var(--ff-serif);
+  font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+  line-height: 1.6;
+  color: var(--text-muted);
+  max-width: 44ch;
+  margin: 28px 0 0;
+}
+
+.body {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--text-muted);
+  max-width: 52ch;
+  margin: 20px 0 0;
+}
+
+.cta {
+  margin-top: 36px;
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  margin: 56px 0;
+}
+
+/* ═══════════════════════ FACTS ═══════════════════════ */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px 24px;
+}
+@media (min-width: 768px) {
+  .facts { grid-template-columns: repeat(4, 1fr); gap: 24px 32px; }
+}
+
+.fact {
+  border-top: 1px solid var(--hairline);
+  padding-top: 20px;
+}
+
+.factValue {
+  font-family: var(--ff-display);
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.factLabel {
+  font-size: .85rem;
+  letter-spacing: .04em;
+  color: var(--text-muted);
+  margin: 8px 0 0;
+}

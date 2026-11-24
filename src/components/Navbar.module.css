@@ -41,10 +41,25 @@
 .logo {
   display: inline-flex;
   align-items: center;
+  gap: 9px;
   min-height: 44px;
   flex-shrink: 0;
   font-family: var(--ff-display);
   font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-main);
+}
+.logoMark {
+  flex-shrink: 0;
+  transition: transform .4s var(--ease-spring, cubic-bezier(0.16,1,0.3,1));
+}
+.logo:hover .logoMark {
+  transform: rotate(90deg) scale(1.08);
+}
+.logoText {
+  font-family: var(--ff-display, 'Playfair Display', serif);
+  font-size: 1.25rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--text-main);

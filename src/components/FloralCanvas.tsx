@@ -13,7 +13,8 @@
  */
 
 import dynamic from 'next/dynamic';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import LogoBloom from './LogoBloom';
 
 const FloralScene = dynamic(() => import('./FloralScene'), { ssr: false });
 
@@ -33,6 +34,9 @@ function hasWebGL(): boolean {
 export default function FloralCanvas() {
   const [mode, setMode] = useState<Mode>(null);
   const [ready, setReady] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+  // Stable callback: LogoBloom restarts its timers whenever onDone changes identity.
+  const onSplashDone = useCallback(() => setShowSplash(false), []);
 
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -63,11 +67,15 @@ export default function FloralCanvas() {
     };
   }, []);
 
-  if (!mode) return null;
-
+  // The splash renders on every device, including those where WebGL is skipped (mode stays null).
   return (
-    <div className={`floral-canvas${ready ? ' ready' : ''}`} aria-hidden="true">
-      <FloralScene key={mode} mobile={mode === 'mobile'} onReady={() => setReady(true)} />
-    </div>
+    <>
+      {showSplash && <LogoBloom onDone={onSplashDone} />}
+      {mode && (
+        <div className={`floral-canvas${ready ? ' ready' : ''}`} aria-hidden="true">
+          <FloralScene key={mode} mobile={mode === 'mobile'} onReady={() => setReady(true)} />
+        </div>
+      )}
+    </>
   );
 }

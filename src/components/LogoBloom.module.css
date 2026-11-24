@@ -1,0 +1,63 @@
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cream, #fdf6f0);
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.splashOut {
+  opacity: 0;
+  pointer-events: none;
+}
+.mark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+.svg {
+  width: 72px;
+  height: 72px;
+  overflow: visible;
+}
+.petal {
+  opacity: 0;
+  transform-origin: 20px 20px;
+  transform: scale(0);
+  animation: petalBloom 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.p0 { animation-delay: 0ms; }
+.p1 { animation-delay: 100ms; }
+.p2 { animation-delay: 200ms; }
+.p3 { animation-delay: 300ms; }
+.center {
+  opacity: 0;
+  animation: centerPop 0.3s cubic-bezier(0.16, 1, 0.3, 1) 400ms forwards;
+}
+@keyframes petalBloom {
+  from { opacity: 0; transform: scale(0.1); }
+  to   { opacity: 0.92; transform: scale(1); }
+}
+@keyframes centerPop {
+  from { opacity: 0; transform-origin: center; transform: scale(0); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.wordmark {
+  font-family: var(--ff-display, 'Playfair Display', serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-main, #1a0910);
+  opacity: 0;
+  animation: wordFade 0.5s ease 500ms forwards;
+}
+@keyframes wordFade {
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .petal, .center, .wordmark { animation: none; opacity: 1; transform: none; }
+  .splashOut { opacity: 0; }
+}
