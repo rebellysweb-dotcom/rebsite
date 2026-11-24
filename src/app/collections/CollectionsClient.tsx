@@ -38,7 +38,7 @@ export default function CollectionsClient({ products }: { products: Product[] })
       </div>
 
       {visible.length > 0 ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))', gap: 'clamp(16px, 3vw, 32px)' }}>
+        <div className={styles.grid}>
           {visible.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

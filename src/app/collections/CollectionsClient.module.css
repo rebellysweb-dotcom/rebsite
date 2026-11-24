@@ -34,3 +34,16 @@
 @media (prefers-reduced-motion: reduce) {
   .tab { transition: none; }
 }
+
+/* ── Product grid: 2 cols on mobile, scales up ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(8px, 2vw, 14px);
+}
+@media (min-width: 560px) {
+  .grid { grid-template-columns: repeat(3, 1fr); gap: 18px; }
+}
+@media (min-width: 1024px) {
+  .grid { grid-template-columns: repeat(4, 1fr); gap: clamp(16px, 2vw, 28px); }
+}

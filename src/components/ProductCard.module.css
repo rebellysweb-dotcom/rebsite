@@ -176,6 +176,25 @@
   .card:hover .body { transform: translateY(-4px); }
 }
 
+/* ── Compact for 2-column mobile grids (< 560px) ── */
+@media (max-width: 559px) {
+  .body { padding: 9px 10px 12px; gap: 3px; }
+  .name { font-size: .95rem; }
+  .desc { display: none; }
+  .priceRow { margin-top: 2px; }
+  .price { font-size: .88rem; }
+  .addBtn {
+    left: 6px; right: 6px; bottom: 6px;
+    min-height: 36px;
+    font-size: .78rem;
+    gap: 4px;
+    border-radius: 10px;
+  }
+  .addBtn svg { width: 13px; height: 13px; }
+  .tags { top: 6px; left: 6px; gap: 4px; }
+  .tag { padding: 3px 7px; font-size: .68rem; }
+}
+
 @media (min-width: 768px) {
   .body { padding: 18px 20px 22px; }
   .name { font-size: 1.45rem; }

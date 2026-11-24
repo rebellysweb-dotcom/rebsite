@@ -29,6 +29,13 @@ const toProduct = (r: ProductRow): Product => ({
 
 const HEADLINE = ['Fresh.', 'Grown.', 'Gifted.'];
 
+const CATEGORIES = [
+  { emoji: '🎄', name: 'Christmas', href: '/collections' },
+  { emoji: '👶', name: 'New Born', href: '/collections' },
+  { emoji: '💐', name: 'Bouquets', href: '/collections' },
+  { emoji: '🌹', name: 'Events', href: '/services' },
+];
+
 const SERVICES = [
   {
     name: 'Weddings and events',
@@ -122,6 +129,20 @@ export default function HomePage() {
           />
         </figure>
       </section>
+
+      {/* ── SHOP BY OCCASION ─────────────────────────────── */}
+      <nav aria-label="Shop by occasion" className={styles.catSection}>
+        <ul className={styles.catGrid}>
+          {CATEGORIES.map((cat) => (
+            <li key={cat.name}>
+              <Link href={cat.href} className={styles.catTile}>
+                <span className={styles.catEmoji} aria-hidden="true">{cat.emoji}</span>
+                <span className={styles.catName}>{cat.name}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
 
       <section className={styles.trustStrip} aria-label="Trust signals">
         <ul className={styles.trustList}>
