@@ -6,8 +6,16 @@ import { useCartStore } from '@/store/cart';
 import { formatUsd } from '@/lib/utils';
 import styles from './CartDrawer.module.css';
 
+const ADD_ONS = [
+  { id: 'addon-card', name: 'Greeting Card', price_usd: 0, emoji: '💌', slug: 'addon-card' },
+  { id: 'addon-balloon-sm', name: 'Balloon S', price_usd: 3, emoji: '🎈', slug: 'addon-balloon-sm' },
+  { id: 'addon-balloon-lg', name: 'Balloon L', price_usd: 5, emoji: '🎈', slug: 'addon-balloon-lg' },
+  { id: 'addon-balloon-helium', name: 'Helium 18"', price_usd: 12, emoji: '🎈', slug: 'addon-balloon-helium' },
+  { id: 'addon-teddy', name: 'Teddy Bear', price_usd: 15, imageUrl: '/images/products/ralph-teddy-bear-1.jpg', slug: 'addon-teddy' },
+] as const;
+
 export default function CartDrawer() {
-  const { items, isOpen, closeCart, removeItem, updateQuantity, totalItems, totalUsd } =
+  const { items, isOpen, closeCart, addItem, removeItem, updateQuantity, totalItems, totalUsd } =
     useCartStore();
 
   const drawerRef  = useRef<HTMLDivElement>(null);
@@ -165,6 +173,37 @@ export default function CartDrawer() {
             </ul>
           )}
         </div>
+
+        {items.length > 0 && (
+          <div className={styles.addOnsSection}>
+            <p className={styles.addOnsLabel}>🎁 Add extras?</p>
+            <div className={styles.addOnsRow}>
+              {ADD_ONS.map((ao) => {
+                const active = items.some(i => i.lineId === ao.id);
+                return (
+                  <button
+                    key={ao.id}
+                    type="button"
+                    className={`${styles.addonTile} ${active ? styles.addonTileActive : ''}`}
+                    onClick={() => active
+                      ? removeItem(ao.id)
+                      : addItem({ id: ao.id, name: ao.name, price_usd: ao.price_usd, image_url: 'imageUrl' in ao ? ao.imageUrl : null, is_event_product: false, slug: ao.slug })
+                    }
+                    aria-pressed={active}
+                    aria-label={`${active ? 'Remove' : 'Add'} ${ao.name}`}
+                  >
+                    {'imageUrl' in ao
+                      ? <img src={ao.imageUrl} alt={ao.name} className={styles.addonImg} />
+                      : <span className={styles.addonEmoji} aria-hidden="true">{ao.emoji}</span>
+                    }
+                    <span className={styles.addonName}>{ao.name}</span>
+                    <span className={styles.addonPrice}>{ao.price_usd === 0 ? 'Free' : `+$${ao.price_usd}`}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Footer — only when items exist */}
         {items.length > 0 && (

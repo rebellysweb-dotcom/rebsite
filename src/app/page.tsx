@@ -100,27 +100,36 @@ export default function HomePage() {
           </h1>
 
           <p className={`${styles.sub} ${styles.fadeIn}`}>
-            Arranged by hand in Zalka since 1990, and carried to your door across the Metn.
+            Arranged by hand in Zalka since 1990 — Christmas gifting, delivered to your door across the Metn.
           </p>
 
           <div className={`${styles.ctas} ${styles.fadeIn}`}>
             <Link href="/checkout" className="btn btn-primary">Order Now</Link>
-            <Link href="/collections" className="btn btn-gold-outline">Explore</Link>
+            <Link href="/collections" className="btn btn-gold-outline">Shop Christmas</Link>
           </div>
         </div>
 
         <figure className={styles.arch}>
           <Image
-            src="/images/mixed_bouquet.png"
-            alt="A hand-tied bouquet of pink and red roses with baby's breath, wrapped in cream paper and a pink ribbon"
+            src="/images/products/christmas-basket.jpg"
+            alt="A festive Christmas gift basket with Ksara wine, chocolates, and seasonal greenery"
             className={styles.archImg}
             fill
             priority
             sizes="(min-width: 768px) 460px, 72vw"
             placeholder="blur"
-            blurDataURL={getBlurDataUrl('#fcd8ec')}
+            blurDataURL={getBlurDataUrl('#8b2020')}
           />
         </figure>
+      </section>
+
+      <section className={styles.trustStrip} aria-label="Trust signals">
+        <ul className={styles.trustList}>
+          <li>🏪 Est. 1990</li>
+          <li>🚚 Same-day delivery</li>
+          <li>💵 Cash on delivery</li>
+          <li>💬 WhatsApp confirmed</li>
+        </ul>
       </section>
 
       {/* ── STORY ────────────────────────────────────────────── */}

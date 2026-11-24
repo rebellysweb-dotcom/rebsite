@@ -10,6 +10,7 @@ import FloralCanvas from "@/components/FloralCanvas";
 import { JsonLd } from "@/components/JsonLd";
 import { getLocalBusinessSchema } from "@/lib/structured-data";
 import PostHogProvider from "@/components/PostHogProvider";
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -112,6 +113,7 @@ export default function RootLayout({
             <Footer />
           </div>
           <CartDrawer />
+          <WhatsAppButton />
         </PostHogProvider>
       </body>
     </html>

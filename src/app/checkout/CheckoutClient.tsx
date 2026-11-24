@@ -25,6 +25,7 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
     delivery_date: '',
     delivery_time: '',
     notes: '',
+    card_message: '',
     payment_method: 'whish' as 'whish' | 'cash',
   });
 
@@ -50,6 +51,7 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          card_message: formData.card_message,
           items: items.map(i => ({
             id: i.id,
             name: i.name,
@@ -305,6 +307,22 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
                   Leave blank for ASAP delivery. The shop will confirm the exact time via WhatsApp.
                 </p>
               </div>
+
+              {items.some(i => i.id === 'addon-card') && (
+                <div className="form-group" style={{ marginBottom: '16px' }}>
+                  <label className="form-label" htmlFor="card_message">Card Message</label>
+                  <textarea
+                    id="card_message"
+                    className="form-textarea"
+                    rows={3}
+                    maxLength={160}
+                    placeholder="Write your message for the greeting card (max 160 characters)..."
+                    value={formData.card_message}
+                    onChange={e => setFormData(f => ({ ...f, card_message: e.target.value }))}
+                  />
+                  <small style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{formData.card_message.length}/160</small>
+                </div>
+              )}
 
               <div className="form-group" style={{ marginBottom: '16px' }}>
                 <label className="form-label">Payment Method <span className="required">*</span></label>

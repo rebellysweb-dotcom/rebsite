@@ -163,3 +163,29 @@
   width: 100%;
   font-size: 0.85rem;
 }
+
+.addOnsSection { padding: 1rem 1.25rem 0; border-top: 1px solid var(--hairline); }
+.addOnsLabel { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.75rem; }
+.addOnsRow { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 0.5rem; scrollbar-width: none; }
+.addOnsRow::-webkit-scrollbar { display: none; }
+.addonTile {
+  flex: 0 0 auto;
+  width: 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px 8px;
+  border: 1.5px solid var(--hairline);
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+  font-family: inherit;
+}
+.addonTile:hover { border-color: var(--rose-300, #f9a8d4); }
+.addonTileActive { border-color: var(--pink-500, #e91e8c); background: rgba(233,30,140,0.06); }
+.addonEmoji { font-size: 1.5rem; line-height: 1; }
+.addonImg { width: 32px; height: 32px; object-fit: cover; border-radius: 6px; }
+.addonName { font-size: 0.7rem; font-weight: 500; text-align: center; color: var(--text-main); line-height: 1.2; }
+.addonPrice { font-size: 0.7rem; color: var(--text-muted); }
