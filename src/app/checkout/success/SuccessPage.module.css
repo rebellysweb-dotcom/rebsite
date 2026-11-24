@@ -1,239 +1,186 @@
+/* Order confirmation. Mobile first. Tokens only. */
+
 .main {
-  padding: 100px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: calc(var(--nav-h) + 32px) 0 72px;
 }
 
 .card {
-  background: #fff;
-  max-width: 600px;
+  max-width: 640px;
   margin: 0 auto;
-  padding: 64px 48px;
+  padding: clamp(24px, 5vw, 44px);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xl);
-  text-align: center;
+  box-shadow: var(--card-shadow);
 }
 
-/* ── Animated checkmark ── */
-.checkWrap {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  border: 2.5px solid var(--rose-500);
+.eyebrow {
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin: 0 auto 28px;
+  gap: 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+  margin-bottom: 12px;
 }
-
-@keyframes checkPop {
-  from {
-    opacity: 0;
-    transform: scale(0);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+.seal {
+  width: 32px; height: 32px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--success-bg);
+  border: 1px solid var(--success);
+  color: var(--success);
 }
-
-.checkmark {
-  font-size: 2.4rem;
-  line-height: 1;
-  color: var(--rose-500);
-  animation: checkPop 0.4s ease both;
-  display: block;
-}
-
-/* ── Title ── */
 .title {
   font-family: var(--ff-display);
-  font-size: 2.2rem;
+  font-size: clamp(2rem, 7vw, 3rem);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--text-main);
   margin-bottom: 12px;
-  background: linear-gradient(135deg, var(--rose-600), var(--rose-400));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
-
 .subtitle {
-  color: var(--text-muted);
-  margin-bottom: 28px;
+  color: var(--text-soft);
+  line-height: 1.7;
+  margin-bottom: 32px;
 }
 
-/* ── Order number row ── */
+/* Order number */
 .orderNumRow {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 14px;
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--rose-600);
-  letter-spacing: 2px;
-  margin-bottom: 8px;
-}
-
-/* ── Copy button ── */
-.copyBtn {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 999px;
-  border: 1.5px solid var(--rose-500);
-  color: var(--rose-600);
-  background: transparent;
-  cursor: pointer;
-  letter-spacing: 0.5px;
-  transition: background 0.15s, color 0.15s;
-}
-
-.copyBtn:hover {
-  background: var(--rose-500);
-  color: #fff;
-}
-
-/* ── Items list ── */
-.itemsList {
-  list-style: decimal;
-  padding-left: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  text-align: left;
-  font-size: 0.9rem;
-  color: var(--text-muted);
-}
-
-/* ── Next steps / scheduling box (reused) ── */
-.nextSteps {
-  text-align: left;
-  margin-bottom: 16px;
-  padding: 24px;
-  border: 1px solid rgba(45, 10, 30, 0.05);
-  border-radius: var(--radius);
-}
-
-.nextSteps h3 {
-  font-size: 1rem;
-  margin-bottom: 16px;
-  color: var(--text-main);
-}
-
-.nextSteps ul {
-  list-style: disc;
-  padding-left: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.nextSteps li {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-}
-
-/* ── Whish payment box ── */
-.whishBox {
-  background: rgba(233, 30, 140, 0.06);
-  border: 1.5px solid var(--rose-400, #f472b6);
-  border-radius: var(--radius);
+  justify-content: space-between;
+  gap: 16px;
   padding: 20px;
-  text-align: left;
-  margin-top: 20px;
+  background: var(--surface-photo);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  margin-bottom: 32px;
 }
+.orderLabel {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  margin-bottom: 4px;
+}
+.orderNum {
+  font-family: var(--ff-display);
+  font-size: clamp(1.3rem, 5vw, 1.7rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--rose-700);
+  overflow-wrap: anywhere;
+}
+.copyBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  background: var(--surface);
+  border: 1.5px solid var(--rose-700);
+  border-radius: var(--radius-xl);
+  color: var(--rose-700);
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: background-color 0.2s var(--ease), color 0.2s var(--ease);
+}
+.copyBtn:hover { background: var(--rose-700); color: var(--white); }
 
-.whishTitle {
-  color: var(--rose-700, #be185d);
+/* Content blocks */
+.block {
+  padding: 24px 0;
+  border-top: 1px solid var(--border-strong);
+}
+.blockTitle {
+  font-family: var(--ff-display);
+  font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 12px;
-  font-size: 1rem;
 }
-
-.whishStep {
+.itemsList {
+  list-style: none;
   display: flex;
-  gap: 10px;
-  margin-bottom: 8px;
-  font-size: 0.9rem;
-  color: var(--text-main);
-  align-items: flex-start;
-}
-
-.whishStep span:first-child {
-  color: var(--rose-500);
-  font-weight: 700;
-  flex-shrink: 0;
-  min-width: 18px;
-}
-
-/* ── WhatsApp link ── */
-.whatsappLink {
-  color: #25D366;
-  font-weight: 600;
-  display: inline-flex;
+  flex-direction: column;
   gap: 8px;
-  align-items: center;
-  text-decoration: none;
   font-size: 0.95rem;
-  transition: opacity 0.15s;
+  color: var(--text-main);
 }
+.qty { color: var(--text-soft); }
+.meta { font-size: 0.95rem; color: var(--text-soft); margin-bottom: 4px; }
+.meta strong { color: var(--text-main); }
 
-.whatsappLink:hover {
-  opacity: 0.8;
+.steps {
+  list-style: none;
+  counter-reset: step;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
-
-/* ── No order state ── */
-.noOrder {
-  text-align: center;
-  padding: 48px 0;
-  color: var(--text-muted);
+.steps li {
+  counter-increment: step;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 8px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-main);
 }
-
-.noOrder p {
+.steps li::before {
+  content: counter(step);
+  font-family: var(--ff-display);
+  font-style: italic;
   font-size: 1.1rem;
-  margin-bottom: 8px;
+  color: var(--rose-700);
 }
 
-/* ── CTA buttons ── */
+.help {
+  padding: 24px 0;
+  border-top: 1px solid var(--border-strong);
+  color: var(--text-soft);
+  font-size: 0.95rem;
+}
+.whatsappLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  vertical-align: bottom;
+  color: var(--rose-700);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.whatsappLink:hover { color: var(--text-main); }
+.whatsappLink:focus-visible { outline: 2px solid var(--rose-700); outline-offset: 3px; }
+
 .actions {
   display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin-top: 36px;
-}
-
-/* ── Preserved legacy classes ── */
-.orderInfo {
-  background: var(--cream-100);
-  padding: 16px;
-  border-radius: var(--radius);
-  display: inline-flex;
-  align-items: center;
+  flex-direction: column;
   gap: 12px;
-  margin-bottom: 40px;
+  margin-top: 8px;
 }
 
-.orderInfo strong {
-  color: var(--rose-700);
-  letter-spacing: 1px;
+/* No order */
+.noOrder { color: var(--text-soft); }
+.noOrder p { margin-bottom: 20px; }
+.noOrderBtn { display: inline-flex; }
+
+/* Loading */
+.loading { text-align: center; padding: 4rem; }
+.spin { margin: 0 auto; }
+
+@media (min-width: 600px) {
+  .actions { flex-direction: row; }
 }
-
-/* ── Responsive ── */
-@media (max-width: 600px) {
-  .card {
-    padding: 40px 24px;
-    box-shadow: none;
-    border: none;
-    background: transparent;
-  }
-
-  .actions {
-    flex-direction: column;
-  }
-
-  .orderNumRow {
-    font-size: 1.1rem;
-    letter-spacing: 1px;
-  }
+@media (min-width: 768px) {
+  .main { padding-top: calc(var(--nav-h) + 64px); padding-bottom: 112px; }
+  .orderNumRow { padding: 24px 28px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .copyBtn { transition: none; }
 }

@@ -34,7 +34,7 @@ export default async function LoginPage({
           <div className={styles.contentWrap}>
             <div className={styles.loginCard}>
               <header className={styles.header}>
-                <div className={styles.logo}>✿</div>
+                <p className={styles.logo}>Rebelly&apos;s</p>
                 <h1 className={styles.title}>Welcome Back</h1>
                 <p className={styles.subtitle}>
                   Sign in to access your flower shop account
@@ -50,12 +50,12 @@ export default async function LoginPage({
 
                 <EmailAuthForm redirectTo={redirectTo} />
 
-                <div className={styles.divider} style={{ marginTop: '24px' }}>
+                <div className={`${styles.divider} ${styles.dividerSpaced}`}>
                   <span>or browse as guest</span>
                 </div>
 
                 <div className={styles.actions}>
-                  <Link href="/collections" className="btn btn-outline" style={{ width: '100%' }}>
+                  <Link href="/collections" className={`btn btn-outline ${styles.fullBtn}`}>
                     Continue Shopping
                   </Link>
                 </div>

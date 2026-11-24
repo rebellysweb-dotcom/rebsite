@@ -1,44 +1,46 @@
 .sidebar {
-  width: 260px;
+  width: 232px;
   flex-shrink: 0;
-  background: var(--dark);
+  background: var(--surface);
+  border-right: 1px solid var(--border-strong);
+  box-shadow: 4px 0 24px -12px rgba(45,10,30,.18);
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100dvh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   z-index: 10;
 }
 
-/* Logo */
+/* Wordmark */
 .logo {
-  padding: 28px 24px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 28px 24px 22px;
+  border-bottom: 1px solid var(--border-strong);
   flex-shrink: 0;
 }
 
 .logoText {
-  font-family: var(--ff-display);
-  font-size: 1.25rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--rose-500) 0%, var(--rose-300) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
   display: block;
-  line-height: 1.2;
+  font-family: var(--ff-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text-main);
 }
 
 .logoSub {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.35);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  display: block;
   margin-top: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
 }
 
-/* Nav */
+/* Navigation */
 .nav {
   flex: 1;
   padding: 16px 0;
@@ -47,40 +49,32 @@
 .navLink {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 11px 24px;
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 0.88rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  text-decoration: none;
+  gap: 10px;
+  padding: 11px 24px 11px 21px;
   border-left: 3px solid transparent;
-  cursor: pointer;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.15s var(--ease), background-color 0.15s var(--ease), border-color 0.15s var(--ease);
 }
 
 .navLink:hover {
-  color: rgba(255, 255, 255, 0.9);
-  background: rgba(255, 255, 255, 0.06);
-  border-left-color: rgba(255, 255, 255, 0.15);
+  color: var(--text-main);
+  background: var(--surface-muted);
 }
 
 .navLink.active {
-  color: #fff;
-  background: rgba(233, 30, 140, 0.15);
+  color: var(--rose-700);
+  font-weight: 700;
+  background: color-mix(in srgb, var(--rose-200) 28%, var(--white));
   border-left-color: var(--rose-500);
 }
 
-.navIcon {
-  font-size: 1.1rem;
-  width: 20px;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-/* User area */
+/* User */
 .userArea {
-  padding: 20px 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 18px 24px 22px;
+  border-top: 1px solid var(--border-strong);
   flex-shrink: 0;
 }
 
@@ -91,13 +85,17 @@
   margin-bottom: 14px;
 }
 
+.userText {
+  min-width: 0;
+}
+
 .avatar {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: var(--rose-500);
-  color: #fff;
-  font-size: 0.85rem;
+  background: var(--rose-200);
+  color: var(--rose-800);
+  font-size: 0.8rem;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -108,45 +106,44 @@
 .userName {
   font-size: 0.85rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text-main);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .userEmail {
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.75rem;
+  color: var(--text-soft);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .signOutBtn {
-  width: 100%;
-  padding: 9px 14px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius);
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: center;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--rose-700);
+  border-radius: var(--radius);
+  color: var(--rose-700);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.15s var(--ease);
 }
 
 .signOutBtn:hover {
-  background: rgba(233, 30, 140, 0.15);
-  border-color: rgba(233, 30, 140, 0.3);
-  color: var(--rose-300);
+  background: color-mix(in srgb, var(--rose-200) 35%, var(--white));
 }
 
-/* Mobile responsive */
+/* Mobile: becomes a top bar, nav scrolls inside itself */
 @media (max-width: 768px) {
   .sidebar {
     width: 100%;
@@ -154,37 +151,36 @@
     position: static;
     flex-direction: row;
     align-items: center;
-    padding: 0;
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: hidden;
+    border-right: 0;
+    border-bottom: 1px solid var(--hairline);
   }
 
   .logo {
-    padding: 12px 16px;
-    border-bottom: none;
-    border-right: 1px solid rgba(255, 255, 255, 0.07);
-    flex-shrink: 0;
+    padding: 10px 16px;
+    border-bottom: 0;
+    border-right: 1px solid var(--hairline);
   }
 
-  .logoSub {
-    display: none;
+  .logoText {
+    font-size: 1.15rem;
   }
 
   .nav {
     display: flex;
     flex-direction: row;
-    padding: 0;
     flex: 1;
+    min-width: 0;
+    padding: 0;
+    overflow-x: auto;
   }
 
   .navLink {
-    padding: 16px 14px;
-    flex-direction: column;
-    gap: 4px;
-    font-size: 0.72rem;
-    border-left: none;
-    border-bottom: 3px solid transparent;
+    padding: 16px 14px 13px;
+    font-size: 0.85rem;
     white-space: nowrap;
+    border-left: 0;
+    border-bottom: 3px solid transparent;
   }
 
   .navLink.active {
@@ -192,11 +188,20 @@
     border-bottom-color: var(--rose-500);
   }
 
-  .navLink:hover {
-    border-left-color: transparent;
+  .userArea {
+    padding: 0 12px;
+    border-top: 0;
+    border-left: 1px solid var(--hairline);
   }
 
-  .userArea {
+  .userRow {
     display: none;
+  }
+
+  .signOutBtn {
+    width: auto;
+    min-height: 34px;
+    padding: 6px 12px;
+    white-space: nowrap;
   }
 }

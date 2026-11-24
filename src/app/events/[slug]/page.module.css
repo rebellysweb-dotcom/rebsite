@@ -1,0 +1,17 @@
+.page { padding: calc(var(--nav-h) + 3rem) var(--px) 8rem; background: var(--cream); min-height: 100dvh; }
+.banner {
+  background: var(--rose-700);
+  color: var(--white);
+  padding: clamp(2rem, 6vw, 3.5rem) clamp(1.25rem, 4vw, 3rem);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  margin-bottom: 3rem;
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--card-shadow);
+}
+.kicker { text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.78rem; font-weight: 600; }
+.bannerTitle { font-family: var(--ff-display); font-size: clamp(2rem, 6vw, 3rem); font-weight: 600; margin: 1rem 0; }
+.bannerText { font-size: 1.05rem; max-width: 600px; margin: 0 auto; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 2rem; }
+.empty { text-align: center; padding: 4rem 1.5rem; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); box-shadow: var(--card-shadow); color: var(--text-soft); }
+.skeleton { height: 400px; border-radius: var(--radius-lg); background: var(--rose-200); border: 1px solid var(--border-strong); opacity: 0.5; }

@@ -44,8 +44,8 @@ export default function CollectionsClient({ products }: { products: Product[] })
           ))}
         </div>
       ) : (
-        <div style={{ textAlign: 'center', padding: '4rem', background: '#fff', borderRadius: 'var(--radius-lg)' }}>
-          <p style={{ color: 'var(--text-muted)' }}>No products in this collection yet.</p>
+        <div className={styles.empty}>
+          <p>No products in this collection yet.</p>
         </div>
       )}
     </>

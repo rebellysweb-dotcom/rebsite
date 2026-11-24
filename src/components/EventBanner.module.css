@@ -7,7 +7,7 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   animation: slideDown 0.5s var(--ease);
   /* Ensure legibility regardless of banner color */
-  color: #fff;
+  color: var(--white);
 }
 @keyframes slideDown {
   from { transform: translateY(-100%); opacity: 0; }
@@ -45,16 +45,7 @@
   min-width: 0;
 }
 
-.eventIcon {
-  font-size: 1.4rem;
-  flex-shrink: 0;
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%,100% { transform: scale(1); }
-  50%      { transform: scale(1.15) rotate(10deg); }
-}
-
+.lead { display: inline-flex; flex-shrink: 0; color: var(--white); }
 .copy {
   display: flex;
   align-items: baseline;
@@ -66,7 +57,7 @@
 .name {
   font-size: 0.92rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--white);
   white-space: nowrap;
 }
 
@@ -90,9 +81,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: var(--white);
   font-size: 0.83rem;
   font-weight: 600;
   padding: 7px 16px;
@@ -103,16 +94,16 @@
   white-space: nowrap;
 }
 .cta:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateX(2px);
+  background: rgba(255, 255, 255, 0.34);
 }
 
 .dismiss {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: var(--white);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -121,7 +112,7 @@
 }
 .dismiss:hover {
   background: rgba(255, 255, 255, 0.28);
-  color: #fff;
+  color: var(--white);
 }
 
 /* ── Responsive ── */

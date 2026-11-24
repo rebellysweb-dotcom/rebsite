@@ -20,19 +20,19 @@ export default function LogoBloom({ onDone }: { onDone: () => void }) {
             so the CSS transform animation on the ellipse does not override the rotation. */}
         <svg viewBox="0 0 40 40" className={styles.svg} xmlns="http://www.w3.org/2000/svg">
           <g transform="rotate(0 20 20)">
-            <ellipse className={`${styles.petal} ${styles.p0}`} cx="20" cy="11" rx="5.5" ry="9.5" fill="#e91e8c"/>
+            <ellipse className={`${styles.petal} ${styles.p0}`} cx="20" cy="11" rx="5.5" ry="9.5" fill="#844057"/>
           </g>
           <g transform="rotate(90 20 20)">
-            <ellipse className={`${styles.petal} ${styles.p1}`} cx="20" cy="11" rx="5.5" ry="9.5" fill="#e91e8c"/>
+            <ellipse className={`${styles.petal} ${styles.p1}`} cx="20" cy="11" rx="5.5" ry="9.5" fill="#844057"/>
           </g>
           <g transform="rotate(180 20 20)">
-            <ellipse className={`${styles.petal} ${styles.p2}`} cx="20" cy="11" rx="5.5" ry="9.5" fill="#e91e8c"/>
+            <ellipse className={`${styles.petal} ${styles.p2}`} cx="20" cy="11" rx="5.5" ry="9.5" fill="#844057"/>
           </g>
           <g transform="rotate(270 20 20)">
-            <ellipse className={`${styles.petal} ${styles.p3}`} cx="20" cy="11" rx="5.5" ry="9.5" fill="#e91e8c"/>
+            <ellipse className={`${styles.petal} ${styles.p3}`} cx="20" cy="11" rx="5.5" ry="9.5" fill="#844057"/>
           </g>
-          <circle className={styles.center} cx="20" cy="20" r="6" fill="#c9a84c"/>
-          <circle cx="20" cy="20" r="2.5" fill="#e8d095" className={styles.center}/>
+          <circle className={styles.center} cx="20" cy="20" r="6" fill="#f0dce2"/>
+          <circle cx="20" cy="20" r="2.5" fill="#faf3f0" className={styles.center}/>
         </svg>
         <span className={styles.wordmark}>Rebelly&apos;s</span>
       </div>

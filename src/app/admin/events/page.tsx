@@ -2,8 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { Event, EventProduct } from '@/types';
+import styles from '../admin.module.css';
+import Icon from '@/components/icons/Icon';
 
-const EMPTY_EVENT = { name:'', slug:'', description:'', banner_color:'#e91e8c', button_label:'', banner_image_url:'', is_active:false, auto_activate_from:'', auto_deactivate_at:'' };
+// banner_color feeds <input type="color">, which only accepts a hex value.
+const EMPTY_EVENT = { name:'', slug:'', description:'', banner_color:'#844057', button_label:'', banner_image_url:'', is_active:false, auto_activate_from:'', auto_deactivate_at:'' };
 const EMPTY_PRODUCT = { name:'', description:'', image_url:'', price_usd: '' as string | number, tag:'', sort_order: 0, is_active: true };
 
 export default function AdminEventsPage() {
@@ -127,47 +130,75 @@ export default function AdminEventsPage() {
 
   return (
     <>
-      <div className="admin-topbar">
-        <h1 className="admin-page-title">Events</h1>
-        <button className="btn btn-primary" onClick={openCreateEvent}>+ Create Event</button>
-      </div>
+      <header className={styles.pageHeader}>
+        <div className={styles.pageTitleGroup}>
+          <h1 className={styles.pageTitle}>Events</h1>
+          <p className={styles.pageMeta}>Seasonal campaigns and the products that go with them</p>
+        </div>
+        <div className={styles.headerActions}>
+          <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={openCreateEvent}><Icon name="plus" size={18} />Create event</button>
+        </div>
+      </header>
 
-      {/* Event Form Modal */}
       {showEventForm && (
         <>
-          <div className="overlay" onClick={() => setShowEventForm(false)} />
-          <div className="modal-wrap">
-            <div className="modal">
-              <div className="modal-header">
-                <h2 className="modal-title">{editEventId ? 'Edit Event' : 'New Event'}</h2>
-                <button onClick={() => setShowEventForm(false)} className="drawer-close">✕</button>
+          <div className={styles.overlay} onClick={() => setShowEventForm(false)} />
+          <div className={styles.modalWrap}>
+            <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="event-modal-title">
+              <div className={styles.modalHeader}>
+                <h2 id="event-modal-title" className={styles.modalTitle}>{editEventId ? 'Edit event' : 'New event'}</h2>
+                <button type="button" onClick={() => setShowEventForm(false)} className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}><Icon name="close" size={16} />Close</button>
               </div>
-              <div className="modal-body">
-                <div style={{display:'grid',gap:'1rem'}}>
-                  <div className="form-group"><label className="form-label">Name</label><input className="form-input" value={eventForm.name} onChange={e => ef('name',e.target.value)} /></div>
-                  <div className="form-group"><label className="form-label">Slug</label><input className="form-input" value={eventForm.slug} onChange={e => ef('slug',e.target.value)} /></div>
-                  <div className="form-group"><label className="form-label">Description</label><textarea className="form-textarea" value={eventForm.description} onChange={e => ef('description',e.target.value)} /></div>
-                  <div className="form-group"><label className="form-label">Button Label</label><input className="form-input" value={eventForm.button_label} onChange={e => ef('button_label',e.target.value)} /></div>
-                  <div className="form-group"><label className="form-label">Banner Image URL</label><input className="form-input" value={eventForm.banner_image_url} onChange={e => ef('banner_image_url',e.target.value)} /></div>
-                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem'}}>
-                    <div className="form-group"><label className="form-label">Banner Color</label><input type="color" value={eventForm.banner_color} onChange={e => ef('banner_color',e.target.value)} style={{height:42,width:'100%',border:'1.5px solid rgba(45,10,30,.15)',borderRadius:'var(--radius)',cursor:'pointer'}} /></div>
-                    <div className="form-group" style={{justifyContent:'flex-end'}}>
-                      <label style={{display:'flex',alignItems:'center',gap:'8px',cursor:'pointer',fontSize:'0.9rem',marginTop:'auto'}}>
-                        <input type="checkbox" checked={eventForm.is_active} onChange={e => ef('is_active',e.target.checked)} />
+              <div className={styles.modalBody}>
+                <div className={styles.formGrid}>
+                  <div className={styles.field}>
+                    <label className={styles.label} htmlFor="event-name">Name</label>
+                    <input id="event-name" name="name" className={styles.input} value={eventForm.name} onChange={e => ef('name', e.target.value)} />
+                  </div>
+                  <div className={styles.field}>
+                    <label className={styles.label} htmlFor="event-slug">Slug</label>
+                    <input id="event-slug" name="slug" className={styles.input} value={eventForm.slug} onChange={e => ef('slug', e.target.value)} />
+                  </div>
+                  <div className={styles.field}>
+                    <label className={styles.label} htmlFor="event-description">Description</label>
+                    <textarea id="event-description" name="description" className={styles.textarea} value={eventForm.description} onChange={e => ef('description', e.target.value)} />
+                  </div>
+                  <div className={styles.field}>
+                    <label className={styles.label} htmlFor="event-button">Button label</label>
+                    <input id="event-button" name="button_label" className={styles.input} value={eventForm.button_label} onChange={e => ef('button_label', e.target.value)} />
+                  </div>
+                  <div className={styles.field}>
+                    <label className={styles.label} htmlFor="event-banner-image">Banner image URL</label>
+                    <input id="event-banner-image" name="banner_image_url" className={styles.input} value={eventForm.banner_image_url} onChange={e => ef('banner_image_url', e.target.value)} />
+                  </div>
+                  <div className={styles.formRow}>
+                    <div className={styles.field}>
+                      <label className={styles.label} htmlFor="event-color">Banner colour</label>
+                      <input id="event-color" name="banner_color" type="color" className={`${styles.input} ${styles.inputColor}`} value={eventForm.banner_color} onChange={e => ef('banner_color', e.target.value)} />
+                    </div>
+                    <div className={`${styles.field} ${styles.fieldEnd}`}>
+                      <label className={styles.checkRow}>
+                        <input type="checkbox" checked={eventForm.is_active} onChange={e => ef('is_active', e.target.checked)} />
                         Active now
                       </label>
                     </div>
                   </div>
-                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem'}}>
-                    <div className="form-group"><label className="form-label">Auto-Activate From</label><input type="datetime-local" className="form-input" value={eventForm.auto_activate_from} onChange={e => ef('auto_activate_from',e.target.value)} /></div>
-                    <div className="form-group"><label className="form-label">Auto-Deactivate At</label><input type="datetime-local" className="form-input" value={eventForm.auto_deactivate_at} onChange={e => ef('auto_deactivate_at',e.target.value)} /></div>
+                  <div className={styles.formRow}>
+                    <div className={styles.field}>
+                      <label className={styles.label} htmlFor="event-from">Activate automatically from</label>
+                      <input id="event-from" name="auto_activate_from" type="datetime-local" className={styles.input} value={eventForm.auto_activate_from} onChange={e => ef('auto_activate_from', e.target.value)} />
+                    </div>
+                    <div className={styles.field}>
+                      <label className={styles.label} htmlFor="event-until">Deactivate automatically at</label>
+                      <input id="event-until" name="auto_deactivate_at" type="datetime-local" className={styles.input} value={eventForm.auto_deactivate_at} onChange={e => ef('auto_deactivate_at', e.target.value)} />
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="modal-footer">
-                <button className="btn btn-outline" onClick={() => setShowEventForm(false)}>Cancel</button>
-                <button className="btn btn-primary" onClick={saveEvent} disabled={savingEvent}>
-                  {savingEvent ? <span className="spinner" /> : (editEventId ? 'Save Changes' : 'Create Event')}
+              <div className={styles.modalFooter}>
+                <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => setShowEventForm(false)}>Cancel</button>
+                <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={saveEvent} disabled={savingEvent}>
+                  {savingEvent ? 'Saving...' : (editEventId ? 'Save changes' : 'Create event')}
                 </button>
               </div>
             </div>
@@ -175,40 +206,57 @@ export default function AdminEventsPage() {
         </>
       )}
 
-      {/* Event Product Form Modal */}
       {showProductForm && selectedEvent && (
         <>
-          <div className="overlay" onClick={() => setShowProductForm(false)} />
-          <div className="modal-wrap">
-            <div className="modal">
-              <div className="modal-header">
-                <h2 className="modal-title">{editProductId ? 'Edit Event Product' : 'Add Event Product'}</h2>
-                <button onClick={() => setShowProductForm(false)} className="drawer-close">✕</button>
+          <div className={styles.overlay} onClick={() => setShowProductForm(false)} />
+          <div className={styles.modalWrap}>
+            <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="event-product-modal-title">
+              <div className={styles.modalHeader}>
+                <h2 id="event-product-modal-title" className={styles.modalTitle}>{editProductId ? 'Edit event product' : 'Add event product'}</h2>
+                <button type="button" onClick={() => setShowProductForm(false)} className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}><Icon name="close" size={16} />Close</button>
               </div>
-              <div className="modal-body">
-                <div style={{display:'grid',gap:'1rem'}}>
-                  <div className="form-group"><label className="form-label">Name</label><input className="form-input" value={productForm.name} onChange={e => pf('name',e.target.value)} /></div>
-                  <div className="form-group"><label className="form-label">Description</label><textarea className="form-textarea" value={productForm.description} onChange={e => pf('description',e.target.value)} /></div>
-                  <div className="form-group"><label className="form-label">Image URL</label><input className="form-input" value={productForm.image_url} onChange={e => pf('image_url',e.target.value)} /></div>
-                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem'}}>
-                    <div className="form-group"><label className="form-label">Price (USD)</label><input type="number" step="0.01" className="form-input" value={productForm.price_usd} onChange={e => pf('price_usd', e.target.value)} /></div>
-                    <div className="form-group"><label className="form-label">Tag</label><input className="form-input" value={productForm.tag} onChange={e => pf('tag',e.target.value)} /></div>
+              <div className={styles.modalBody}>
+                <div className={styles.formGrid}>
+                  <div className={styles.field}>
+                    <label className={styles.label} htmlFor="ep-name">Name</label>
+                    <input id="ep-name" name="name" className={styles.input} value={productForm.name} onChange={e => pf('name', e.target.value)} />
                   </div>
-                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem'}}>
-                    <div className="form-group"><label className="form-label">Sort Order</label><input type="number" className="form-input" value={productForm.sort_order} onChange={e => pf('sort_order', parseInt(e.target.value) || 0)} /></div>
-                    <div className="form-group" style={{justifyContent:'flex-end'}}>
-                      <label style={{display:'flex',alignItems:'center',gap:'8px',cursor:'pointer',fontSize:'0.9rem',marginTop:'auto'}}>
-                        <input type="checkbox" checked={productForm.is_active} onChange={e => pf('is_active',e.target.checked)} />
+                  <div className={styles.field}>
+                    <label className={styles.label} htmlFor="ep-description">Description</label>
+                    <textarea id="ep-description" name="description" className={styles.textarea} value={productForm.description} onChange={e => pf('description', e.target.value)} />
+                  </div>
+                  <div className={styles.field}>
+                    <label className={styles.label} htmlFor="ep-image">Image URL</label>
+                    <input id="ep-image" name="image_url" className={styles.input} value={productForm.image_url} onChange={e => pf('image_url', e.target.value)} />
+                  </div>
+                  <div className={styles.formRow}>
+                    <div className={styles.field}>
+                      <label className={styles.label} htmlFor="ep-price">Price (USD)</label>
+                      <input id="ep-price" name="price_usd" type="number" step="0.01" className={styles.input} value={productForm.price_usd} onChange={e => pf('price_usd', e.target.value)} />
+                    </div>
+                    <div className={styles.field}>
+                      <label className={styles.label} htmlFor="ep-tag">Tag</label>
+                      <input id="ep-tag" name="tag" className={styles.input} value={productForm.tag} onChange={e => pf('tag', e.target.value)} />
+                    </div>
+                  </div>
+                  <div className={styles.formRow}>
+                    <div className={styles.field}>
+                      <label className={styles.label} htmlFor="ep-sort">Sort order</label>
+                      <input id="ep-sort" name="sort_order" type="number" className={styles.input} value={productForm.sort_order} onChange={e => pf('sort_order', parseInt(e.target.value) || 0)} />
+                    </div>
+                    <div className={`${styles.field} ${styles.fieldEnd}`}>
+                      <label className={styles.checkRow}>
+                        <input type="checkbox" checked={productForm.is_active} onChange={e => pf('is_active', e.target.checked)} />
                         Active
                       </label>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="modal-footer">
-                <button className="btn btn-outline" onClick={() => setShowProductForm(false)}>Cancel</button>
-                <button className="btn btn-primary" onClick={saveProduct} disabled={savingProduct}>
-                  {savingProduct ? <span className="spinner" /> : (editProductId ? 'Save' : 'Add Product')}
+              <div className={styles.modalFooter}>
+                <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => setShowProductForm(false)}>Cancel</button>
+                <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={saveProduct} disabled={savingProduct}>
+                  {savingProduct ? 'Saving...' : (editProductId ? 'Save' : 'Add product')}
                 </button>
               </div>
             </div>
@@ -216,106 +264,117 @@ export default function AdminEventsPage() {
         </>
       )}
 
-      {/* Events + Products Panel Side-by-Side */}
-      <div style={{display:'grid', gridTemplateColumns: selectedEvent ? '1fr 1fr' : '1fr', gap:'1.5rem'}}>
-        {/* Events Table */}
-        <div className="admin-card" style={{overflowX:'auto'}}>
+      <div className={`${styles.twoColSplit} ${selectedEvent ? styles.twoColSplitOpen : ''}`}>
+        <section className={`${styles.card} ${styles.cardFlush}`}>
           {loading ? (
-            <div style={{textAlign:'center',padding:'3rem'}}><div className="spinner spinner-rose" style={{margin:'0 auto'}} /></div>
+            <p className={styles.loading} role="status">Loading events</p>
           ) : events.length === 0 ? (
-            <div style={{textAlign:'center',padding:'3rem',color:'var(--text-muted)'}}>
-              <div style={{fontSize:'2.5rem',marginBottom:'0.75rem'}}>🎉</div>
-              <p>No events yet. Create your first event!</p>
+            <div className={styles.empty}>
+              <p className={styles.emptyTitle}>No events yet</p>
+              <p className={styles.emptyText}>Create an event for a season or occasion, then add its special products.</p>
+              <div className={styles.emptyAction}>
+                <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={openCreateEvent}>Create event</button>
+              </div>
             </div>
           ) : (
-            <table className="tbl">
-              <thead><tr><th>Color</th><th>Name</th><th>Active</th><th>Auto-Dates</th><th>Actions</th></tr></thead>
-              <tbody>
-                {events.map(ev => (
-                  <tr key={ev.id} style={{ background: selectedEvent?.id === ev.id ? 'rgba(233,30,140,.05)' : undefined }}>
-                    <td><div style={{width:28,height:28,borderRadius:'50%',background:ev.banner_color,flexShrink:0}} /></td>
-                    <td style={{fontWeight:600}}>
-                      {ev.name}
-                      <br/><span style={{fontSize:'0.75rem',color:'var(--text-muted)'}}>/{ev.slug}</span>
-                    </td>
-                    <td>
-                      <button onClick={() => toggleEventActive(ev)} style={{background:'none',border:'none',cursor:'pointer',fontSize:'1.3rem'}} title={ev.is_active ? 'Deactivate' : 'Activate'}>
-                        {ev.is_active ? '✅' : '⭕'}
-                      </button>
-                    </td>
-                    <td style={{fontSize:'0.75rem',color:'var(--text-muted)'}}>
-                      {ev.auto_activate_from ? new Date(ev.auto_activate_from).toLocaleDateString() : '—'}
-                      {' → '}
-                      {ev.auto_deactivate_at ? new Date(ev.auto_deactivate_at).toLocaleDateString() : '—'}
-                    </td>
-                    <td>
-                      <div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>
-                        <button className="btn btn-outline btn-sm" onClick={() => openEditEvent(ev)}>Edit</button>
-                        <button
-                          className="btn btn-sm"
-                          onClick={() => openManageProducts(ev)}
-                          style={{background:'rgba(233,30,140,.08)',color:'var(--rose-700)',border:'none'}}
-                        >
-                          🌸 Products
-                        </button>
-                      </div>
-                    </td>
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th><span className={styles.srOnly}>Colour</span></th>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Runs</th>
+                    <th><span className={styles.srOnly}>Actions</span></th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {events.map(ev => (
+                    <tr key={ev.id} className={selectedEvent?.id === ev.id ? styles.rowSelected : undefined}>
+                      <td><span className={styles.swatch} style={{ background: ev.banner_color }} aria-hidden="true" /></td>
+                      <td className={styles.cellStrong}>
+                        {ev.name}
+                        <span className={styles.cellSub}>/{ev.slug}</span>
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          onClick={() => toggleEventActive(ev)}
+                          aria-pressed={!!ev.is_active}
+                          title={ev.is_active ? 'Click to deactivate' : 'Click to activate'}
+                          className={`${styles.toggle} ${ev.is_active ? styles.toggleOn : ''}`}
+                        >
+                          <Icon name={ev.is_active ? 'eye' : 'eye-off'} size={16} />
+                          {ev.is_active ? 'Active' : 'Off'}
+                        </button>
+                      </td>
+                      <td className={`${styles.num} ${styles.muted} ${styles.small}`}>
+                        {ev.auto_activate_from ? new Date(ev.auto_activate_from).toLocaleDateString() : 'Not set'}
+                        {' to '}
+                        {ev.auto_deactivate_at ? new Date(ev.auto_deactivate_at).toLocaleDateString() : 'Not set'}
+                      </td>
+                      <td>
+                        <div className={styles.cellActions}>
+                          <button type="button" className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`} onClick={() => openEditEvent(ev)}>Edit</button>
+                          <button type="button" className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`} onClick={() => openManageProducts(ev)}>Products</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
-        </div>
+        </section>
 
-        {/* Event Products Panel */}
         {selectedEvent && (
-          <div className="admin-card">
-            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'1.25rem'}}>
+          <section className={styles.card}>
+            <div className={styles.cardHead}>
               <div>
-                <h2 style={{fontFamily:'var(--ff-display)',fontSize:'1.1rem',fontWeight:700,margin:0}}>
-                  🌸 {selectedEvent.name} Products
-                </h2>
-                <p style={{fontSize:'0.78rem',color:'var(--text-muted)',margin:'4px 0 0'}}>
-                  Special products only available during this event
-                </p>
+                <h2 className={styles.cardTitle}>{selectedEvent.name} products</h2>
+                <p className={styles.cardNote}>Only available while this event is running</p>
               </div>
-              <div style={{display:'flex',gap:'8px'}}>
-                <button className="btn btn-primary btn-sm" onClick={openCreateProduct}>+ Add</button>
-                <button className="btn btn-outline btn-sm" onClick={closeProductPanel}>✕</button>
+              <div className={styles.headerActions}>
+                <button type="button" className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`} onClick={openCreateProduct}><Icon name="plus" size={16} />Add</button>
+                <button type="button" className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`} onClick={closeProductPanel}>Close</button>
               </div>
             </div>
 
             {loadingProducts ? (
-              <div style={{textAlign:'center',padding:'2rem'}}><div className="spinner spinner-rose" style={{margin:'0 auto'}} /></div>
+              <p className={styles.loading} role="status">Loading products</p>
             ) : eventProducts.length === 0 ? (
-              <div style={{textAlign:'center',padding:'2rem',color:'var(--text-muted)',background:'rgba(45,10,30,.03)',borderRadius:'var(--radius)'}}>
-                <p>No products for this event yet.</p>
-                <button className="btn btn-primary btn-sm" onClick={openCreateProduct} style={{marginTop:'0.75rem'}}>Add First Product</button>
+              <div className={`${styles.empty} ${styles.emptyInset}`}>
+                <p className={styles.emptyTitle}>No products for this event</p>
+                <p className={styles.emptyText}>Add the first one to offer it during the event.</p>
+                <div className={styles.emptyAction}>
+                  <button type="button" className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`} onClick={openCreateProduct}>Add first product</button>
+                </div>
               </div>
             ) : (
-              <div style={{display:'grid',gap:'0.75rem'}}>
+              <div className={styles.itemList}>
                 {eventProducts.map(p => (
-                  <div key={p.id} style={{display:'flex',alignItems:'center',gap:'12px',padding:'10px 12px',background:'rgba(45,10,30,.03)',borderRadius:'var(--radius)',border: !p.is_active ? '1px dashed rgba(45,10,30,.15)' : 'none'}}>
+                  <div key={p.id} className={`${styles.item} ${!p.is_active ? styles.itemInactive : ''}`}>
                     {p.image_url
-                      ? <img src={p.image_url} alt={p.name} style={{width:44,height:44,objectFit:'cover',borderRadius:'var(--radius-sm)',flexShrink:0}} />
-                      : <div style={{width:44,height:44,background:'var(--rose-200)',borderRadius:'var(--radius-sm)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.1rem',flexShrink:0}}>🌸</div>
+                      // eslint-disable-next-line @next/next/no-img-element
+                      ? <img src={p.image_url} alt={p.name} width={44} height={44} className={`${styles.thumb} ${styles.thumbSm}`} />
+                      : <div className={`${styles.thumbEmpty} ${styles.thumbSm}`} aria-hidden="true" />
                     }
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontWeight:600,fontSize:'0.88rem'}}>{p.name}</div>
-                      <div style={{fontSize:'0.78rem',color:'var(--text-muted)'}}>
-                        {p.price_usd ? `$${p.price_usd}` : 'No price'} · Sort: {p.sort_order}
+                    <div className={styles.itemBody}>
+                      <div className={styles.itemName}>{p.name}</div>
+                      <div className={`${styles.itemMeta} ${styles.num}`}>
+                        {p.price_usd ? `$${p.price_usd}` : 'No price'} · Sort {p.sort_order}
                         {!p.is_active && ' · Inactive'}
                       </div>
                     </div>
-                    <div style={{display:'flex',gap:'4px'}}>
-                      <button className="btn btn-outline btn-sm" onClick={() => openEditProduct(p)} style={{padding:'4px 10px',minHeight:28}}>Edit</button>
-                      <button className="btn btn-sm" onClick={() => deleteProduct(p.id)} style={{padding:'4px 10px',minHeight:28,background:'#fee2e2',color:'#991b1b',border:'none'}}>×</button>
+                    <div className={styles.cellActions}>
+                      <button type="button" className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`} onClick={() => openEditProduct(p)}>Edit</button>
+                      <button type="button" className={`${styles.btn} ${styles.btnDanger} ${styles.btnSm}`} onClick={() => deleteProduct(p.id)}><Icon name="trash" size={16} />Delete</button>
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </div>
+          </section>
         )}
       </div>
     </>

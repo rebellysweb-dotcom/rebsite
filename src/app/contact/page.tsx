@@ -1,27 +1,41 @@
 import { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import ContactForm from './ContactForm';
+import { SHOP, telHref, whatsappHref } from '@/lib/shop';
+import Icon, { type IconName } from '@/components/icons/Icon';
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
-  title: 'Contact Rebelly\'s Flower Shop | Saydeh Street, Zalka',
-  description: 'Call, WhatsApp, or visit Rebelly\'s Flower Shop on Saydeh Street in Zalka, Lebanon. Open Monday to Saturday, 9:30 AM to 7:30 PM.',
+  title: 'Contact Rebelly\'s | Saydeh Street, Zalka',
+  description: 'Call, WhatsApp, email or visit Rebelly\'s on Saydeh Street in Zalka, Lebanon. Open Monday to Saturday, 9:30 AM to 7:30 PM. Also reachable in the UAE and Morocco.',
   alternates: {
     canonical: 'https://rebellys.com/contact',
   },
 };
 
+function Block({ icon, label, children }: { icon: IconName; label: string; children: ReactNode }) {
+  return (
+    <div className={styles.block}>
+      <span className={styles.badge} aria-hidden="true"><Icon name={icon} size={22} /></span>
+      <div className={styles.blockBody}>
+        <span className={styles.label}>{label}</span>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export default function ContactPage() {
   return (
     <div className={styles.page}>
       <section className={`container ${styles.header}`} aria-label="Contact us">
-        <span className={styles.eyebrow}>Find us</span>
+        <span className={styles.eyebrow}>{SHOP.tagline}</span>
         <h1 className={styles.title}>Come and say hello</h1>
       </section>
 
       <section className={`container ${styles.layout}`} aria-label="Contact details and form">
         <div className={styles.info}>
-          <div className={styles.block}>
-            <span className={styles.label}>Address</span>
+          <Block icon="pin" label="Address">
             <p className={styles.value}>
               Saydeh Street, Zalka
               <br />
@@ -33,39 +47,65 @@ export default function ContactPage() {
               rel="noopener noreferrer"
               className={styles.link}
             >
-              Get directions ↗
+              Get directions
+              <Icon name="arrow-right" size={18} motion="nudge" />
             </a>
-          </div>
+          </Block>
 
-          <div className={styles.block}>
-            <span className={styles.label}>Phone</span>
-            <p className={styles.value}>+961 76 585 028</p>
-            <a href="tel:+96176585028" className={styles.link}>
-              Call now ↗
+          <Block icon="phone" label="Phone">
+            <p className={styles.value}>{SHOP.phoneDisplay}</p>
+            <a href={telHref} className={styles.link}>
+              Call now
+              <Icon name="arrow-right" size={18} motion="nudge" />
             </a>
-          </div>
+          </Block>
 
-          <div className={styles.block}>
-            <span className={styles.label}>WhatsApp</span>
-            <p className={styles.value}>+961 76 585 028</p>
+          <Block icon="mail" label="Email">
+            <p className={styles.value}>{SHOP.email}</p>
+            <a href={`mailto:${SHOP.email}`} className={styles.link}>
+              Write to us
+              <Icon name="arrow-right" size={18} motion="nudge" />
+            </a>
+          </Block>
+
+          <Block icon="whatsapp" label="WhatsApp">
+            <p className={styles.value}>{SHOP.whatsappDisplay}</p>
             <a
-              href="https://wa.me/96176585028"
+              href={whatsappHref()}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.link}
             >
-              Message us ↗
+              Message us
+              <Icon name="arrow-right" size={18} motion="nudge" />
             </a>
-          </div>
+          </Block>
 
-          <div className={styles.block}>
-            <span className={styles.label}>Opening hours</span>
+          <Block icon="clock" label="Opening hours">
             <dl className={styles.hours}>
               <dt>Mon–Sat</dt>
               <dd>9:30–19:30</dd>
               <dt>Sunday</dt>
               <dd>Closed</dd>
             </dl>
+          </Block>
+
+          <div className={styles.also}>
+            <h2 className={styles.alsoTitle}>Also reachable in</h2>
+            <ul className={styles.alsoList}>
+              {SHOP.international.map((c) => (
+                <li key={c.country}>
+                  <a href={`tel:${c.phone}`} className={styles.alsoLink}>
+                    <Icon name="pin" size={18} />
+                    <span className={styles.alsoCountry}>{c.country}</span>
+                    <span className={styles.alsoNumber}>
+                      <Icon name="phone" size={18} />
+                      {c.display}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 

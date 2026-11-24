@@ -36,9 +36,12 @@
   gap: 0.75rem;
   flex-wrap: wrap;
   justify-content: center;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--hairline);
-  color: var(--text-muted);
+  padding: 0.75rem 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--card-shadow);
+  color: var(--text-soft);
   font-family: var(--ff-sans);
   font-size: 0.95rem;
 }
@@ -63,7 +66,7 @@
 
 .stars::before {
   content: '\2605\2605\2605\2605\2605';
-  color: rgba(45, 10, 30, 0.16);
+  color: rgba(45, 10, 30, 0.28);
 }
 
 .stars::after {
@@ -73,7 +76,7 @@
   top: 0;
   overflow: hidden;
   white-space: nowrap;
-  color: var(--gold);
+  color: var(--gold-ink);
   width: 0;
 }
 
@@ -102,11 +105,14 @@
   flex-direction: column;
   gap: 1.1rem;
   padding: 28px;
-  background: var(--cream-100);
-  border: 1px solid var(--hairline);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--card-shadow);
+  transition: transform .3s var(--ease-spring), box-shadow .3s var(--ease), border-color .3s var(--ease);
 }
+.card:hover { transform: translateY(-2px); border-color: var(--border-hover); box-shadow: var(--card-shadow-hover); }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
 
 .cardTop {
   display: flex;
@@ -122,17 +128,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--white);
   font-family: var(--ff-display);
   font-size: 1.2rem;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--rose-500), #ff6b9d);
+  background: var(--rose-700);
 }
 
-.avatar[data-tone='blue'] { background: linear-gradient(135deg, #1e3a8a, #3b82f6); }
-.avatar[data-tone='violet'] { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
-.avatar[data-tone='red'] { background: linear-gradient(135deg, #dc2626, #f87171); }
-.avatar[data-tone='green'] { background: linear-gradient(135deg, #059669, #34d399); }
+.avatar[data-tone='blue'] { background: var(--info); }
+.avatar[data-tone='violet'] { background: var(--rose-800); }
+.avatar[data-tone='red'] { background: var(--danger); }
+.avatar[data-tone='green'] { background: var(--success); }
 
 .reviewer {
   display: flex;
@@ -154,7 +160,7 @@
   font-style: italic;
   font-size: 1.12rem;
   line-height: 1.65;
-  color: var(--text-muted);
+  color: var(--text-soft);
   margin: 0;
 }
 
@@ -168,8 +174,8 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #4285f4;
-  color: #fff;
+  background: var(--info);
+  color: var(--white);
   display: flex;
   align-items: center;
   justify-content: center;

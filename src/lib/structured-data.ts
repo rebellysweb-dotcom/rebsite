@@ -1,3 +1,5 @@
+import { SHOP, whatsappHref } from '@/lib/shop';
+
 export function getLocalBusinessSchema() {
   // No aggregateRating here on purpose: the only reviews in the codebase are the
   // five on /reviews (average 4.4). A hardcoded 4.9 / 20 is not backed by anything
@@ -9,15 +11,17 @@ export function getLocalBusinessSchema() {
     name: "Rebelly's Flower Shop",
     alternateName: 'Rebellys',
     description:
-      'Family-owned flower shop in Zalka, Lebanon, arranging fresh bouquets, wedding flowers, and gift arrangements since 1990.',
+      'Flower shop on Saydeh Street in Zalka, Lebanon, arranging flowers since 1993: floral decoration for weddings and events, bridal bouquets, vase arrangements, hotels, homes and hand bouquets.',
     url: 'https://rebellys.com',
-    telephone: '+96176585028',
+    telephone: SHOP.phoneE164,
+    email: SHOP.email,
+    slogan: SHOP.tagline,
     image: [
-      'https://rebellys.com/images/shop_interior.png',
-      'https://rebellys.com/images/heart_roses.png',
+      'https://rebellys.com/images/og.jpg',
+      'https://rebellys.com/images/products/christmas-basket.jpg',
     ],
     logo: 'https://rebellys.com/favicon.svg',
-    foundingDate: '1990',
+    foundingDate: '1993',
     priceRange: '$$',
     paymentAccepted: 'Cash, Whish Money, WhatsApp Order',
     currenciesAccepted: 'LBP, USD',
@@ -45,7 +49,7 @@ export function getLocalBusinessSchema() {
     hasMap: 'https://maps.app.goo.gl/aq7CZ26re22c4KQx7',
     sameAs: [
       'https://www.instagram.com/rebellys.lb',
-      'https://wa.me/96176585028',
+      whatsappHref(),
     ],
     areaServed: [
       { '@type': 'City', name: 'Zalka' },
@@ -58,6 +62,14 @@ export function getLocalBusinessSchema() {
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
       name: 'Floral Arrangements',
+      itemListElement: [
+        'Weddings and events',
+        'Bridal bouquets',
+        'Hotel flowers',
+        'Residential flowers',
+        'Vase arrangements',
+        'Hand bouquets',
+      ].map((name) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name } })),
     },
   };
 }
@@ -77,15 +89,9 @@ export function getProductSchema(product: {
       product.description ??
       `Premium floral arrangement — ${product.name} by Rebelly's Flower Shop`,
     image:
-      product.image_url ?? 'https://rebellys.com/images/shop_interior.png',
+      product.image_url ?? 'https://rebellys.com/images/og.jpg',
     url: `https://rebellys.com/collections`,
     brand: { '@type': 'Brand', name: "Rebelly's" },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.9',
-      reviewCount: '20',
-      bestRating: '5',
-    },
     offers: product.price_usd
       ? {
           '@type': 'Offer',
@@ -116,7 +122,7 @@ export function getEventSchema(event: {
       `Special event collection — ${event.name} at Rebelly's Flower Shop`,
     image:
       event.banner_image_url ??
-      'https://rebellys.com/images/shop_interior.png',
+      'https://rebellys.com/images/og.jpg',
     url: `https://rebellys.com/events/${event.slug}`,
     eventStatus: 'https://schema.org/EventScheduled',
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',

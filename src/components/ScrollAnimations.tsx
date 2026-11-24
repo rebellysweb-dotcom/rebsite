@@ -5,7 +5,7 @@
  *
  *   data-animate="fade-up"    fade + translateY (24px desktop / 12px mobile)
  *   data-animate="fade-left"  fade + translateX
- *   data-animate="scale-in"   scale .92 → 1
+ *   data-animate="scale-in"   scale .92 to 1
  *   data-animate="stagger"    children with .stagger-item enter 80ms apart
  *
  * Legacy names (fadeUp, fadeLeft, fadeRight, fadeIn) still work.
@@ -27,7 +27,9 @@ function prepStagger(el: Element) {
 }
 
 function reveal(el: Element) {
-  el.classList.add('animated', 'visible'); // 'visible' kept for older styles
+  // A data attribute, not a class: React owns className, and changing it before a
+  // streamed page segment hydrates causes a hydration mismatch.
+  el.setAttribute('data-revealed', '');
 }
 
 export default function ScrollAnimations() {

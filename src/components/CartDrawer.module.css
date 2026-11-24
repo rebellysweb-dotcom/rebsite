@@ -1,8 +1,26 @@
 /* CartDrawer.module.css */
 
 .drawer {
-  /* Extra layer class — overrides/extends the global .drawer */
+  /* Extra layer class that extends the global .drawer */
 }
+
+.close {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px 0 10px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-input);
+  background: var(--surface);
+  color: var(--text-main);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: color var(--transition), border-color var(--transition);
+}
+.close:hover { color: var(--rose-800); border-color: var(--rose-700); background: var(--rose-200); }
+.close:focus-visible { outline: 2px solid var(--rose-500); outline-offset: 2px; }
 
 .count {
   display: inline-flex;
@@ -10,82 +28,77 @@
   justify-content: center;
   min-width: 20px;
   height: 20px;
-  background: var(--rose-500);
-  color: #fff;
+  background: var(--rose-700);
+  color: var(--white);
+  font-family: var(--ff-sans);
   font-size: 0.7rem;
   font-weight: 700;
   border-radius: var(--radius-xl);
-  padding: 0 5px;
+  padding: 0 6px;
   margin-left: 8px;
   vertical-align: middle;
 }
 
-/* ── Empty state ── */
+/* Empty state */
 .empty {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 48px 16px;
+  align-items: flex-start;
+  text-align: left;
+  padding: 40px 0;
   gap: 10px;
 }
-.emptyIcon { font-size: 3rem; animation: float 3s ease-in-out infinite; }
-@keyframes float {
-  0%,100% { transform: translateY(0); }
-  50%      { transform: translateY(-8px); }
+.emptyIcon {
+  width: 52px; height: 52px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--rose-200);
+  border: 1px solid var(--border-strong);
+  color: var(--rose-800);
 }
 .emptyText {
   font-family: var(--ff-display);
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   font-weight: 600;
   color: var(--text-main);
 }
 .emptySub {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
-  font-family: var(--ff-serif);
   line-height: 1.6;
-  max-width: 240px;
+  max-width: 260px;
 }
 .shopBtn {
   margin-top: 12px;
-  text-decoration: none;
   width: 100%;
 }
 
-/* ── Items list ── */
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+/* Items */
+.list { display: flex; flex-direction: column; gap: 16px; }
 
 .item {
   display: flex;
   align-items: flex-start;
-  gap: 13px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(45, 10, 30, 0.07);
+  gap: 14px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 2px rgba(45,10,30,.06);
 }
-.item:last-child { border-bottom: 0; padding-bottom: 0; }
 
 .thumb {
-  width: 64px;
-  height: 64px;
+  position: relative;
+  width: 72px;
+  height: 72px;
   border-radius: var(--radius);
   overflow: hidden;
   flex-shrink: 0;
-  background: var(--cream);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.8rem;
+  background: var(--surface-photo);
+  border: 1px solid var(--hairline);
 }
-.thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+/* whole product visible, padded inside its mat */
+.thumbImg { object-fit: contain; padding: 4px; mix-blend-mode: multiply; }
 
 .info {
   flex: 1;
@@ -95,12 +108,20 @@
   gap: 5px;
 }
 .name {
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 600;
   color: var(--text-main);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.eventTag {
+  align-self: flex-start;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
 }
 .price {
   font-size: 0.85rem;
@@ -109,83 +130,94 @@
 }
 
 .remove {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  background: rgba(45, 10, 30, 0.05);
+  gap: 5px;
+  min-height: 44px;
+  padding: 0 6px;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  font-weight: 600;
   flex-shrink: 0;
-  margin-top: 2px;
-  transition: var(--transition);
+  border-radius: var(--radius);
+  transition: color var(--transition), background-color var(--transition);
 }
-.remove:hover {
-  background: rgba(220, 38, 38, 0.1);
-  color: #dc2626;
-}
+.remove:hover { color: var(--danger); background: var(--danger-bg); }
+.remove:focus-visible { outline: 2px solid var(--rose-500); outline-offset: 2px; }
 
-/* ── Footer totals ── */
+/* Totals */
 .totals {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   margin-bottom: 8px;
 }
-.totalLabel {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  font-weight: 500;
-}
+.totalLabel { font-size: 0.85rem; color: var(--text-soft); font-weight: 600; }
 .totalValue {
   font-family: var(--ff-display);
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: var(--text-main);
 }
-
 .note {
   font-size: 0.78rem;
   color: var(--text-muted);
   line-height: 1.55;
   margin-bottom: 14px;
-  font-family: var(--ff-serif);
 }
+.checkoutBtn { width: 100%; margin-bottom: 10px; }
+.continueBtn { width: 100%; font-size: 0.85rem; }
 
-.checkoutBtn {
-  width: 100%;
-  text-decoration: none;
-  margin-bottom: 10px;
+/* Add-ons */
+.addOnsSection { padding: 1rem 1.5rem 0; border-top: 1px solid var(--border-strong); background: var(--surface); }
+.addOnsLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--gold-ink);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
 }
-.continueBtn {
-  width: 100%;
-  font-size: 0.85rem;
+.addOnsRow {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 0.75rem;
+  scrollbar-width: none;
 }
-
-.addOnsSection { padding: 1rem 1.25rem 0; border-top: 1px solid var(--hairline); }
-.addOnsLabel { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.75rem; }
-.addOnsRow { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 0.5rem; scrollbar-width: none; }
 .addOnsRow::-webkit-scrollbar { display: none; }
 .addonTile {
   flex: 0 0 auto;
-  width: 76px;
+  min-width: 84px;
+  min-height: 64px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 4px;
-  padding: 10px 6px 8px;
-  border: 1.5px solid var(--hairline);
-  border-radius: 12px;
-  background: transparent;
-  cursor: pointer;
-  transition: border-color 0.2s, background-color 0.2s;
-  font-family: inherit;
+  padding: 10px 8px;
+  border: 1.5px solid var(--border-input);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--rose-800);
+  transition: border-color 0.2s var(--ease), background-color 0.2s var(--ease), transform 0.3s var(--ease-spring);
 }
-.addonTile:hover { border-color: var(--rose-300, #f9a8d4); }
-.addonTileActive { border-color: var(--pink-500, #e91e8c); background: rgba(233,30,140,0.06); }
-.addonEmoji { font-size: 1.5rem; line-height: 1; }
-.addonImg { width: 32px; height: 32px; object-fit: cover; border-radius: 6px; }
-.addonName { font-size: 0.7rem; font-weight: 500; text-align: center; color: var(--text-main); line-height: 1.2; }
-.addonPrice { font-size: 0.7rem; color: var(--text-muted); }
+.addonTile:hover { border-color: var(--rose-700); background: var(--surface-photo); transform: translateY(-2px); }
+.addonTile:focus-visible { outline: 2px solid var(--rose-500); outline-offset: 2px; }
+.addonTileActive { border-color: var(--rose-700); background: var(--rose-200); }
+.addonIcon { position: relative; display: inline-flex; width: 40px; height: 40px; align-items: center; justify-content: center; border-radius: var(--radius-sm); }
+.addonCheck {
+  position: absolute; top: -2px; right: -2px;
+  width: 16px; height: 16px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--rose-700);
+  color: var(--white);
+}
+.addonThumb { position: relative; width: 40px; height: 40px; border-radius: var(--radius-sm); overflow: hidden; }
+.addonName { font-size: 0.72rem; font-weight: 600; text-align: center; color: var(--text-main); line-height: 1.2; }
+.addonPrice { font-size: 0.72rem; color: var(--text-soft); }
+
+@media (prefers-reduced-motion: reduce) {
+  .addonTile, .addonTile:hover { transition: none; transform: none; }
+}

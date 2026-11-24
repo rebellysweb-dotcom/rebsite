@@ -6,11 +6,14 @@ import { usePathname } from 'next/navigation';
 import { useCartStore } from '@/store/cart';
 import NavAuth from './NavAuth';
 import LogoMark from './LogoMark';
+import Icon from './icons/Icon';
+import { SHOP, telHref } from '@/lib/shop';
 import styles from './Navbar.module.css';
 
 const NAV_LINKS = [
   { href: '/',            label: 'Home' },
   { href: '/collections', label: 'Shop' },
+  { href: '/portfolio',   label: 'Portfolio' },
   { href: '/services',    label: 'Services' },
   { href: '/about',       label: 'About' },
   { href: '/reviews',     label: 'Reviews' },
@@ -23,7 +26,11 @@ export default function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const totalItems = useCartStore((s) => s.totalItems());
+  const storeItems = useCartStore((s) => s.totalItems());
+  // Cart lives in localStorage: render 0 on the server and first client pass, then the real count.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  const totalItems = mounted ? storeItems : 0;
   const toggleCart = useCartStore((s) => s.toggleCart);
   const burgerRef = useRef<HTMLButtonElement>(null);
   const firstLinkRef = useRef<HTMLAnchorElement>(null);
@@ -116,10 +123,8 @@ export default function Navbar() {
               onClick={toggleCart}
               aria-label={`Open cart, ${totalItems} ${totalItems === 1 ? 'item' : 'items'}`}
             >
-              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M6 7h12l-1 13H7L6 7z" />
-                <path d="M9 7V6a3 3 0 016 0v1" />
-              </svg>
+              <Icon name="bag" size={18} className={styles.cartIcon} key={totalItems} />
+              <span className={styles.cartWord}>Cart</span>
               {totalItems > 0 && (
                 <span className={styles.badge} aria-hidden="true">
                   {totalItems > 99 ? '99+' : totalItems}
@@ -129,6 +134,7 @@ export default function Navbar() {
 
             <Link href="/checkout" className={`${styles.cta} btn btn-primary`}>
               Order Now
+              <Icon name="arrow-right" size={18} motion="nudge" />
             </Link>
 
             <button
@@ -141,8 +147,8 @@ export default function Navbar() {
               aria-expanded={menuOpen}
               aria-controls="mobile-menu"
             >
-              <span className={menuOpen ? styles.barTop : ''} />
-              <span className={menuOpen ? styles.barBot : ''} />
+              <Icon name={menuOpen ? 'close' : 'menu'} size={18} />
+              <span className={styles.menuWord}>{menuOpen ? 'Close' : 'Menu'}</span>
             </button>
           </div>
         </div>
@@ -174,8 +180,12 @@ export default function Navbar() {
         <div className={styles.mobileFoot} style={{ '--i': NAV_LINKS.length } as CSSProperties}>
           <Link href="/checkout" className={`${styles.mobileCta} btn btn-primary`}>
             Order Now
+            <Icon name="arrow-right" size={18} motion="nudge" />
           </Link>
-          <a href="tel:+96176585028" className={styles.mobileMeta}>+961 76 585 028</a>
+          <a href={telHref} className={styles.mobileMeta}>
+            <Icon name="phone" size={18} />
+            {SHOP.phoneDisplay}
+          </a>
           <NavAuth mobile />
         </div>
       </nav>

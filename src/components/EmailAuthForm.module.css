@@ -26,8 +26,8 @@
 }
 
 .tabActive {
-  background: #fff;
-  color: var(--rose-600, #e91e8c);
+  background: var(--white);
+  color: var(--rose-700);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
@@ -42,9 +42,9 @@
 
 .error {
   font-size: 0.85rem;
-  color: #dc2626;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  color: var(--danger);
+  background: var(--danger-bg);
+  border: 1px solid var(--danger);
   border-radius: var(--radius-sm, 6px);
   padding: 8px 12px;
   margin-bottom: 12px;
@@ -80,7 +80,7 @@
 .successBox em {
   font-style: normal;
   font-weight: 600;
-  color: var(--rose-600, #e91e8c);
+  color: var(--rose-700);
 }
 
 .resend {

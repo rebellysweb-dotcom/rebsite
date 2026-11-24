@@ -9,21 +9,22 @@
   flex: 1 1 auto;
   min-height: 44px;
   padding: 10px 20px;
-  border: 1px solid var(--hairline);
+  border: 1.5px solid var(--border-input);
   border-radius: 999px;
-  background: transparent;
-  color: var(--text-muted);
+  background: var(--surface);
+  color: var(--text-main);
   font-size: .95rem;
   font-weight: 500;
   cursor: pointer;
   transition: background-color .25s ease, color .25s ease, border-color .25s ease;
 }
+.tab:not(.tabActive):hover { border-color: var(--rose-700); background: var(--rose-200); }
 .tab:focus-visible { outline: 2px solid var(--rose-500); outline-offset: 2px; }
 
 .tabActive {
-  background: var(--pink-500, #e91e8c);
-  border-color: var(--pink-500, #e91e8c);
-  color: #fff;
+  background: var(--rose-700);
+  border-color: var(--rose-700);
+  color: var(--white);
 }
 
 @media (min-width: 768px) {
@@ -46,4 +47,14 @@
 }
 @media (min-width: 1024px) {
   .grid { grid-template-columns: repeat(4, 1fr); gap: clamp(16px, 2vw, 28px); }
+}
+
+.empty {
+  text-align: center;
+  padding: 4rem 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  color: var(--text-soft);
 }

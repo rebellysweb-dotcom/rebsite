@@ -5,6 +5,7 @@ import type { Product, EventProduct } from '@/types';
 import { formatUsd } from '@/lib/utils';
 import { useCartStore } from '@/store/cart';
 import ProductGallery from './ProductGallery';
+import Icon from './icons/Icon';
 import styles from './ProductCard.module.css';
 
 type CardProduct = (Product | EventProduct) & { is_event_product?: boolean; event_id?: string };
@@ -79,16 +80,12 @@ const ProductCard = memo(function ProductCard({ product, lbpRate, eventId }: Pro
         >
           {added ? (
             <>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
+              <Icon name="check" size={18} />
               Added
             </>
           ) : (
             <>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
+              <Icon name="bag" size={18} motion="lift" />
               Add to order
             </>
           )}

@@ -1,0 +1,185 @@
+/* Portfolio gallery: filters, column masonry (natural aspect ratios) and the lightbox. */
+
+/* ── Filters: set type with an underline, not chips ── */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 28px;
+  margin-bottom: 40px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--hairline);
+}
+.filter {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0;
+  font-family: var(--ff-display);
+  font-size: 1.3rem;
+  font-weight: 500;
+  letter-spacing: .035em;
+  color: var(--text-muted);
+  transition: color .25s var(--ease);
+}
+.filter::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  height: 2px;
+  background: var(--rose-500);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .45s var(--ease-spring);
+}
+.filter:hover { color: var(--text-main); }
+.filter:hover::after { transform: scaleX(.35); }
+.filterActive { color: var(--rose-700); }
+.filterActive::after,
+.filterActive:hover::after { transform: scaleX(1); }
+.count {
+  font-family: var(--ff-sans);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+/* ── Masonry: CSS columns keep each photo at its own proportions ── */
+.grid {
+  column-count: 1;
+  column-gap: 16px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+@media (min-width: 560px) { .grid { column-count: 2; column-gap: 18px; } }
+@media (min-width: 1000px) { .grid { column-count: 3; column-gap: 22px; } }
+
+.cell {
+  break-inside: avoid;
+  margin: 0 0 16px;
+}
+@media (min-width: 560px) { .cell { margin-bottom: 18px; } }
+@media (min-width: 1000px) { .cell { margin-bottom: 22px; } }
+
+.tile {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--surface-photo);
+  cursor: zoom-in;
+  line-height: 0;
+}
+.tile:focus-visible { outline: 2px solid var(--rose-500); outline-offset: 3px; }
+
+.img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform .7s var(--ease-spring);
+}
+.tile:hover .img { transform: scale(1.03); }
+
+/* Two source photos carry a thin black frame: sit it just outside the tile */
+.trim { transform: scale(1.05); }
+.tile:hover .trim { transform: scale(1.08); }
+
+/* ── Lightbox ── */
+.dialog {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: rgba(30, 11, 20, .94);
+  color: var(--cream);
+  overflow: hidden;
+}
+.dialog::backdrop { background: rgba(30, 11, 20, .94); }
+.dialog[open] { animation: lbIn .25s var(--ease-out); }
+@keyframes lbIn { from { opacity: 0; } to { opacity: 1; } }
+
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 72px 16px 64px;
+}
+.photoWrap {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.photo {
+  width: auto;
+  height: auto;
+  max-width: min(92vw, 1100px);
+  max-height: calc(100dvh - 140px);
+  object-fit: contain;
+  border-radius: 2px;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, .6);
+}
+
+.ctrl {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(250, 243, 240, .4);
+  background: rgba(30, 11, 20, .55);
+  color: var(--cream);
+  transition: background-color .25s var(--ease), border-color .25s var(--ease), transform .2s var(--ease-spring);
+}
+.ctrl:hover { background: var(--rose-500); border-color: var(--rose-500); }
+.ctrl:active { transform: scale(.94); }
+.ctrl:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
+.close { top: 16px; right: 16px; }
+.prev, .next { top: 50%; margin-top: -24px; }
+.prev { left: 12px; }
+.next { right: 12px; }
+
+.counter {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 18px;
+  text-align: center;
+  font-family: var(--ff-sans);
+  font-size: .85rem;
+  letter-spacing: .12em;
+  font-variant-numeric: tabular-nums;
+  color: rgba(250, 243, 240, .8);
+}
+
+/* Phones: arrows drop to the bottom corners so they never sit on the photo */
+@media (max-width: 640px) {
+  .prev, .next { top: auto; bottom: 8px; margin-top: 0; }
+  .prev { left: 16px; }
+  .next { right: 16px; }
+  .stage { padding: 72px 12px 72px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .img, .filter::after, .ctrl { transition: none; }
+  .tile:hover .img { transform: none; }
+  .tile:hover .trim { transform: scale(1.05); }
+  .dialog[open] { animation: none; }
+}

@@ -13,7 +13,7 @@
 
 /* Past 60px (or any page but home): cream glass */
 .glass {
-  background: rgba(253, 246, 240, 0.92);
+  background: rgba(250, 243, 240, 0.92);
   -webkit-backdrop-filter: var(--blur-nav);
   backdrop-filter: var(--blur-nav);
   border-bottom-color: var(--hairline);
@@ -45,9 +45,6 @@
   min-height: 44px;
   flex-shrink: 0;
   font-family: var(--ff-display);
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
   color: var(--text-main);
 }
 .logoMark {
@@ -58,10 +55,11 @@
   transform: rotate(90deg) scale(1.08);
 }
 .logoText {
-  font-family: var(--ff-display, 'Playfair Display', serif);
-  font-size: 1.25rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-family: var(--ff-display);
+  font-size: 1.55rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: .03em;
   color: var(--text-main);
 }
 
@@ -124,38 +122,42 @@
 
 .cartBtn {
   position: relative;
-  width: 44px;
+  min-width: 44px;
   height: 44px;
-  border-radius: 50%;
+  padding: 0 12px;
+  border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 7px;
   color: var(--text-main);
-  transition: background-color .25s var(--ease), transform .2s var(--ease-spring);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  transition: background-color .25s var(--ease), border-color .25s var(--ease), transform .2s var(--ease-spring);
 }
-.cartBtn:hover { background: rgba(233, 30, 140, .08); }
+.cartIcon { transition: transform .3s var(--ease-spring); animation: bagLift .5s var(--ease-spring); }
+.cartBtn:hover .cartIcon { transform: translateY(-2px); }
+@keyframes bagLift {
+  0%   { transform: translateY(0); }
+  35%  { transform: translateY(-4px) rotate(-6deg); }
+  100% { transform: translateY(0); }
+}
+.cartWord { font-size: .85rem; font-weight: 600; letter-spacing: .04em; }
+.cartBtn:hover { background: var(--surface-muted); border-color: var(--border-hover); }
 .cartBtn:active { transform: scale(.92); }
 
+/* Item count sits inline after the word: "Cart 2" */
 .badge {
-  position: absolute;
-  top: 4px;
-  right: 2px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: var(--radius-xl);
-  background: var(--rose-500);
-  color: #fff;
-  font-size: .68rem;
-  font-weight: 600;
-  line-height: 18px;
-  text-align: center;
-  box-shadow: 0 0 0 2px var(--cream);
-  animation: badgePop .4s var(--ease-spring);
+  margin-left: 6px;
+  color: var(--rose-700);
+  font-size: .85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  animation: badgePop .35s var(--ease-spring);
 }
 @keyframes badgePop {
-  from { transform: scale(.4); opacity: 0; }
-  to   { transform: scale(1); opacity: 1; }
+  from { transform: translateY(-3px); opacity: 0; }
+  to   { transform: none; opacity: 1; }
 }
 
 .cta {
@@ -169,25 +171,20 @@
 .hamburger {
   position: relative;
   z-index: 2;
-  width: 44px;
+  min-width: 44px;
   height: 44px;
+  padding: 0 14px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  border-radius: 50%;
+  color: var(--text-main);
 }
-.hamburger span {
-  display: block;
-  width: 22px;
-  height: 1.5px;
-  border-radius: 2px;
-  background: var(--text-main);
-  transition: transform .5s var(--ease-spring);
-}
-.barTop { transform: translateY(4.25px) rotate(45deg); }
-.barBot { transform: translateY(-4.25px) rotate(-45deg); }
+.menuWord { font-size: .85rem; font-weight: 600; letter-spacing: .04em; }
 
 /* ── Mobile full-screen menu ── */
 .mobileMenu {
@@ -200,7 +197,7 @@
   padding: calc(var(--nav-h) + 24px) var(--px) calc(32px + env(safe-area-inset-bottom));
   height: 100dvh;
   overflow-y: auto;
-  background: rgba(253, 246, 240, .84);
+  background: rgba(250, 243, 240, .84);
   -webkit-backdrop-filter: blur(22px) saturate(160%);
   backdrop-filter: blur(22px) saturate(160%);
   transform: translateX(100%);
@@ -233,8 +230,9 @@
   min-height: 56px;
   border-bottom: 1px solid var(--hairline);
   font-family: var(--ff-display);
-  font-size: clamp(1.75rem, 8vw, 2.25rem);
+  font-size: clamp(1.95rem, 8.5vw, 2.5rem);
   font-weight: 500;
+  letter-spacing: .03em;
   color: var(--text-main);
   transition: color .2s var(--ease);
 }
@@ -253,7 +251,8 @@
   align-items: center;
   justify-content: center;
   min-height: 44px;
-  color: var(--text-muted);
+  gap: 8px;
+  color: var(--text-soft);
   font-family: var(--ff-serif);
   font-size: 1.1rem;
 }
@@ -266,8 +265,30 @@
   .hamburger, .mobileMenu { display: none; }
 }
 
+/* Seven links plus actions: tighten between the desktop breakpoint and wide screens */
+@media (min-width: 901px) and (max-width: 1140px) {
+  .inner { gap: 12px; }
+  .link { padding: 0 8px; font-size: .86rem; }
+  .link::after { left: 8px; right: 8px; }
+  .cta { padding: 10px 16px; }
+  .logoText { font-size: 1.4rem; }
+}
+
+/* 375px: logo, Cart and Menu on one line without crowding */
+@media (max-width: 420px) {
+  .inner { gap: 8px; }
+  .logo { gap: 7px; }
+  .logoText { font-size: 1.4rem; }
+  .actions { gap: 6px; }
+  .cartBtn { padding: 0 11px; gap: 6px; }
+  .hamburger { padding: 0 12px; gap: 6px; }
+  .cartWord, .menuWord { letter-spacing: .02em; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .navbar, .link::after, .hamburger span, .mobileMenu,
+  .navbar, .link::after, .mobileMenu, .cartIcon,
   .mobileList li, .mobileFoot { transition: none; }
   .active::after { animation: none; }
+  .cartIcon { animation: none; }
+  .cartBtn:hover .cartIcon { transform: none; }
 }

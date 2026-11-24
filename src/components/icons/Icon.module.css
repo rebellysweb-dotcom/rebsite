@@ -1,0 +1,23 @@
+/* Icon micro-interactions: driven by the nearest button or link, transform only. */
+.icon { flex-shrink: 0; display: inline-block; vertical-align: middle; }
+
+.nudge,
+.nudgeBack,
+.lift { transition: transform .3s var(--ease-spring); }
+
+:is(a, button):hover > .nudge,
+:is(a, button):focus-visible > .nudge { transform: translateX(2px); }
+:is(a, button):hover > .nudgeBack,
+:is(a, button):focus-visible > .nudgeBack { transform: translateX(-2px); }
+:is(a, button):hover > .lift,
+:is(a, button):focus-visible > .lift { transform: translateY(-2px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .nudge, .nudgeBack, .lift { transition: none; }
+  :is(a, button):hover > .nudge,
+  :is(a, button):hover > .nudgeBack,
+  :is(a, button):hover > .lift,
+  :is(a, button):focus-visible > .nudge,
+  :is(a, button):focus-visible > .nudgeBack,
+  :is(a, button):focus-visible > .lift { transform: none; }
+}

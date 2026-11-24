@@ -2,21 +2,26 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCartStore } from '@/store/cart';
 import { formatUsd } from '@/lib/utils';
+import Icon from './icons/Icon';
 import styles from './CartDrawer.module.css';
 
 const ADD_ONS = [
-  { id: 'addon-card', name: 'Greeting Card', price_usd: 0, emoji: '💌', slug: 'addon-card' },
-  { id: 'addon-balloon-sm', name: 'Balloon S', price_usd: 3, emoji: '🎈', slug: 'addon-balloon-sm' },
-  { id: 'addon-balloon-lg', name: 'Balloon L', price_usd: 5, emoji: '🎈', slug: 'addon-balloon-lg' },
-  { id: 'addon-balloon-helium', name: 'Helium 18"', price_usd: 12, emoji: '🎈', slug: 'addon-balloon-helium' },
+  { id: 'addon-card', name: 'Greeting Card', price_usd: 0, slug: 'addon-card' },
+  { id: 'addon-balloon-sm', name: 'Balloon S', price_usd: 3, slug: 'addon-balloon-sm' },
+  { id: 'addon-balloon-lg', name: 'Balloon L', price_usd: 5, slug: 'addon-balloon-lg' },
+  { id: 'addon-balloon-helium', name: 'Helium 18"', price_usd: 12, slug: 'addon-balloon-helium' },
   { id: 'addon-teddy', name: 'Teddy Bear', price_usd: 15, imageUrl: '/images/products/ralph-teddy-bear-1.jpg', slug: 'addon-teddy' },
 ] as const;
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, addItem, removeItem, updateQuantity, totalItems, totalUsd } =
     useCartStore();
+
+  // Load the saved cart from localStorage once, after the first render.
+  useEffect(() => { useCartStore.persist.rehydrate(); }, []);
 
   const drawerRef  = useRef<HTMLDivElement>(null);
   const closeRef   = useRef<HTMLButtonElement>(null);
@@ -82,18 +87,20 @@ export default function CartDrawer() {
         {/* Header */}
         <div className="drawer-header">
           <span className="drawer-title">
-            🌸 Your Cart
+            Your Cart
             {totalItems() > 0 && (
               <span className={styles.count}>{totalItems()}</span>
             )}
           </span>
           <button
             ref={closeRef}
-            className="drawer-close"
+            type="button"
+            className={styles.close}
             onClick={closeCart}
             aria-label="Close cart"
           >
-            ✕
+            <Icon name="close" size={18} />
+            Close
           </button>
         </div>
 
@@ -101,7 +108,7 @@ export default function CartDrawer() {
         <div className="drawer-body">
           {items.length === 0 ? (
             <div className={styles.empty}>
-              <div className={styles.emptyIcon} aria-hidden="true">🌷</div>
+              <span className={styles.emptyIcon} aria-hidden="true"><Icon name="bag" size={22} /></span>
               <p className={styles.emptyText}>Your cart is empty</p>
               <p className={styles.emptySub}>Browse our collections and add something beautiful.</p>
               <Link
@@ -110,6 +117,7 @@ export default function CartDrawer() {
                 onClick={closeCart}
               >
                 Browse Flowers
+                <Icon name="arrow-right" size={18} motion="nudge" />
               </Link>
             </div>
           ) : (
@@ -118,11 +126,8 @@ export default function CartDrawer() {
                 <li key={item.id} className={styles.item}>
                   {/* Thumbnail */}
                   <div className={styles.thumb} aria-hidden="true">
-                    {item.image_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={item.image_url} alt={item.name} />
-                    ) : (
-                      <span>🌸</span>
+                    {item.image_url && (
+                      <Image src={item.image_url} alt="" fill sizes="64px" className={styles.thumbImg} />
                     )}
                   </div>
 
@@ -130,7 +135,7 @@ export default function CartDrawer() {
                   <div className={styles.info}>
                     <p className={styles.name}>{item.name}</p>
                     {item.is_event_product && (
-                      <span className="badge badge-rose" style={{ marginBottom: 4 }}>Event</span>
+                      <span className={styles.eventTag}>Event</span>
                     )}
                     <p className={styles.price}>
                       {item.price_usd != null
@@ -145,7 +150,7 @@ export default function CartDrawer() {
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         aria-label={`Decrease quantity of ${item.name}`}
                       >
-                        −
+                        <Icon name="minus" size={18} />
                       </button>
                       <span className="qty-val" aria-live="polite" aria-atomic="true">
                         {item.quantity}
@@ -155,18 +160,20 @@ export default function CartDrawer() {
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
                         aria-label={`Increase quantity of ${item.name}`}
                       >
-                        +
+                        <Icon name="plus" size={18} />
                       </button>
                     </div>
                   </div>
 
                   {/* Remove */}
                   <button
+                    type="button"
                     className={styles.remove}
                     onClick={() => removeItem(item.id)}
                     aria-label={`Remove ${item.name} from cart`}
                   >
-                    ✕
+                    <Icon name="trash" size={18} />
+                    Remove
                   </button>
                 </li>
               ))}
@@ -176,7 +183,7 @@ export default function CartDrawer() {
 
         {items.length > 0 && (
           <div className={styles.addOnsSection}>
-            <p className={styles.addOnsLabel}>🎁 Add extras?</p>
+            <p className={styles.addOnsLabel}>Add a finishing touch</p>
             <div className={styles.addOnsRow}>
               {ADD_ONS.map((ao) => {
                 const active = items.some(i => i.lineId === ao.id);
@@ -192,10 +199,16 @@ export default function CartDrawer() {
                     aria-pressed={active}
                     aria-label={`${active ? 'Remove' : 'Add'} ${ao.name}`}
                   >
-                    {'imageUrl' in ao
-                      ? <img src={ao.imageUrl} alt={ao.name} className={styles.addonImg} />
-                      : <span className={styles.addonEmoji} aria-hidden="true">{ao.emoji}</span>
-                    }
+                    {'imageUrl' in ao ? (
+                      <span className={styles.addonThumb} aria-hidden="true">
+                        <Image src={ao.imageUrl} alt="" fill sizes="40px" className={styles.thumbImg} />
+                      </span>
+                    ) : (
+                      <span className={styles.addonIcon} aria-hidden="true">
+                        <Icon name={ao.id === 'addon-card' ? 'card' : 'balloon'} size={22} />
+                        {active && <span className={styles.addonCheck}><Icon name="check" size={12} /></span>}
+                      </span>
+                    )}
                     <span className={styles.addonName}>{ao.name}</span>
                     <span className={styles.addonPrice}>{ao.price_usd === 0 ? 'Free' : `+$${ao.price_usd}`}</span>
                   </button>
@@ -215,7 +228,7 @@ export default function CartDrawer() {
               </span>
             </div>
             <p className={styles.note}>
-              Final price, delivery fee &amp; availability confirmed by our team via WhatsApp.
+              Final price, delivery fee and availability are confirmed by our team on WhatsApp.
             </p>
             <Link
               href="/checkout"
@@ -223,14 +236,14 @@ export default function CartDrawer() {
               onClick={closeCart}
             >
               Proceed to Checkout
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
+              <Icon name="arrow-right" size={18} motion="nudge" />
             </Link>
             <button
+              type="button"
               className={`btn btn-outline ${styles.continueBtn}`}
               onClick={closeCart}
             >
+              <Icon name="arrow-left" size={18} motion="nudge-back" />
               Continue Shopping
             </button>
           </div>

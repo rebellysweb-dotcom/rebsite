@@ -2,8 +2,17 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { Product } from '@/types';
+import styles from '../admin.module.css';
+import Icon from '@/components/icons/Icon';
 
 const EMPTY: Partial<Product> = { name:'', slug:'', tag:'', description:'', image_url:'', image_urls:[], price_usd: undefined, is_active:true, sort_order:0 };
+
+const TEXT_FIELDS = [
+  { key: 'name', label: 'Name' },
+  { key: 'slug', label: 'Slug' },
+  { key: 'tag', label: 'Tag' },
+  { key: 'description', label: 'Description' },
+] as const;
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -52,45 +61,49 @@ export default function AdminProductsPage() {
 
   return (
     <>
-      <div className="admin-topbar">
-        <h1 className="admin-page-title">Products</h1>
-        <button className="btn btn-primary" onClick={openCreate}>+ Add Product</button>
-      </div>
+      <header className={styles.pageHeader}>
+        <div className={styles.pageTitleGroup}>
+          <h1 className={styles.pageTitle}>Products</h1>
+          <p className={styles.pageMeta}>{products.length} in the catalogue</p>
+        </div>
+        <div className={styles.headerActions}>
+          <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={openCreate}><Icon name="plus" size={18} />Add product</button>
+        </div>
+      </header>
 
-      {/* Form Modal */}
       {showForm && (
         <>
-          <div className="overlay" onClick={() => setShowForm(false)} />
-          <div className="modal-wrap">
-            <div className="modal">
-              <div className="modal-header">
-                <h2 className="modal-title">{editId ? 'Edit Product' : 'New Product'}</h2>
-                <button onClick={() => setShowForm(false)} className="drawer-close">✕</button>
+          <div className={styles.overlay} onClick={() => setShowForm(false)} />
+          <div className={styles.modalWrap}>
+            <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+              <div className={styles.modalHeader}>
+                <h2 id="product-modal-title" className={styles.modalTitle}>{editId ? 'Edit product' : 'New product'}</h2>
+                <button type="button" onClick={() => setShowForm(false)} className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}><Icon name="close" size={16} />Close</button>
               </div>
-              <div className="modal-body">
-                <div style={{display:'grid',gap:'1rem'}}>
-                  {(['name','slug','tag','description'] as const).map(f => (
-                    <div className="form-group" key={f}>
-                      <label className="form-label" style={{textTransform:'capitalize'}}>{f.replace('_',' ')}</label>
-                      {f === 'description'
-                        ? <textarea className="form-textarea" value={(form[f] as string) ?? ''} onChange={e => setForm(p => ({...p, [f]: e.target.value}))} />
-                        : <input className="form-input" value={(form[f] as string) ?? ''} onChange={e => setForm(p => ({...p, [f]: e.target.value}))} />
+              <div className={styles.modalBody}>
+                <div className={styles.formGrid}>
+                  {TEXT_FIELDS.map(({ key, label }) => (
+                    <div className={styles.field} key={key}>
+                      <label className={styles.label} htmlFor={`product-${key}`}>{label}</label>
+                      {key === 'description'
+                        ? <textarea id={`product-${key}`} name={key} className={styles.textarea} value={(form[key] as string) ?? ''} onChange={e => setForm(p => ({...p, [key]: e.target.value}))} />
+                        : <input id={`product-${key}`} name={key} className={styles.input} value={(form[key] as string) ?? ''} onChange={e => setForm(p => ({...p, [key]: e.target.value}))} />
                       }
                     </div>
                   ))}
 
-                  {/* Multi-image gallery URLs */}
-                  <div className="form-group">
-                    <label className="form-label">Product Images (gallery)</label>
-                    <p style={{fontSize:'0.78rem',color:'var(--text-muted)',marginBottom:'8px'}}>
+                  <div className={styles.field}>
+                    <span className={styles.label}>Product images</span>
+                    <p className={styles.help}>
                       Add one URL per image. The first image is also used as the cover in the cart.
                     </p>
                     {(form.image_urls ?? []).map((url, i) => (
-                      <div key={i} style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
+                      <div key={i} className={styles.urlRow}>
                         <input
-                          className="form-input"
-                          style={{flex:1}}
+                          className={styles.input}
                           type="url"
+                          name={`image-url-${i}`}
+                          aria-label={`Image URL ${i + 1}`}
                           placeholder="https://..."
                           value={url}
                           onChange={e => {
@@ -101,42 +114,49 @@ export default function AdminProductsPage() {
                         />
                         <button
                           type="button"
+                          className={`${styles.btn} ${styles.btnDanger}`}
                           onClick={() => {
                             const next = (form.image_urls ?? []).filter((_,j) => j !== i);
                             setForm(p => ({...p, image_urls: next, image_url: next[0] ?? ''}));
                           }}
-                          style={{background:'#fee2e2',color:'#991b1b',border:'none',borderRadius:'var(--radius-sm)',padding:'0 10px',cursor:'pointer',fontWeight:600}}
-                        >✕</button>
+                        >
+                          <Icon name="trash" size={16} />
+                          Remove
+                        </button>
                       </div>
                     ))}
-                    <button
-                      type="button"
-                      className="btn btn-outline btn-sm"
-                      onClick={() => setForm(p => ({...p, image_urls: [...(p.image_urls ?? []), '']}))}
-                    >
-                      + Add Image URL
-                    </button>
-                  </div>
-                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem'}}>
-                    <div className="form-group">
-                      <label className="form-label">Price (USD)</label>
-                      <input type="number" step="0.01" className="form-input" value={form.price_usd ?? ''} onChange={e => setForm(p => ({...p, price_usd: parseFloat(e.target.value) || undefined}))} />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">Sort Order</label>
-                      <input type="number" className="form-input" value={form.sort_order ?? 0} onChange={e => setForm(p => ({...p, sort_order: parseInt(e.target.value)}))} />
+                    <div>
+                      <button
+                        type="button"
+                        className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}
+                        onClick={() => setForm(p => ({...p, image_urls: [...(p.image_urls ?? []), '']}))}
+                      >
+                        <Icon name="plus" size={16} />
+                        Add image URL
+                      </button>
                     </div>
                   </div>
-                  <label style={{display:'flex',alignItems:'center',gap:'8px',cursor:'pointer',fontSize:'0.9rem'}}>
+
+                  <div className={styles.formRow}>
+                    <div className={styles.field}>
+                      <label className={styles.label} htmlFor="product-price">Price (USD)</label>
+                      <input id="product-price" name="price_usd" type="number" step="0.01" className={styles.input} value={form.price_usd ?? ''} onChange={e => setForm(p => ({...p, price_usd: parseFloat(e.target.value) || undefined}))} />
+                    </div>
+                    <div className={styles.field}>
+                      <label className={styles.label} htmlFor="product-sort">Sort order</label>
+                      <input id="product-sort" name="sort_order" type="number" className={styles.input} value={form.sort_order ?? 0} onChange={e => setForm(p => ({...p, sort_order: parseInt(e.target.value)}))} />
+                    </div>
+                  </div>
+                  <label className={styles.checkRow}>
                     <input type="checkbox" checked={form.is_active ?? true} onChange={e => setForm(p => ({...p, is_active: e.target.checked}))} />
-                    Active (visible on site)
+                    Active (visible on the shop)
                   </label>
                 </div>
               </div>
-              <div className="modal-footer">
-                <button className="btn btn-outline" onClick={() => setShowForm(false)}>Cancel</button>
-                <button className="btn btn-primary" onClick={save} disabled={saving}>
-                  {saving ? <span className="spinner" /> : (editId ? 'Save Changes' : 'Create Product')}
+              <div className={styles.modalFooter}>
+                <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => setShowForm(false)}>Cancel</button>
+                <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={save} disabled={saving}>
+                  {saving ? 'Saving...' : (editId ? 'Save changes' : 'Create product')}
                 </button>
               </div>
             </div>
@@ -144,54 +164,73 @@ export default function AdminProductsPage() {
         </>
       )}
 
-      {/* Table */}
-      <div className="admin-card" style={{overflowX:'auto'}}>
+      <section className={`${styles.card} ${styles.cardFlush}`}>
         {loading ? (
-          <div style={{textAlign:'center',padding:'3rem'}}><div className="spinner spinner-rose" style={{margin:'0 auto'}} /></div>
+          <p className={styles.loading} role="status">Loading products</p>
         ) : products.length === 0 ? (
-          <div style={{textAlign:'center',padding:'3rem',color:'var(--text-muted)'}}>
-            <div style={{fontSize:'2.5rem',marginBottom:'0.75rem'}}>🌹</div>
-            <p>No products yet. Add your first product!</p>
+          <div className={styles.empty}>
+            <p className={styles.emptyTitle}>No products yet</p>
+            <p className={styles.emptyText}>Add your first product and it will appear on the shop.</p>
+            <div className={styles.emptyAction}>
+              <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={openCreate}>Add product</button>
+            </div>
           </div>
         ) : (
-          <table className="tbl">
-            <thead>
-              <tr>
-                <th>Image</th><th>Name</th><th>Tag</th><th>Price</th><th>Sort</th><th>Active</th><th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map(p => (
-                <tr key={p.id}>
-                  <td>
-                    {p.image_url
-                      ? <img src={p.image_url} alt={p.name} style={{width:48,height:48,objectFit:'cover',borderRadius:'var(--radius-sm)'}} />
-                      : <div style={{width:48,height:48,background:'var(--rose-200)',borderRadius:'var(--radius-sm)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.3rem'}}>🌸</div>
-                    }
-                  </td>
-                  <td style={{fontWeight:600}}>{p.name}<br/><span style={{fontSize:'0.75rem',color:'var(--text-muted)'}}>{p.slug}</span></td>
-                  <td>{p.tag && <span className="badge badge-rose">{p.tag}</span>}</td>
-                  <td>{p.price_usd ? `$${p.price_usd.toFixed(2)}` : '—'}</td>
-                  <td>{p.sort_order}</td>
-                  <td>
-                    <button
-                      onClick={() => toggleActive(p)}
-                      style={{background:'none',border:'none',cursor:'pointer',fontSize:'1.3rem'}}
-                      title={p.is_active ? 'Deactivate' : 'Activate'}
-                    >
-                      {p.is_active ? '✅' : '⭕'}
-                    </button>
-                  </td>
-                  <td style={{display:'flex',gap:'8px',flexWrap:'wrap'}}>
-                    <button className="btn btn-outline btn-sm" onClick={() => openEdit(p)}>Edit</button>
-                    <button className="btn btn-sm" onClick={() => remove(p.id)} style={{background:'#fee2e2',color:'#991b1b',border:'none'}}>Archive</button>
-                  </td>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th><span className={styles.srOnly}>Image</span></th>
+                  <th>Name</th>
+                  <th>Tag</th>
+                  <th className={styles.right}>Price</th>
+                  <th className={styles.right}>Sort</th>
+                  <th>Status</th>
+                  <th><span className={styles.srOnly}>Actions</span></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {products.map(p => (
+                  <tr key={p.id}>
+                    <td>
+                      {p.image_url
+                        // eslint-disable-next-line @next/next/no-img-element
+                        ? <img src={p.image_url} alt={p.name} width={48} height={48} className={styles.thumb} />
+                        : <div className={styles.thumbEmpty} aria-hidden="true" />
+                      }
+                    </td>
+                    <td className={styles.cellStrong}>
+                      {p.name}
+                      <span className={styles.cellSub}>{p.slug}</span>
+                    </td>
+                    <td>{p.tag && <span className={`${styles.badge} ${styles.badgePreparing}`}>{p.tag}</span>}</td>
+                    <td className={styles.money}>{p.price_usd ? `$${p.price_usd.toFixed(2)}` : '-'}</td>
+                    <td className={`${styles.num} ${styles.right}`}>{p.sort_order}</td>
+                    <td>
+                      <button
+                        type="button"
+                        onClick={() => toggleActive(p)}
+                        aria-pressed={!!p.is_active}
+                        title={p.is_active ? 'Click to hide from the shop' : 'Click to show on the shop'}
+                        className={`${styles.toggle} ${p.is_active ? styles.toggleOn : ''}`}
+                      >
+                        <Icon name={p.is_active ? 'eye' : 'eye-off'} size={16} />
+                        {p.is_active ? 'Active' : 'Hidden'}
+                      </button>
+                    </td>
+                    <td>
+                      <div className={styles.cellActions}>
+                        <button type="button" className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`} onClick={() => openEdit(p)}>Edit</button>
+                        <button type="button" className={`${styles.btn} ${styles.btnDanger} ${styles.btnSm}`} onClick={() => remove(p.id)}><Icon name="trash" size={16} />Archive</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-      </div>
+      </section>
     </>
   );
 }

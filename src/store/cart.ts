@@ -72,6 +72,9 @@ export const useCartStore = create<CartStore>()(
       name: 'rebellys-cart',
       // Only persist items, not UI state
       partialize: (state) => ({ items: state.items }),
+      // Server and first client render both start empty; CartDrawer rehydrates
+      // from localStorage after mount, so there is no hydration mismatch.
+      skipHydration: true,
     }
   )
 );

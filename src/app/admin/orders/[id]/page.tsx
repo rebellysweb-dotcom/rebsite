@@ -4,20 +4,19 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import type { Order, OrderStatus, PaymentStatus } from '@/types';
+import styles from '../../admin.module.css';
+import { orderBadge } from '../../badges';
+import Icon from '@/components/icons/Icon';
 
 const STATUS_OPTIONS: OrderStatus[] = ['pending','confirmed','preparing','ready','delivered','cancelled'];
 const PAYMENT_OPTIONS: PaymentStatus[] = ['pending','confirmed','paid','failed'];
-const STATUS_BADGE: Record<OrderStatus, string> = {
-  pending:'status-pending',confirmed:'status-confirmed',preparing:'status-preparing',
-  ready:'status-ready',delivered:'status-delivered',cancelled:'status-cancelled',
-};
 
 function Row({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null;
   return (
-    <div style={{ display:'flex', gap:'1rem', padding:'9px 0', borderBottom:'1px solid rgba(45,10,30,.06)' }}>
-      <span style={{ minWidth:130, fontSize:'0.78rem', fontWeight:600, color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.06em' }}>{label}</span>
-      <span style={{ fontSize:'0.9rem' }}>{value}</span>
+    <div className={styles.defRow}>
+      <dt className={styles.defTerm}>{label}</dt>
+      <dd className={styles.defValue}>{value}</dd>
     </div>
   );
 }
@@ -62,84 +61,111 @@ export default function AdminOrderDetailPage() {
     if (d.order) setOrder(d.order);
   };
 
-  if (loading) return <div style={{textAlign:'center',padding:'4rem'}}><div className="spinner spinner-rose" style={{margin:'0 auto'}} /></div>;
-  if (!order) return <div style={{textAlign:'center',padding:'4rem'}}><p>Order not found.</p><Link href="/admin/orders" className="btn btn-outline" style={{marginTop:'1rem',display:'inline-flex'}}>← Back</Link></div>;
+  if (loading) return <p className={styles.loading} role="status">Loading order</p>;
+  if (!order) {
+    return (
+      <div className={`${styles.card} ${styles.empty}`}>
+        <p className={styles.emptyTitle}>Order not found</p>
+        <p className={styles.emptyText}>It may have been removed, or the link is wrong.</p>
+        <div className={styles.emptyAction}>
+          <Link href="/admin/orders" className={`${styles.btn} ${styles.btnSecondary}`}>Back to orders</Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
-      <div className="admin-topbar">
-        <div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
-          <Link href="/admin/orders" style={{color:'var(--text-muted)',fontSize:'1.3rem'}}>←</Link>
-          <h1 className="admin-page-title">{order.order_number}</h1>
-          <span className={`badge ${STATUS_BADGE[order.order_status]}`}>{order.order_status}</span>
-        </div>
-        <span style={{fontSize:'0.82rem',color:'var(--text-muted)'}}>{new Date(order.created_at).toLocaleString()}</span>
-      </div>
-
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1.5rem',marginBottom:'1.5rem'}}>
-        <div className="admin-card">
-          <h2 style={{fontFamily:'var(--ff-display)',fontSize:'1rem',marginBottom:'1rem',fontWeight:700}}>👤 Customer</h2>
-          <Row label="Name" value={order.customer_name} />
-          <Row label="Phone" value={order.customer_phone} />
-          <Row label="Email" value={order.customer_email} />
-          <Row label="Occasion" value={order.occasion} />
-          <Row label="Card Message" value={order.card_message} />
-          <Row label="Notes" value={order.notes} />
-        </div>
-        <div className="admin-card">
-          <h2 style={{fontFamily:'var(--ff-display)',fontSize:'1rem',marginBottom:'1rem',fontWeight:700}}>🚚 {order.fulfillment === 'delivery' ? 'Delivery' : 'Pickup'}</h2>
-          <Row label="Type" value={order.fulfillment} />
-          <Row label="Address" value={order.delivery_address} />
-          <Row label="Area" value={order.delivery_area} />
-          <Row label="Date" value={order.delivery_date} />
-          <Row label="Time" value={order.delivery_time} />
-          <Row label="Payment" value={`${order.payment_method} — ${order.payment_status}`} />
-        </div>
-      </div>
-
-      <div className="admin-card" style={{marginBottom:'1.5rem'}}>
-        <h2 style={{fontFamily:'var(--ff-display)',fontSize:'1rem',marginBottom:'1rem',fontWeight:700}}>🌸 Items</h2>
-        <table className="tbl">
-          <thead><tr><th>Item</th><th>Qty</th><th>Unit</th><th>Subtotal</th></tr></thead>
-          <tbody>
-            {(order.items ?? []).map(item => (
-              <tr key={item.id}>
-                <td>{item.name}</td>
-                <td>{item.quantity}</td>
-                <td>${(item.price_usd ?? 0).toFixed(2)}</td>
-                <td style={{fontWeight:600}}>${((item.price_usd ?? 0) * item.quantity).toFixed(2)}</td>
-              </tr>
-            ))}
-            <tr>
-              <td colSpan={3} style={{textAlign:'right',fontWeight:700}}>Total</td>
-              <td style={{fontWeight:700,color:'var(--rose-700)'}}>${(order.total_usd ?? 0).toFixed(2)}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div className="admin-card">
-        <h2 style={{fontFamily:'var(--ff-display)',fontSize:'1rem',marginBottom:'1rem',fontWeight:700}}>✏️ Update Status</h2>
-        <div style={{display:'flex',gap:'1rem',flexWrap:'wrap',alignItems:'flex-end'}}>
-          <div className="form-group">
-            <label className="form-label">Order Status</label>
-            <select className="form-select" value={orderStatus} onChange={e => setOrderStatus(e.target.value as OrderStatus)}>
-              {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+      <header className={styles.pageHeader}>
+        <div className={styles.pageTitleGroup}>
+          <Link href="/admin/orders" className={styles.backLink}><Icon name="arrow-left" size={16} motion="nudge-back" />Back to orders</Link>
+          <div className={styles.titleRow}>
+            <h1 className={styles.pageTitle}>{order.order_number}</h1>
+            <span className={orderBadge(order.order_status)}>{order.order_status}</span>
           </div>
-          <div className="form-group">
-            <label className="form-label">Payment Status</label>
-            <select className="form-select" value={paymentStatus} onChange={e => setPaymentStatus(e.target.value as PaymentStatus)}>
-              {PAYMENT_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </div>
-          <button className="btn btn-primary" onClick={save} disabled={saving}>
-            {saving ? <span className="spinner" /> : 'Save'}
-          </button>
-          <button className={`btn ${order.whatsapp_sent ? 'btn-outline' : 'btn-dark'}`} onClick={toggleWA}>
-            💬 {order.whatsapp_sent ? 'WA Sent ✓' : 'Mark WA Sent'}
-          </button>
+          <p className={`${styles.pageMeta} ${styles.num}`}>{new Date(order.created_at).toLocaleString()}</p>
         </div>
+      </header>
+
+      <div className={styles.stack}>
+        <div className={styles.twoCol}>
+          <section className={styles.card}>
+            <h2 className={`${styles.cardTitle} ${styles.cardTitleGap}`}>Customer</h2>
+            <dl className={styles.defList}>
+              <Row label="Name" value={order.customer_name} />
+              <Row label="Phone" value={order.customer_phone} />
+              <Row label="Email" value={order.customer_email} />
+              <Row label="Occasion" value={order.occasion} />
+              <Row label="Card message" value={order.card_message} />
+              <Row label="Notes" value={order.notes} />
+            </dl>
+          </section>
+          <section className={styles.card}>
+            <h2 className={`${styles.cardTitle} ${styles.cardTitleGap}`}>{order.fulfillment === 'delivery' ? 'Delivery' : 'Pickup'}</h2>
+            <dl className={styles.defList}>
+              <Row label="Type" value={order.fulfillment} />
+              <Row label="Address" value={order.delivery_address} />
+              <Row label="Area" value={order.delivery_area} />
+              <Row label="Date" value={order.delivery_date} />
+              <Row label="Time" value={order.delivery_time} />
+              <Row label="Payment" value={`${order.payment_method} / ${order.payment_status}`} />
+            </dl>
+          </section>
+        </div>
+
+        <section className={`${styles.card} ${styles.cardFlush}`}>
+          <h2 className={`${styles.cardTitle} ${styles.cardHeadPad}`}>Items</h2>
+          <div className={styles.tableWrap}>
+            <table className={`${styles.table} ${styles.tableGap}`}>
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th className={styles.right}>Qty</th>
+                  <th className={styles.right}>Unit</th>
+                  <th className={styles.right}>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(order.items ?? []).map(item => (
+                  <tr key={item.id}>
+                    <td>{item.name}</td>
+                    <td className={`${styles.num} ${styles.right}`}>{item.quantity}</td>
+                    <td className={styles.money}>${(item.price_usd ?? 0).toFixed(2)}</td>
+                    <td className={styles.money}>${((item.price_usd ?? 0) * item.quantity).toFixed(2)}</td>
+                  </tr>
+                ))}
+                <tr className={styles.totalRow}>
+                  <td colSpan={3} className={styles.right}>Total</td>
+                  <td className={styles.money}>${(order.total_usd ?? 0).toFixed(2)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className={styles.card}>
+          <h2 className={`${styles.cardTitle} ${styles.cardTitleGap}`}>Update status</h2>
+          <div className={styles.formInline}>
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="order-status">Order status</label>
+              <select id="order-status" className={styles.select} value={orderStatus} onChange={e => setOrderStatus(e.target.value as OrderStatus)}>
+                {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="payment-status">Payment status</label>
+              <select id="payment-status" className={styles.select} value={paymentStatus} onChange={e => setPaymentStatus(e.target.value as PaymentStatus)}>
+                {PAYMENT_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={save} disabled={saving}>
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+            <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={toggleWA} aria-pressed={!!order.whatsapp_sent}>
+              {order.whatsapp_sent ? 'WhatsApp sent (undo)' : 'Mark WhatsApp as sent'}
+            </button>
+          </div>
+        </section>
       </div>
     </>
   );

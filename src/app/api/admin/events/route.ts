@@ -120,7 +120,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'slug must be lowercase alphanumeric with hyphens only' }, { status: 400 });
     }
 
-    const bannerColor = body.banner_color || '#e91e8c';
+    const bannerColor = body.banner_color || '#844057';
     if (typeof bannerColor !== 'string' || !HEX_COLOR_RE.test(bannerColor)) {
       return NextResponse.json({ error: 'banner_color must be a valid hex color' }, { status: 400 });
     }

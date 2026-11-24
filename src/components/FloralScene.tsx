@@ -8,10 +8,10 @@ import * as THREE from 'three';
 
 /* Brand palette */
 const PALETTE: { hex: string; weight: number; alpha: [number, number] }[] = [
-  { hex: '#e91e8c', weight: 0.14, alpha: [0.40, 0.55] },
-  { hex: '#f8aed6', weight: 0.34, alpha: [0.45, 0.70] },
-  { hex: '#fcd8ec', weight: 0.32, alpha: [0.55, 0.80] },
-  { hex: '#c9a84c', weight: 0.20, alpha: [0.40, 0.60] },
+  { hex: '#844057', weight: 0.14, alpha: [0.40, 0.55] },
+  { hex: '#d4a3b3', weight: 0.34, alpha: [0.45, 0.70] },
+  { hex: '#f0dce2', weight: 0.32, alpha: [0.55, 0.80] },
+  { hex: '#a85f78', weight: 0.20, alpha: [0.40, 0.60] },
 ];
 
 const FOCUS_DEPTH = 10;

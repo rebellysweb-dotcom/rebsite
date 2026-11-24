@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import styles from './ContactForm.module.css';
+import Icon from '@/components/icons/Icon';
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
@@ -33,7 +35,7 @@ export default function ContactForm() {
       })
 
       if (!response.ok) {
-        const data = await response.json()
+        const data = (await response.json()) as { error?: string }
         throw new Error(data.error ?? 'Failed to send message')
       }
 
@@ -57,7 +59,7 @@ export default function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', background: '#fff', padding: '2rem', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)' }}>
+    <form onSubmit={handleSubmit} noValidate className={styles.form}>
       {globalError && (
         <div className="alert alert-error" role="alert" aria-live="assertive">
           {globalError}
@@ -116,7 +118,7 @@ export default function ContactForm() {
       </div>
 
       <button type="submit" className="btn btn-primary" disabled={status === 'submitting'} aria-busy={status === 'submitting'}>
-        {status === 'submitting' ? 'Sending...' : 'Send Message'}
+        {status === 'submitting' ? 'Sending...' : (<>Send Message<Icon name="arrow-right" size={18} motion="nudge" /></>)}
       </button>
     </form>
   );

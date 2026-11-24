@@ -4,18 +4,19 @@ import { dbQuery } from '@/lib/db';
 import type { Product } from '@/types';
 import { JsonLd } from '@/components/JsonLd';
 import CollectionsClient from './CollectionsClient';
+import styles from './page.module.css';
 import { getProductSchema, getBreadcrumbSchema } from '@/lib/structured-data';
 
 export const metadata: Metadata = {
   title: 'Flower Collections | Bouquets & Gift Boxes in Zalka',
-  description: 'Explore Rebelly\'s romantic bouquets, floral gift boxes, mixed arrangements, and heart-shaped rose displays for delivery or pickup in Zalka and nearby areas.',
+  description: 'Christmas gifts, baskets, orchid arrangements and bouquets from Rebelly\'s, arranged by hand in Zalka for delivery across the Metn or pickup on Saydeh Street.',
   alternates: {
     canonical: 'https://rebellys.com/collections',
   },
   openGraph: {
     title: 'Flower Collections | Bouquets & Gift Boxes in Zalka',
-    description: 'Explore Rebelly\'s romantic bouquets, floral gift boxes, mixed arrangements, and heart-shaped rose displays for delivery or pickup in Zalka and nearby areas.',
-    images: [{ url: 'https://rebellys.com/images/mixed_bouquet.png', width: 1200, height: 630, alt: "Rebelly's flower collections" }],
+    description: 'Christmas gifts, baskets, orchid arrangements and bouquets from Rebelly\'s, arranged by hand in Zalka for delivery across the Metn or pickup on Saydeh Street.',
+    images: [{ url: 'https://rebellys.com/images/og.jpg', width: 1200, height: 630, alt: "Rebelly's flower collections" }],
     type: 'website',
   },
 };
@@ -32,24 +33,24 @@ const toProduct = (r: ProductRow): Product => ({
 });
 
 async function ProductGrid() {
-  const { MOCK_PRODUCTS } = await import('@/lib/mock-data');
-  let products: Product[] = [...MOCK_PRODUCTS];
+  const { CATALOG_PRODUCTS } = await import('@/lib/catalog');
+  let products: Product[] = [...CATALOG_PRODUCTS];
 
   try {
     const rows = await dbQuery<ProductRow>(
       'SELECT * FROM products WHERE is_active = 1 ORDER BY sort_order'
     );
     const dbProducts = rows.map(toProduct);
-    products = dbProducts.length ? dbProducts : MOCK_PRODUCTS;
+    products = dbProducts.length ? dbProducts : CATALOG_PRODUCTS;
   } catch {
-    products = MOCK_PRODUCTS;
+    products = CATALOG_PRODUCTS;
   }
 
   const itemListSchema = products && products.length > 0 ? {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: "Rebelly's Flower Collections",
-    description: 'Browse our premium handcrafted floral arrangements',
+    description: 'Christmas gifts, baskets, orchids and bouquets arranged by hand in Zalka',
     url: 'https://rebellys.com/collections',
     numberOfItems: products.length,
     itemListElement: products.map((p, i) => ({
@@ -65,8 +66,8 @@ async function ProductGrid() {
       {products && products.length > 0 ? (
         <CollectionsClient products={products} />
       ) : (
-        <div style={{ textAlign: 'center', padding: '4rem', background: '#fff', borderRadius: 'var(--radius-lg)' }}>
-          <p style={{ color: 'var(--text-muted)' }}>No products available at the moment. Please check back later!</p>
+        <div className={styles.empty}>
+          <p>No products available at the moment. Please check back later!</p>
         </div>
       )}
     </>
@@ -75,9 +76,9 @@ async function ProductGrid() {
 
 function GridSkeleton() {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))', gap: 'clamp(16px, 3vw, 32px)' }}>
+    <div className={styles.skeletonGrid}>
       {[...Array(6)].map((_, i) => (
-        <div key={i} style={{ aspectRatio: '3 / 4.9', borderRadius: 'var(--radius-lg)', background: 'var(--rose-200)', opacity: 0.5, animation: 'pulseText 1.5s infinite' }}></div>
+        <div key={i} className={styles.skeleton} />
       ))}
     </div>
   );
@@ -85,7 +86,7 @@ function GridSkeleton() {
 
 export default function CollectionsPage() {
   return (
-    <div style={{ padding: 'calc(var(--nav-h) + 3rem) var(--px) 8rem', minHeight: '100dvh' }}>
+    <div className={styles.page}>
       <JsonLd data={getBreadcrumbSchema([
         { name: 'Home', url: 'https://rebellys.com' },
         { name: 'Collections', url: 'https://rebellys.com/collections' },
@@ -95,7 +96,7 @@ export default function CollectionsPage() {
           <span className="section-tag">What We Offer</span>
           <h1 className="section-title">Our Signature<br /><em>Collections</em></h1>
           <p className="section-subtitle">
-            Handcrafted with the finest blooms, each arrangement is a work of art designed to express what words cannot.
+            Every arrangement is built by hand in our Zalka shop. Choose one, add it to your order, and we confirm the price on WhatsApp.
           </p>
         </div>
 

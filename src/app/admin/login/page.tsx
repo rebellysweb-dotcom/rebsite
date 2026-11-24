@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import styles from './login.module.css';
 
 // Only same-origin relative paths. Blocks protocol-relative and absolute URLs.
 function safeRedirect(value: string | null): string {
@@ -46,45 +47,53 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main style={{ maxWidth: 360, margin: '96px auto', padding: '0 16px' }}>
-      <h1 style={{ marginBottom: 24 }}>Admin sign in</h1>
-      <form onSubmit={handleSubmit} noValidate>
-        <div className="form-group" style={{ marginBottom: 14 }}>
-          <label className="form-label" htmlFor="admin-email">Email</label>
-          <input
-            id="admin-email"
-            type="email"
-            className="form-input"
-            required
-            autoComplete="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-          />
+    <div className={styles.page}>
+      <div className={styles.panel}>
+        <div className={styles.brand}>
+          <span className={styles.wordmark}>Rebelly&apos;s</span>
+          <span className={styles.sub}>Admin</span>
         </div>
+        <h1 className={styles.title}>Sign in</h1>
+        <form onSubmit={handleSubmit} noValidate className={styles.form}>
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="admin-email">Email</label>
+            <input
+              id="admin-email"
+              name="email"
+              type="email"
+              className={styles.input}
+              required
+              autoComplete="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+            />
+          </div>
 
-        <div className="form-group" style={{ marginBottom: 14 }}>
-          <label className="form-label" htmlFor="admin-password">Password</label>
-          <input
-            id="admin-password"
-            type="password"
-            className="form-input"
-            required
-            autoComplete="current-password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-          />
-        </div>
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="admin-password">Password</label>
+            <input
+              id="admin-password"
+              name="password"
+              type="password"
+              className={styles.input}
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+            />
+          </div>
 
-        {error && (
-          <p role="alert" style={{ color: '#b91c1c', marginBottom: 14 }}>
-            {error}
-          </p>
-        )}
+          {error && (
+            <p role="alert" className={styles.error}>
+              {error}
+            </p>
+          )}
 
-        <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
-          {loading ? 'Signing in...' : 'Sign in'}
-        </button>
-      </form>
-    </main>
+          <button type="submit" className={styles.submit} disabled={loading}>
+            {loading ? 'Signing in...' : 'Sign in'}
+          </button>
+        </form>
+      </div>
+    </div>
   );
 }

@@ -2,14 +2,15 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { SiteSettings } from '@/types';
+import styles from '../admin.module.css';
 
 const FIELDS: { key: keyof SiteSettings; label: string; type?: string; help?: string }[] = [
-  { key: 'lbp_rate', label: 'USD → LBP Rate', type: 'number', help: 'Current market rate used for LBP price display' },
-  { key: 'whish_number', label: 'Whish Money Number', help: 'Number shown to customers for Whish payments' },
-  { key: 'whatsapp_number', label: 'WhatsApp Number', help: 'Used for WhatsApp order messages (no + prefix, e.g. 96176585028)' },
-  { key: 'shop_phone', label: 'Shop Phone', help: 'Displayed in footer and contact pages' },
-  { key: 'shop_address', label: 'Shop Address', help: 'Physical store address' },
-  { key: 'shop_email', label: 'Shop Email', type: 'email', help: 'Public contact email' },
+  { key: 'lbp_rate', label: 'USD to LBP rate', type: 'number', help: 'Current market rate used for LBP price display' },
+  { key: 'whish_number', label: 'Whish Money number', help: 'Number shown to customers for Whish payments' },
+  { key: 'whatsapp_number', label: 'WhatsApp number', help: 'Used for WhatsApp order messages (no + prefix, e.g. 96176585028)' },
+  { key: 'shop_phone', label: 'Shop phone', help: 'Displayed in footer and contact pages' },
+  { key: 'shop_address', label: 'Shop address', help: 'Physical store address' },
+  { key: 'shop_email', label: 'Shop email', type: 'email', help: 'Public contact email' },
 ];
 
 export default function AdminSettingsPage() {
@@ -52,7 +53,7 @@ export default function AdminSettingsPage() {
       if (data.settings) {
         setSettings(data.settings);
         setOriginal(data.settings);
-        setMessage({ type: 'success', text: 'Settings saved successfully!' });
+        setMessage({ type: 'success', text: 'Settings saved.' });
       } else {
         setMessage({ type: 'error', text: data.error || 'Failed to save settings' });
       }
@@ -69,58 +70,60 @@ export default function AdminSettingsPage() {
   };
 
   if (loading) {
-    return (
-      <div style={{ textAlign: 'center', padding: '4rem' }}>
-        <div className="spinner spinner-rose" style={{ margin: '0 auto' }} />
-      </div>
-    );
+    return <p className={styles.loading} role="status">Loading settings</p>;
   }
 
   return (
     <>
-      <div className="admin-topbar">
-        <h1 className="admin-page-title">Settings</h1>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+      <header className={styles.pageHeader}>
+        <div className={styles.pageTitleGroup}>
+          <h1 className={styles.pageTitle}>Settings</h1>
+          <p className={styles.pageMeta}>
+            Currency rate, payment numbers and shop contact details. Changes go live as soon as you save.
+          </p>
+        </div>
+        <div className={styles.headerActions}>
           {hasChanges && (
-            <button className="btn btn-outline btn-sm" onClick={handleReset}>
-              Discard Changes
+            <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={handleReset}>
+              Discard changes
             </button>
           )}
           <button
-            className="btn btn-primary"
+            type="button"
+            className={`${styles.btn} ${styles.btnPrimary}`}
             onClick={handleSave}
             disabled={saving || !hasChanges}
           >
-            {saving ? <span className="spinner" /> : 'Save Settings'}
+            {saving ? 'Saving...' : 'Save settings'}
           </button>
         </div>
-      </div>
+      </header>
 
       {message && (
-        <div className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-error'}`} role="alert" style={{ marginBottom: '1.5rem' }}>
+        <div
+          className={`${styles.alert} ${message.type === 'success' ? styles.alertSuccess : styles.alertError}`}
+          role="alert"
+        >
           {message.text}
         </div>
       )}
 
-      <div className="admin-card" style={{ maxWidth: 640 }}>
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-          These settings control live currency rates, payment numbers, and contact information shown to customers.
-          Changes take effect immediately on save.
-        </p>
-
-        <div style={{ display: 'grid', gap: '1.25rem' }}>
+      <div className={`${styles.card} ${styles.narrow}`}>
+        <div className={styles.formGrid}>
           {FIELDS.map(({ key, label, type, help }) => (
-            <div className="form-group" key={key}>
-              <label className="form-label" htmlFor={`settings-${key}`}>{label}</label>
+            <div className={styles.field} key={key}>
+              <label className={styles.label} htmlFor={`settings-${key}`}>{label}</label>
               <input
                 id={`settings-${key}`}
-                className="form-input"
+                name={key}
+                className={styles.input}
                 type={type ?? 'text'}
                 value={(settings[key] as string) ?? ''}
+                aria-describedby={help ? `settings-${key}-help` : undefined}
                 onChange={(e) => setSettings((prev) => ({ ...prev, [key]: e.target.value }))}
               />
               {help && (
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                <span id={`settings-${key}-help`} className={styles.help}>
                   {help}
                 </span>
               )}

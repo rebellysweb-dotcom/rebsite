@@ -1,12 +1,14 @@
 import { dbQuery, dbQueryOne } from '@/lib/db';
 import Link from 'next/link';
-import type { OrderStatus } from '@/types';
+import styles from './admin.module.css';
+import { orderBadge, paymentBadge } from './badges';
+import Icon from '@/components/icons/Icon';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'edge';
 
 export const metadata = {
-  title: 'Dashboard | Rebellys Admin',
+  title: "Dashboard | Rebelly's Admin",
 };
 
 // D1 timestamps are 'YYYY-MM-DD HH:MM:SS' in UTC (datetime('now')).
@@ -15,40 +17,19 @@ const parseD1Date = (s: string) => new Date(s.replace(' ', 'T') + 'Z');
 function StatCard({
   label,
   value,
-  icon,
-  color,
+  accent = false,
 }: {
   label: string;
   value: string | number;
-  icon: string;
-  color: string;
+  accent?: boolean;
 }) {
   return (
-    <div
-      className="admin-card"
-      style={{ borderTop: `3px solid ${color}` }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <span style={{ fontSize: '1.8rem' }}>{icon}</span>
-        <span style={{ fontSize: '2rem', fontFamily: 'var(--ff-display)', fontWeight: 700, color }}>
-          {value}
-        </span>
-      </div>
-      <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-        {label}
-      </p>
+    <div className={`${styles.stat} ${accent ? styles.statAccent : ''}`}>
+      <p className={styles.statLabel}>{label}</p>
+      <p className={styles.statValue}>{value}</p>
     </div>
   );
 }
-
-const STATUS_BADGE: Record<OrderStatus, string> = {
-  pending: 'status-pending',
-  confirmed: 'status-confirmed',
-  preparing: 'status-preparing',
-  ready: 'status-ready',
-  delivered: 'status-delivered',
-  cancelled: 'status-cancelled',
-};
 
 type RecentOrder = {
   id: string;
@@ -87,61 +68,61 @@ export default async function AdminDashboardPage() {
 
   return (
     <>
-      <div className="admin-topbar">
-        <h1 className="admin-page-title">Dashboard</h1>
-        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-        </span>
-      </div>
+      <header className={styles.pageHeader}>
+        <div className={styles.pageTitleGroup}>
+          <h1 className={styles.pageTitle}>Dashboard</h1>
+          <p className={styles.pageMeta}>
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
+        </div>
+        <div className={styles.headerActions}>
+          <Link href="/admin/products" className={`${styles.btn} ${styles.btnPrimary}`}><Icon name="plus" size={18} />Add product</Link>
+          <Link href="/admin/events" className={`${styles.btn} ${styles.btnSecondary}`}><Icon name="calendar" size={18} />Create event</Link>
+        </div>
+      </header>
 
-      {/* Stats Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-        <StatCard label="Pending Orders" value={pendingCount} icon="⏳" color="var(--rose-500)" />
-        <StatCard label="Total Orders" value={totalOrders} icon="🧾" color="#0369a1" />
-        <StatCard label="Active Products" value={productCount} icon="🌷" color="#b45309" />
-        <StatCard label="Orders Today" value={todayCount} icon="📦" color="#6d28d9" />
-        <StatCard label="Revenue This Month" value={`$${monthRevenue.toFixed(0)}`} icon="💰" color="#059669" />
-      </div>
+      <section className={styles.stats} aria-label="Summary">
+        <StatCard label="Pending orders" value={pendingCount} accent />
+        <StatCard label="Orders today" value={todayCount} />
+        <StatCard label="Total orders" value={totalOrders} />
+        <StatCard label="Active products" value={productCount} />
+        <StatCard label="Revenue this month" value={`$${monthRevenue.toFixed(0)}`} />
+      </section>
 
-      {/* Recent Orders */}
-      <div className="admin-card">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h2 style={{ fontFamily: 'var(--ff-display)', fontSize: '1.15rem', fontWeight: 700 }}>Recent Orders</h2>
-          <Link href="/admin/orders" className="btn btn-outline btn-sm">View All</Link>
+      <section className={`${styles.card} ${styles.cardFlush}`}>
+        <div className={`${styles.cardHead} ${styles.cardHeadPad}`}>
+          <h2 className={styles.cardTitle}>Recent orders</h2>
+          <Link href="/admin/orders" className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}>View all orders<Icon name="arrow-right" size={16} motion="nudge" /></Link>
         </div>
 
         {recentOrders.length > 0 ? (
-          <div style={{ overflowX: 'auto' }}>
-            <table className="tbl">
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Order #</th>
+                  <th>Order</th>
                   <th>Customer</th>
                   <th>Status</th>
                   <th>Payment</th>
-                  <th>Total</th>
+                  <th className={styles.right}>Total</th>
                   <th>Date</th>
                 </tr>
               </thead>
               <tbody>
                 {recentOrders.map((order) => (
                   <tr key={order.id}>
-                    <td style={{ fontWeight: 600, fontSize: '0.82rem', color: 'var(--rose-700)' }}>
-                      <Link href={`/admin/orders/${order.id}`}>{order.order_number}</Link>
+                    <td>
+                      <Link href={`/admin/orders/${order.id}`} className={styles.orderLink}>{order.order_number}</Link>
                     </td>
                     <td>{order.customer_name}</td>
                     <td>
-                      <span className={`badge ${STATUS_BADGE[order.order_status as OrderStatus] ?? 'badge-muted'}`}>
-                        {order.order_status}
-                      </span>
+                      <span className={orderBadge(order.order_status)}>{order.order_status}</span>
                     </td>
                     <td>
-                      <span className={`badge ${order.payment_status === 'paid' ? 'badge-green' : 'badge-muted'}`}>
-                        {order.payment_status}
-                      </span>
+                      <span className={paymentBadge(order.payment_status)}>{order.payment_status}</span>
                     </td>
-                    <td style={{ fontWeight: 600 }}>${(order.total_usd ?? 0).toFixed(2)}</td>
-                    <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    <td className={styles.money}>${(order.total_usd ?? 0).toFixed(2)}</td>
+                    <td className={`${styles.num} ${styles.muted}`}>
                       {parseD1Date(order.created_at).toLocaleDateString()}
                     </td>
                   </tr>
@@ -150,19 +131,12 @@ export default async function AdminDashboardPage() {
             </table>
           </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🌸</div>
-            <p>No orders yet. They&apos;ll appear here once customers start ordering.</p>
+          <div className={styles.empty}>
+            <p className={styles.emptyTitle}>No orders yet</p>
+            <p className={styles.emptyText}>Orders will show up here as soon as a customer places one.</p>
           </div>
         )}
-      </div>
-
-      {/* Quick Actions */}
-      <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem', flexWrap: 'wrap' }}>
-        <Link href="/admin/products" className="btn btn-primary">+ Add Product</Link>
-        <Link href="/admin/events" className="btn btn-outline">+ Create Event</Link>
-        <Link href="/admin/orders" className="btn btn-outline">View All Orders</Link>
-      </div>
+      </section>
     </>
   );
 }

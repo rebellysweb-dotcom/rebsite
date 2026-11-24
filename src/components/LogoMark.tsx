@@ -13,18 +13,18 @@ export default function LogoMark({ size = 32, ...props }: { size?: number } & SV
       {/* 4 organic petals arranged as a cross-flower */}
       <g opacity="0.92">
         {/* Top petal */}
-        <ellipse cx="20" cy="11" rx="5.5" ry="9.5" fill="#e91e8c"/>
+        <ellipse cx="20" cy="11" rx="5.5" ry="9.5" fill="#844057"/>
         {/* Right petal (rotate 90° around center 20,20) */}
-        <ellipse cx="20" cy="11" rx="5.5" ry="9.5" fill="#e91e8c" transform="rotate(90 20 20)"/>
+        <ellipse cx="20" cy="11" rx="5.5" ry="9.5" fill="#844057" transform="rotate(90 20 20)"/>
         {/* Bottom petal (rotate 180° around center 20,20) */}
-        <ellipse cx="20" cy="11" rx="5.5" ry="9.5" fill="#e91e8c" transform="rotate(180 20 20)"/>
+        <ellipse cx="20" cy="11" rx="5.5" ry="9.5" fill="#844057" transform="rotate(180 20 20)"/>
         {/* Left petal (rotate 270° around center 20,20) */}
-        <ellipse cx="20" cy="11" rx="5.5" ry="9.5" fill="#e91e8c" transform="rotate(270 20 20)"/>
+        <ellipse cx="20" cy="11" rx="5.5" ry="9.5" fill="#844057" transform="rotate(270 20 20)"/>
       </g>
       {/* Gold center */}
-      <circle cx="20" cy="20" r="6" fill="#c9a84c"/>
+      <circle cx="20" cy="20" r="6" fill="#f0dce2"/>
       {/* Inner center highlight */}
-      <circle cx="20" cy="20" r="2.5" fill="#e8d095" opacity="0.6"/>
+      <circle cx="20" cy="20" r="2.5" fill="#faf3f0" opacity="0.6"/>
     </svg>
   );
 }

@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { dbQuery, dbQueryOne } from '@/lib/db';
 import type { Product } from '@/types';
 import CheckoutClient from './CheckoutClient';
-import { MOCK_PRODUCTS } from '@/lib/mock-data';
+import { CATALOG_PRODUCTS } from '@/lib/catalog';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'edge';
@@ -23,7 +23,7 @@ const toProduct = (r: ProductRow): Product => ({
 
 export default async function CheckoutPage() {
   let settings = null;
-  let products: Product[] = MOCK_PRODUCTS;
+  let products: Product[] = CATALOG_PRODUCTS;
 
   try {
     settings = await dbQueryOne('SELECT * FROM site_settings LIMIT 1');

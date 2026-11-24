@@ -14,9 +14,9 @@
 
 .error {
   font-size: 0.82rem;
-  color: #dc2626;
-  background: #fee2e2;
-  border-left: 3px solid #ef4444;
+  color: var(--danger);
+  background: var(--danger-bg);
+  border-left: 3px solid var(--danger);
   padding: 10px 14px;
   border-radius: var(--radius-sm);
   line-height: 1.5;

@@ -26,25 +26,28 @@
   margin-bottom: 18px;
   text-decoration: none;
 }
-.logoFlower {
-  color: var(--rose-400);
-  font-size: 1.3rem;
-  animation: spin 12s linear infinite;
-  display: inline-block;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
 
 .logoText {
   font-family: var(--ff-display);
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #fff;
+  font-size: 1.9rem;
+  font-weight: 500;
+  letter-spacing: .035em;
+  line-height: 1;
+  color: var(--white);
+}
+
+.strapline {
+  font-family: var(--ff-serif);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--gold-light);
+  margin: -6px 0 10px;
 }
 
 .tagline {
   font-size: 0.88rem;
   line-height: 1.75;
-  color: rgba(255, 255, 255, 0.48);
+  color: rgba(255, 255, 255, 0.62);
   margin-bottom: 24px;
   max-width: 280px;
 }
@@ -60,8 +63,8 @@
   gap: 7px;
   padding: 8px 16px;
   border-radius: var(--radius-xl);
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  color: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  color: rgba(255, 255, 255, 0.86);
   font-size: 0.82rem;
   font-weight: 500;
   transition: var(--transition);
@@ -70,17 +73,17 @@
 .socialBtn:hover {
   border-color: var(--rose-400);
   color: var(--rose-300);
-  background: rgba(233, 30, 140, 0.08);
+  background: transparent;
 }
 
 /* ── Link Columns ── */
 .col {}
 
 .colTitle {
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-family: var(--ff-display);
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   color: rgba(255, 255, 255, 0.92);
   margin-bottom: 18px;
 }
@@ -93,7 +96,7 @@
 
 .footerLink {
   font-size: 0.88rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.66);
   text-decoration: none;
   transition: var(--transition);
   display: inline-block;
@@ -112,25 +115,27 @@
   margin-bottom: 20px;
 }
 .address p {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 10px;
   font-size: 0.87rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.62);
   line-height: 1.5;
 }
-.infoIcon { flex-shrink: 0; font-size: 0.9rem; margin-top: 1px; }
-
-.hours { color: rgba(255, 255, 255, 0.45) !important; }
+.infoLabel {
+  color: var(--gold-light);
+  padding-top: 2px;
+}
 
 .mapsBtn {
-  background: var(--rose-500);
-  color: #fff !important;
+  gap: 8px;
+  background: var(--rose-700);
+  color: var(--white) !important;
   text-decoration: none;
-  box-shadow: 0 4px 14px rgba(233, 30, 140, 0.3);
+  box-shadow: none;
 }
 .mapsBtn:hover {
-  background: var(--rose-400) !important;
+  background: var(--rose-500) !important;
   transform: translateY(-1px);
 }
 
@@ -148,11 +153,11 @@
 }
 .copy {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.28);
+  color: rgba(255, 255, 255, 0.6);
 }
 .made {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.28);
+  color: rgba(255, 255, 255, 0.6);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -171,6 +176,14 @@
     grid-template-columns: 1fr;
   }
   .brand { grid-column: auto; }
-  .tagline { max-width: 100%; }
+  .strapline {
+  font-family: var(--ff-serif);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--gold-light);
+  margin: -6px 0 10px;
+}
+
+.tagline { max-width: 100%; }
   .bottomInner { flex-direction: column; text-align: center; gap: 6px; }
 }

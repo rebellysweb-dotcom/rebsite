@@ -2,6 +2,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { requireAdmin } from '@/lib/auth/session';
 import AdminSidebar from '@/components/AdminSidebar';
+import styles from './admin.module.css';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,9 +31,11 @@ export default async function AdminLayout({
   const userEmail = check.user.email;
 
   return (
-    <div className="admin-shell">
+    <div className={styles.shell}>
       <AdminSidebar userName={userName} userEmail={userEmail} />
-      <div className="admin-main">{children}</div>
+      <div className={styles.main}>
+        <div className={styles.inner}>{children}</div>
+      </div>
     </div>
   );
 }
