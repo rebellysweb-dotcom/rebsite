@@ -1,17 +1,49 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { requireAdmin } from '@/lib/admin-auth';
+import { dbQuery, dbQueryOne, dbRun } from '@/lib/db';
+import { RLS } from '../../../../../cloudflare/rls-policies';
 
+export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 const SLUG_RE = /^[a-z0-9-]{1,100}$/
+
+const PRODUCT_COLUMNS =
+  'id, name, slug, tag, description, image_url, image_urls, price_usd, is_active, sort_order, created_at, updated_at';
+
+interface ProductRow {
+  id: string;
+  name: string;
+  slug: string;
+  tag: string | null;
+  description: string | null;
+  image_url: string | null;
+  image_urls: string; // JSON text in D1
+  price_usd: number | null;
+  is_active: number; // INTEGER 0/1 in D1
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+function parseImageUrls(raw: string): string[] {
+  try {
+    const parsed: unknown = JSON.parse(raw || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function toProduct(row: ProductRow) {
+  return { ...row, image_urls: parseImageUrls(row.image_urls), is_active: !!row.is_active };
+}
 
 function isAllowedImageUrl(url: string): boolean {
   try {
     const u = new URL(url)
     return (
       u.protocol === 'https:' &&
-      (u.hostname.endsWith('.supabase.co') || u.hostname === 'lh3.googleusercontent.com')
+      (u.hostname.endsWith('.r2.dev') || u.hostname === 'images.rebellys.com')
     )
   } catch {
     return false
@@ -19,22 +51,24 @@ function isAllowedImageUrl(url: string): boolean {
 }
 
 // GET /api/admin/products — list all products (including inactive)
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const supabase = await createClient();
-    const session = await requireAdmin(supabase);
-    if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-
-    const { data: products, count, error } = await supabase
-      .from('products')
-      .select('*', { count: 'exact' })
-      .order('sort_order', { ascending: true });
-
-    if (error) {
-      return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
+    // TODO(auth): x-user-role is a stub. Replace with the role from the verified JWT once auth lands;
+    // middleware must strip and overwrite any client-supplied x-user-role, or this check is spoofable.
+    const userRole = request.headers.get('x-user-role') ?? 'customer';
+    if (!RLS.canWriteProducts(userRole).allowed) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    return NextResponse.json({ products: products ?? [], total: count ?? 0 });
+    const rows = await dbQuery<ProductRow>(
+      `SELECT ${PRODUCT_COLUMNS} FROM products ORDER BY sort_order ASC`
+    );
+    const countRow = await dbQueryOne<{ total: number }>('SELECT COUNT(*) AS total FROM products');
+
+    return NextResponse.json({
+      products: rows.map(toProduct),
+      total: countRow?.total ?? 0,
+    });
   } catch (err) {
     console.error('Admin products GET error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -44,9 +78,11 @@ export async function GET() {
 // POST /api/admin/products — create product
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-    const session = await requireAdmin(supabase);
-    if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    // TODO(auth): x-user-role is a stub. See GET above.
+    const userRole = request.headers.get('x-user-role') ?? 'customer';
+    if (!RLS.canWriteProducts(userRole).allowed) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     const body = await request.json();
     const { name, slug, tag, description, image_url, price_usd, is_active, sort_order } = body;
@@ -63,27 +99,38 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'image_url must be from an allowed domain' }, { status: 400 });
     }
 
-    const { data: product, error } = await supabase
-      .from('products')
-      .insert({
-        name,
-        slug,
-        tag: tag ?? null,
-        description: description ?? null,
-        image_url: image_url ?? null,
-        price_usd: price_usd ?? null,
-        is_active: is_active ?? true,
-        sort_order: sort_order ?? 0,
-      })
-      .select()
-      .single();
-
-    if (error) {
+    const id = crypto.randomUUID();
+    try {
+      // slug is UNIQUE, so a duplicate slug lands here and returns 500 like the Supabase version.
+      await dbRun(
+        'INSERT INTO products (id, name, slug, tag, description, image_url, image_urls, price_usd, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [
+          id,
+          name,
+          slug,
+          tag ?? null,
+          description ?? null,
+          image_url ?? null,
+          '[]',
+          price_usd ?? null,
+          (is_active ?? true) ? 1 : 0,
+          sort_order ?? 0,
+        ]
+      );
+    } catch (error) {
       console.error('Product insert error:', error);
       return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
     }
 
-    return NextResponse.json({ product }, { status: 201 });
+    const row = await dbQueryOne<ProductRow>(
+      `SELECT ${PRODUCT_COLUMNS} FROM products WHERE id = ?`,
+      [id]
+    );
+    if (!row) {
+      return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
+    }
+
+    return NextResponse.json({ product: toProduct(row) }, { status: 201 });
   } catch (err) {
     console.error('Admin products POST error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -1,18 +1,26 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
-import { createClient } from '@/lib/supabase/server';
+import { dbQuery, dbQueryOne } from '@/lib/db';
+import type { Event, EventProduct } from '@/types';
 import ProductCard from '@/components/ProductCard';
 import { JsonLd } from '@/components/JsonLd';
 import { getEventSchema } from '@/lib/structured-data';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
+// D1 stores booleans as 0/1 and image_urls as a JSON string.
+type EventRow = Omit<Event, 'is_active' | 'event_products'> & { is_active: number };
+type EventProductRow = Omit<EventProduct, 'is_active' | 'image_urls'> & { is_active: number; image_urls: string };
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   try {
-    const supabase = await createClient();
-    const { data: event } = await supabase.from('events').select('name').eq('slug', slug).single();
+    const event = await dbQueryOne<{ name: string }>(
+      'SELECT name FROM events WHERE slug = ? AND is_active = 1',
+      [slug]
+    );
     if (!event) return { title: "Event Not Found | Rebelly's" };
     return {
       title: `${event.name} Menu | Rebelly's Flower Shop`,
@@ -24,27 +32,27 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 }
 
-async function EventProductsGrid({ slug, eventId }: { slug: string; eventId: string }) {
+async function EventProductsGrid({ event }: { event: Event }) {
   try {
-    const supabase = await createClient();
-    const { data: event } = await supabase
-      .from('events')
-      .select('*, event_products(*)')
-      .eq('slug', slug)
-      .single();
+    const rows = await dbQuery<EventProductRow>(
+      'SELECT * FROM event_products WHERE event_id = ? AND is_active = 1 ORDER BY sort_order',
+      [event.id]
+    );
 
-    if (!event) return null;
-
-    const products = event.event_products?.sort((a: any, b: any) => a.sort_order - b.sort_order) || [];
+    const products = rows.map((r) => ({
+      ...r,
+      is_active: !!r.is_active,
+      image_urls: JSON.parse(r.image_urls || '[]') as string[],
+    }));
 
     return (
       <>
         <JsonLd data={getEventSchema(event)} />
         {products.length > 0 ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2.5rem' }}>
-            {products.map((product: any) => (
+            {products.map((product) => (
               <div key={product.id} data-animate="fadeUp">
-                <ProductCard product={{ ...product, is_event_product: true }} eventId={eventId} />
+                <ProductCard product={{ ...product, is_event_product: true }} eventId={event.id} />
               </div>
             ))}
           </div>
@@ -73,20 +81,18 @@ function GridSkeleton() {
 export default async function EventMenuPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
-  let event: { id: string; name: string; description: string | null; banner_color: string; is_active: boolean } | null = null;
+  let event: Event | null = null;
   try {
-    const supabase = await createClient();
-    const { data } = await supabase
-      .from('events')
-      .select('id, name, description, banner_color, is_active')
-      .eq('slug', slug)
-      .single();
-    event = data;
+    const row = await dbQueryOne<EventRow>(
+      'SELECT * FROM events WHERE slug = ? AND is_active = 1',
+      [slug]
+    );
+    event = row ? { ...row, is_active: !!row.is_active } : null;
   } catch {
     notFound();
   }
 
-  if (!event || !event.is_active) {
+  if (!event) {
     notFound();
   }
 
@@ -112,7 +118,7 @@ export default async function EventMenuPage({ params }: { params: Promise<{ slug
         </div>
 
         <Suspense fallback={<GridSkeleton />}>
-          <EventProductsGrid slug={slug} eventId={event.id} />
+          <EventProductsGrid event={event} />
         </Suspense>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
-import { createClient } from '@/lib/supabase/server';
+import { dbQuery } from '@/lib/db';
+import type { Product } from '@/types';
 import ProductCard from '@/components/ProductCard';
 import { JsonLd } from '@/components/JsonLd';
 import { getProductSchema, getBreadcrumbSchema } from '@/lib/structured-data';
@@ -20,19 +21,26 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
+// D1 stores booleans as 0/1 and image_urls as a JSON string.
+type ProductRow = Omit<Product, 'is_active' | 'image_urls'> & { is_active: number; image_urls: string };
+const toProduct = (r: ProductRow): Product => ({
+  ...r,
+  is_active: !!r.is_active,
+  image_urls: JSON.parse(r.image_urls || '[]'),
+});
 
 async function ProductGrid() {
   const { MOCK_PRODUCTS } = await import('@/lib/mock-data');
-  let products = [...MOCK_PRODUCTS];
+  let products: Product[] = [...MOCK_PRODUCTS];
 
   try {
-    const supabase = await createClient();
-    const { data: dbProducts } = await supabase
-      .from('products')
-      .select('*')
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true });
-    products = dbProducts?.length ? dbProducts : MOCK_PRODUCTS;
+    const rows = await dbQuery<ProductRow>(
+      'SELECT * FROM products WHERE is_active = 1 ORDER BY sort_order'
+    );
+    const dbProducts = rows.map(toProduct);
+    products = dbProducts.length ? dbProducts : MOCK_PRODUCTS;
   } catch {
     products = MOCK_PRODUCTS;
   }
@@ -55,11 +63,9 @@ async function ProductGrid() {
     <>
       {itemListSchema && <JsonLd data={itemListSchema} />}
       {products && products.length > 0 ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))', gap: 'clamp(16px, 3vw, 32px)' }}>
           {products.map((product) => (
-            <div key={product.id} data-animate="fadeUp">
-              <ProductCard product={product} />
-            </div>
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       ) : (
@@ -73,9 +79,9 @@ async function ProductGrid() {
 
 function GridSkeleton() {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2.5rem' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))', gap: 'clamp(16px, 3vw, 32px)' }}>
       {[...Array(6)].map((_, i) => (
-        <div key={i} className="card" style={{ height: '400px', background: 'rgba(45,10,30,0.05)', animation: 'pulseText 1.5s infinite' }}></div>
+        <div key={i} style={{ aspectRatio: '3 / 4.9', borderRadius: 'var(--radius-lg)', background: 'var(--rose-200)', opacity: 0.5, animation: 'pulseText 1.5s infinite' }}></div>
       ))}
     </div>
   );
@@ -83,7 +89,7 @@ function GridSkeleton() {
 
 export default function CollectionsPage() {
   return (
-    <div style={{ padding: '6rem var(--px) 8rem', background: 'var(--cream)', minHeight: '100vh' }}>
+    <div style={{ padding: 'calc(var(--nav-h) + 3rem) var(--px) 8rem', minHeight: '100dvh' }}>
       <JsonLd data={getBreadcrumbSchema([
         { name: 'Home', url: 'https://rebellys.com' },
         { name: 'Collections', url: 'https://rebellys.com/collections' },

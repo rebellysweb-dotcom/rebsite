@@ -17,12 +17,13 @@ function safeRedirect(value: string | string[] | undefined): string {
   return '/account';
 }
 
-export default function LoginPage({
+export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { redirectTo?: string | string[] };
+  searchParams: Promise<{ redirectTo?: string | string[] }>;
 }) {
-  const redirectTo = safeRedirect(searchParams.redirectTo);
+  const { redirectTo: redirectToParam } = await searchParams;
+  const redirectTo = safeRedirect(redirectToParam);
 
   return (
     <div className="page-shell">

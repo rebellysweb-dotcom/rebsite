@@ -6,26 +6,37 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cf:build": "npx @opennextjs/cloudflare build",
+    "cf:dev": "npx wrangler dev --compatibility-date=2024-09-23",
+    "cf:deploy": "npx wrangler deploy",
+    "cf:d1:create": "npx wrangler d1 create rebellys-db",
+    "cf:d1:migrate": "npx wrangler d1 execute rebellys-db --file=./cloudflare/schema.d1.sql",
+    "cf:r2:create": "npx wrangler r2 bucket create rebellys-images"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.5.2",
-    "@supabase/supabase-js": "^2.45.4",
-    "@vercel/analytics": "^2.0.1",
-    "@vercel/speed-insights": "^2.0.0",
+    "@react-three/drei": "^9.117.3",
+    "@react-three/fiber": "^8.17.10",
+    "@types/three": "^0.169.0",
+    "better-auth": "^1.2.7",
+    "gsap": "^3.12.5",
     "next": "^16.2.9",
     "posthog-js": "^1.160.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "resend": "^4.0.0",
+    "three": "^0.169.0",
     "zustand": "^5.0.1"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250224.0",
+    "@opennextjs/cloudflare": "^1.4.0",
     "@types/node": "^20.16.11",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",
     "eslint": "^8.57.1",
     "eslint-config-next": "^14.2.35",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "wrangler": "^4.0.0"
   }
 }

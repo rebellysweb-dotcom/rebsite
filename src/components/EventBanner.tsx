@@ -14,22 +14,10 @@ export default function EventBanner() {
 
     async function load() {
       try {
-        const { createClient } = await import('@/lib/supabase/client');
-        const supabase = createClient();
-
-        // Get the first active event — auto-activation handled by checking dates
-        const now = new Date().toISOString();
-
-        const { data: events } = await supabase
-          .from('events')
-          .select('*')
-          .or(`is_active.eq.true,and(auto_activate_from.lte.${now},auto_deactivate_at.gte.${now})`)
-          .order('created_at', { ascending: false })
-          .limit(1);
-
-        if (!ignore && events && events.length > 0) {
-          setEvent(events[0]);
-        }
+        const res = await fetch('/api/events/active');
+        if (!res.ok) return;
+        const data = await res.json() as { event?: Event | null };
+        if (!ignore && data?.event) setEvent(data.event);
       } catch {
         // Silently fail — banner is optional
       }

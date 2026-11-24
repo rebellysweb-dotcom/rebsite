@@ -7,6 +7,13 @@
       "runtimeArgs": ["run", "dev"],
       "port": 3000,
       "cwd": "Projects/rebellys"
+    },
+    {
+      "name": "rebellys-webpack",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--turbo=false"],
+      "port": 3002,
+      "cwd": "Projects/rebellys"
     }
   ]
 }

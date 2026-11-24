@@ -6,14 +6,10 @@ import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import EventBanner from "@/components/EventBanner";
 import ScrollAnimations from "@/components/ScrollAnimations";
-import dynamic from "next/dynamic";
+import FloralCanvas from "@/components/FloralCanvas";
 import { JsonLd } from "@/components/JsonLd";
 import { getLocalBusinessSchema } from "@/lib/structured-data";
 import PostHogProvider from "@/components/PostHogProvider";
-
-const FloatingPetals = dynamic(() => import("@/components/FloatingPetals"), { ssr: false });
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -99,12 +95,16 @@ export default function RootLayout({
         {/* hreflang for international bots */}
         <link rel="alternate" hrefLang="en" href="https://rebellys.com" />
         <link rel="alternate" hrefLang="x-default" href="https://rebellys.com" />
+        {/* Scroll-reveal content must stay visible when scripting is off */}
+        <noscript>
+          <style>{`[data-animate],[data-animate] .stagger-item{opacity:1!important;transform:none!important}`}</style>
+        </noscript>
       </head>
       <body>
         <JsonLd data={getLocalBusinessSchema()} />
         <PostHogProvider>
           <ScrollAnimations />
-          <FloatingPetals />
+          <FloralCanvas />
           <div className="page-shell">
             <EventBanner />
             <Navbar />
@@ -113,8 +113,6 @@ export default function RootLayout({
           </div>
           <CartDrawer />
         </PostHogProvider>
-        <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   );

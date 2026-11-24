@@ -1,9 +1,11 @@
 import { Metadata } from 'next';
-import { createClient } from '@/lib/supabase/server';
+import { dbQuery, dbQueryOne } from '@/lib/db';
+import type { Product } from '@/types';
 import CheckoutClient from './CheckoutClient';
 import { MOCK_PRODUCTS } from '@/lib/mock-data';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
 
 export const metadata: Metadata = {
   title: 'Order Flowers | Rebelly\'s Flower Shop Zalka',
@@ -11,20 +13,25 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+// D1 stores booleans as 0/1 and image_urls as a JSON string.
+type ProductRow = Omit<Product, 'is_active' | 'image_urls'> & { is_active: number; image_urls: string };
+const toProduct = (r: ProductRow): Product => ({
+  ...r,
+  is_active: !!r.is_active,
+  image_urls: JSON.parse(r.image_urls || '[]'),
+});
+
 export default async function CheckoutPage() {
   let settings = null;
-  let products = MOCK_PRODUCTS;
+  let products: Product[] = MOCK_PRODUCTS;
 
   try {
-    const supabase = await createClient();
-    const { data: s } = await supabase.from('site_settings').select('*').single();
-    if (s) settings = s;
-    const { data: dbProducts } = await supabase
-      .from('products')
-      .select('*')
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true });
-    if (dbProducts?.length) products = dbProducts;
+    settings = await dbQueryOne('SELECT * FROM site_settings LIMIT 1');
+    const rows = await dbQuery<ProductRow>(
+      'SELECT * FROM products WHERE is_active = 1 ORDER BY sort_order'
+    );
+    const dbProducts = rows.map(toProduct);
+    if (dbProducts.length) products = dbProducts;
   } catch {
     // Use defaults
   }

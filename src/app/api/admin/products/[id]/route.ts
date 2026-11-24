@@ -1,45 +1,117 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { requireAdmin } from '@/lib/admin-auth';
+import { dbQueryOne, dbRun } from '@/lib/db';
+import { requireAdmin } from '@/lib/auth/session';
+import { RLS } from '@cloudflare/rls-policies';
 
+export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-const SLUG_RE = /^[a-z0-9-]{1,100}$/
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const SLUG_RE = /^[a-z0-9-]{1,100}$/;
+
+const PRODUCT_COLUMNS =
+  'id, name, slug, tag, description, image_url, image_urls, price_usd, is_active, sort_order, created_at, updated_at';
+
+interface ProductRow {
+  id: string;
+  name: string;
+  slug: string;
+  tag: string | null;
+  description: string | null;
+  image_url: string | null;
+  image_urls: string; // JSON text in D1
+  price_usd: number | null;
+  is_active: number; // INTEGER 0/1 in D1
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+type DbValue = string | number | null;
+
+class BadInput extends Error {}
+
+function bind(field: string, value: unknown): DbValue {
+  if (value === undefined || value === null) return null;
+  if (typeof value === 'string' || typeof value === 'number') return value;
+  throw new BadInput(`${field} has an invalid type`);
+}
+
+function flag(field: string, value: unknown): 0 | 1 {
+  if (typeof value !== 'boolean') throw new BadInput(`${field} must be a boolean`);
+  return value ? 1 : 0;
+}
+
+function parseImageUrls(raw: string): string[] {
+  try {
+    const parsed: unknown = JSON.parse(raw || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function toProduct(row: ProductRow) {
+  return { ...row, image_urls: parseImageUrls(row.image_urls), is_active: !!row.is_active };
+}
 
 function isAllowedImageUrl(url: string): boolean {
   try {
-    const u = new URL(url)
+    const u = new URL(url);
     return (
       u.protocol === 'https:' &&
       (u.hostname.endsWith('.supabase.co') || u.hostname === 'lh3.googleusercontent.com')
-    )
+    );
   } catch {
-    return false
+    return false;
   }
+}
+
+async function readJsonObject(request: Request): Promise<Record<string, unknown> | null> {
+  try {
+    const parsed: unknown = await request.json();
+    return parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+// Authentication comes from the verified Better Auth session, not from request headers.
+// The role check goes through the RLS policy.
+async function guardAdmin(request: Request): Promise<NextResponse | null> {
+  const auth = await requireAdmin(request);
+  if (auth.status !== 200) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+  if (!RLS.canWriteAdminContent(auth.user.role).allowed) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+  return null;
+}
+
+async function loadProduct(id: string) {
+  const row = await dbQueryOne<ProductRow>(`SELECT ${PRODUCT_COLUMNS} FROM products WHERE id = ?`, [id]);
+  return row ? toProduct(row) : null;
 }
 
 // GET /api/admin/products/:id
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient();
-    const session = await requireAdmin(supabase);
-    if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    const denied = await guardAdmin(request);
+    if (denied) return denied;
 
     const { id } = await params;
     if (!UUID_RE.test(id)) {
-      return NextResponse.json({ error: 'Invalid id' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
     }
-    const { data: product, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('id', id)
-      .single();
 
-    if (error || !product) {
+    const product = await loadProduct(id);
+    if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
@@ -56,81 +128,81 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient();
-    const session = await requireAdmin(supabase);
-    if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    const denied = await guardAdmin(request);
+    if (denied) return denied;
 
     const { id } = await params;
     if (!UUID_RE.test(id)) {
-      return NextResponse.json({ error: 'Invalid id' }, { status: 400 })
-    }
-    const body = await request.json();
-
-    const allowedFields = ['name', 'slug', 'tag', 'description', 'image_url', 'price_usd', 'is_active', 'sort_order'];
-    const updates: Record<string, unknown> = {};
-
-    for (const field of allowedFields) {
-      if (field in body) updates[field] = body[field];
+      return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
     }
 
-    if (Object.keys(updates).length === 0) {
+    const body = await readJsonObject(request);
+    if (!body) {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
+
+    // Column names come only from this fixed allowlist, never from the request.
+    const ALLOWED_FIELDS = ['name', 'slug', 'tag', 'description', 'image_url', 'price_usd', 'is_active', 'sort_order'] as const;
+    const FLAG_FIELDS: ReadonlySet<string> = new Set(['is_active']);
+
+    const sets: string[] = [];
+    const values: DbValue[] = [];
+    for (const field of ALLOWED_FIELDS) {
+      if (!(field in body)) continue;
+      sets.push(`${field} = ?`);
+      values.push(FLAG_FIELDS.has(field) ? flag(field, body[field]) : bind(field, body[field]));
+    }
+
+    if (sets.length === 0) {
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
     }
 
-    const slug = updates.slug as string | undefined;
-    if (slug && !SLUG_RE.test(slug)) {
+    const slug = body.slug;
+    if (slug !== undefined && (typeof slug !== 'string' || !SLUG_RE.test(slug))) {
       return NextResponse.json({ error: 'slug must be lowercase alphanumeric with hyphens only' }, { status: 400 });
     }
 
-    const image_url = updates.image_url as string | undefined;
-    if (image_url && !isAllowedImageUrl(image_url)) {
+    const imageUrl = body.image_url;
+    if (imageUrl && (typeof imageUrl !== 'string' || !isAllowedImageUrl(imageUrl))) {
       return NextResponse.json({ error: 'image_url must be from an allowed domain' }, { status: 400 });
     }
 
-    updates.updated_at = new Date().toISOString();
-
-    const { data: product, error } = await supabase
-      .from('products')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error || !product) {
+    sets.push("updated_at = datetime('now')");
+    const result = await dbRun(`UPDATE products SET ${sets.join(', ')} WHERE id = ?`, [...values, id]);
+    if (result.meta.changes === 0) {
       return NextResponse.json({ error: 'Product not found or update failed' }, { status: 404 });
     }
 
+    const product = await loadProduct(id);
     return NextResponse.json({ product });
   } catch (err) {
+    if (err instanceof BadInput) {
+      return NextResponse.json({ error: err.message }, { status: 400 });
+    }
     console.error('Admin product PATCH error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-// DELETE /api/admin/products/:id
+// DELETE /api/admin/products/:id — soft delete (sets is_active = 0)
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient();
-    const session = await requireAdmin(supabase);
-    if (!session) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    const denied = await guardAdmin(request);
+    if (denied) return denied;
 
     const { id } = await params;
     if (!UUID_RE.test(id)) {
-      return NextResponse.json({ error: 'Invalid id' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
     }
 
-    // Soft delete — set is_active to false
-    const { data: product, error } = await supabase
-      .from('products')
-      .update({ is_active: false, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select('id')
-      .single();
-
-    if (error || !product) {
+    const result = await dbRun(
+      "UPDATE products SET is_active = 0, updated_at = datetime('now') WHERE id = ?",
+      [id]
+    );
+    if (result.meta.changes === 0) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 

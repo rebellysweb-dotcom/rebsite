@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef, type CSSProperties } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCartStore } from '@/store/cart';
@@ -16,156 +16,166 @@ const NAV_LINKS = [
   { href: '/contact',     label: 'Contact' },
 ];
 
+const SCROLL_THRESHOLD = 60;
+
 export default function Navbar() {
   const pathname = usePathname();
-  const [scrolled, setScrolled]   = useState(false);
-  const [menuOpen, setMenuOpen]   = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const totalItems = useCartStore((s) => s.totalItems());
   const toggleCart = useCartStore((s) => s.toggleCart);
+  const burgerRef = useRef<HTMLButtonElement>(null);
+  const firstLinkRef = useRef<HTMLAnchorElement>(null);
+  const menuRef = useRef<HTMLElement>(null);
 
-  const throttle = (fn: () => void, delay: number) => {
-    let last = 0;
-    return () => {
-      const now = Date.now();
-      if (now - last >= delay) {
-        last = now;
-        fn();
-      }
-    };
-  };
-
-  const handleScroll = useCallback(
-    throttle(() => {
-      setScrolled(window.scrollY > 20);
-    }, 100),
-    []
-  );
-
+  // Closed menu is inert: unreachable by Tab and screen readers.
+  // (Set via the DOM because React 18 has no `inert` prop.)
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
+    const el = menuRef.current as (HTMLElement & { inert?: boolean }) | null;
+    if (el) el.inert = !menuOpen;
+  }, [menuOpen]);
+
+  // Scroll state: one rAF-batched passive listener
+  useEffect(() => {
+    let raf = 0;
+    const read = () => { raf = 0; setScrolled(window.scrollY > SCROLL_THRESHOLD); };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(read); };
+    read();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => { window.removeEventListener('scroll', onScroll); if (raf) cancelAnimationFrame(raf); };
+  }, []);
 
   // Close mobile menu on route change
   useEffect(() => { setMenuOpen(false); }, [pathname]);
 
-  // Lock body scroll when menu open
+  // Lock scroll, move focus in, close on Escape, return focus on close
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    if (!menuOpen) return;
+    const burger = burgerRef.current;
+    document.body.style.overflow = 'hidden';
+    const focusTimer = window.setTimeout(() => firstLinkRef.current?.focus(), 60);
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = '';
+      window.clearTimeout(focusTimer);
+      window.removeEventListener('keydown', onKey);
+      burger?.focus({ preventScroll: true });
+    };
   }, [menuOpen]);
 
+  // Close the menu if the viewport grows past the mobile breakpoint
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 901px)');
+    const onChange = () => { if (mq.matches) setMenuOpen(false); };
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
   const isHome = pathname === '/';
+  const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname?.startsWith(href));
 
   return (
     <>
       <header
         className={[
           styles.navbar,
-          scrolled ? styles.scrolled : '',
-          !isHome ? styles.solid : '',
+          scrolled || !isHome ? styles.glass : '',
+          menuOpen ? styles.menuIsOpen : '',
         ].join(' ')}
-        aria-label="Site navigation"
       >
         <div className={styles.inner}>
-          {/* Logo */}
-          <Link href="/" className={styles.logo} aria-label="Rebelly's Home">
-            <span className={styles.logoFlower} aria-hidden="true">✿</span>
-            <span className={styles.logoText}>Rebelly&apos;s</span>
+          <Link href="/" className={styles.logo} aria-label="Rebelly's, home">
+            Rebelly&apos;s
           </Link>
 
-          {/* Desktop nav */}
-          <nav className={styles.links} aria-label="Main menu">
+          <nav className={styles.links} aria-label="Main">
             {NAV_LINKS.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
-                className={[
-                  styles.link,
-                  pathname === href ? styles.active : '',
-                ].join(' ')}
+                className={[styles.link, isActive(href) ? styles.active : ''].join(' ')}
+                aria-current={isActive(href) ? 'page' : undefined}
               >
                 {label}
               </Link>
             ))}
           </nav>
 
-          {/* Right actions */}
           <div className={styles.actions}>
-            {/* Auth (desktop) */}
             <span className={styles.authSlot}>
               <NavAuth />
             </span>
 
-            {/* Cart toggle */}
             <button
               id="nav-cart-btn"
+              type="button"
               className={styles.cartBtn}
               onClick={toggleCart}
-              aria-label={`Open cart (${totalItems} items)`}
+              aria-label={`Open cart, ${totalItems} ${totalItems === 1 ? 'item' : 'items'}`}
             >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-                <path d="M1 1h4l2.68 13.39a2 2 0 001.98 1.61h9.72a2 2 0 001.97-1.61L23 6H6"/>
+              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M6 7h12l-1 13H7L6 7z" />
+                <path d="M9 7V6a3 3 0 016 0v1" />
               </svg>
               {totalItems > 0 && (
-                <span className={styles.badge} aria-live="polite">
+                <span className={styles.badge} aria-hidden="true">
                   {totalItems > 99 ? '99+' : totalItems}
                 </span>
               )}
             </button>
 
-            {/* Order CTA — desktop */}
             <Link href="/checkout" className={`${styles.cta} btn btn-primary`}>
-              <span>Order Now</span>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
+              Order Now
             </Link>
 
-            {/* Mobile hamburger */}
             <button
+              ref={burgerRef}
               id="nav-hamburger"
+              type="button"
               className={styles.hamburger}
               onClick={() => setMenuOpen((v) => !v)}
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={menuOpen}
+              aria-controls="mobile-menu"
             >
-              <span className={menuOpen ? styles.barTop   : ''} />
-              <span className={menuOpen ? styles.barMid   : ''} />
-              <span className={menuOpen ? styles.barBot   : ''} />
+              <span className={menuOpen ? styles.barTop : ''} />
+              <span className={menuOpen ? styles.barBot : ''} />
             </button>
           </div>
         </div>
       </header>
 
-      {/* Mobile menu */}
-      {menuOpen && (
-        <div className={styles.mobileBackdrop} onClick={() => setMenuOpen(false)} aria-hidden="true" />
-      )}
+      {/* Full-screen mobile menu: a translucent sheet that blurs the page behind it */}
       <nav
+        id="mobile-menu"
         className={[styles.mobileMenu, menuOpen ? styles.mobileOpen : ''].join(' ')}
-        aria-label="Mobile menu"
+        aria-label="Mobile"
         aria-hidden={!menuOpen}
-        {...(!menuOpen ? { inert: true } : {})}
+        ref={menuRef}
       >
-        {NAV_LINKS.map(({ href, label }) => (
-          <Link
-            key={href}
-            href={href}
-            className={[styles.mobileLink, pathname === href ? styles.mobileLinkActive : ''].join(' ')}
-          >
-            {label}
+        <ul className={styles.mobileList}>
+          {NAV_LINKS.map(({ href, label }, i) => (
+            <li key={href} style={{ '--i': i } as CSSProperties}>
+              <Link
+                ref={i === 0 ? firstLinkRef : undefined}
+                href={href}
+                className={[styles.mobileLink, isActive(href) ? styles.mobileLinkActive : ''].join(' ')}
+                aria-current={isActive(href) ? 'page' : undefined}
+              >
+                {label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        <div className={styles.mobileFoot} style={{ '--i': NAV_LINKS.length } as CSSProperties}>
+          <Link href="/checkout" className={`${styles.mobileCta} btn btn-primary`}>
+            Order Now
           </Link>
-        ))}
-        <Link
-          href="/checkout"
-          className={`${styles.mobileCta} btn btn-primary`}
-        >
-          🌸 Order Now
-        </Link>
-        <NavAuth mobile />
+          <a href="tel:+96176585028" className={styles.mobileMeta}>+961 76 585 028</a>
+          <NavAuth mobile />
+        </div>
       </nav>
     </>
   );

@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import styles from './AdminSidebar.module.css';
 
 const NAV_LINKS = [
@@ -34,9 +33,8 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
     exact ? pathname === href : pathname.startsWith(href);
 
   const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push('/');
+    await fetch('/api/auth/sign-out', { method: 'POST' });
+    router.push('/admin/login');
   };
 
   return (

@@ -41,9 +41,26 @@
   --shadow-card: 0 4px 24px rgba(45,10,30,.10);
   --shadow-xl:   0 32px 80px rgba(45,10,30,.20);
 
+  /* Accessible gold for text on white/cream (5:1) — --gold itself is decorative only */
+  --gold-ink:   #8a6a1f;
+  --hairline:   rgba(45,10,30,.10);
+
   /* Motion */
   --ease:       cubic-bezier(.4,0,.2,1);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out:    cubic-bezier(0.0, 0.0, 0.2, 1);
   --transition: 0.3s var(--ease);
+
+  /* Effects / layering */
+  --blur-nav:   blur(12px) saturate(180%);
+  --canvas-z:   -1;
+
+  /* Scroll-reveal distance (reduced on mobile below) */
+  --reveal-d:   12px;
+
+  /* Fluid type */
+  --fs-body:    clamp(14px, 4vw, 16px);
+  --fs-hero:    clamp(32px, 8vw, 72px);
 
   /* Layout */
   --nav-h:      70px;
@@ -55,6 +72,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
+  overflow-x: clip;
   font-size: 16px;
   scroll-padding-top: var(--nav-h);
   -webkit-text-size-adjust: 100%;
@@ -62,11 +80,15 @@ html {
 
 body {
   font-family: var(--ff-sans);
+  font-size: var(--fs-body);
   background: var(--cream);
   color: var(--text-main);
-  overflow-x: hidden;
+  overflow-x: clip;
   line-height: 1.6;
-  min-height: 100vh;
+  min-height: 100dvh;
+}
+@media (min-width: 768px) {
+  :root { --reveal-d: 24px; }
 }
 
 img  { max-width: 100%; display: block; }
@@ -86,22 +108,56 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
 
 /* ── PAGE WRAPPER ─────────────────────────────────────────── */
 .page-shell {
+  position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 .page-shell main { flex: 1; }
 
+/* ── WEBGL BACKGROUND ─────────────────────────────────────── */
+.floral-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: var(--canvas-z);
+  pointer-events: none;
+  /* fade in once the first frame is ready, so there is never a black flash */
+  opacity: 0;
+  transition: opacity 1.6s var(--ease-out);
+}
+.floral-canvas.ready { opacity: 1; }
+
 /* ── SCROLL ENTRY ANIMATIONS ──────────────────────────────── */
+/* Base: fade-up. Distance comes from --reveal-d (12px mobile, 24px ≥768px). */
 [data-animate] {
   opacity: 0;
-  transition: opacity 0.7s ease, transform 0.7s var(--ease);
+  transform: translateY(var(--tx, var(--reveal-d)));
+  transition: opacity 0.6s var(--ease-spring), transform 0.6s var(--ease-spring);
+  transition-delay: calc(var(--stagger-index, 0) * 80ms);
 }
-[data-animate="fadeUp"]    { transform: translateY(48px); }
-[data-animate="fadeLeft"]  { transform: translateX(-48px); }
-[data-animate="fadeRight"] { transform: translateX(48px); }
-[data-animate="fadeIn"]    { transform: scale(.97); }
-[data-animate].visible { opacity: 1; transform: none; }
+[data-animate="fade-left"],
+[data-animate="fadeLeft"]  { transform: translateX(calc(var(--reveal-d) * -1)); }
+[data-animate="fadeRight"] { transform: translateX(var(--reveal-d)); }
+[data-animate="scale-in"],
+[data-animate="fadeIn"]    { transform: scale(.92); }
+
+/* Stagger container: the wrapper itself is static, children carry the motion */
+[data-animate="stagger"] { opacity: 1; transform: none; transition: none; }
+[data-animate="stagger"] .stagger-item {
+  opacity: 0;
+  transform: translateY(var(--reveal-d));
+  transition: opacity 0.6s var(--ease-spring), transform 0.6s var(--ease-spring);
+  transition-delay: calc(var(--stagger-index, 0) * 80ms);
+}
+
+[data-animate].animated,
+[data-animate].visible,
+[data-animate="stagger"].animated .stagger-item { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-animate],
+  [data-animate] .stagger-item { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
 
 /* ── BUTTONS ──────────────────────────────────────────────── */
 .btn {
@@ -115,7 +171,9 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
   font-size: .92rem;
   font-weight: 500;
   letter-spacing: .01em;
-  transition: var(--transition);
+  transition: background-color .3s var(--ease), color .3s var(--ease),
+              border-color .3s var(--ease), box-shadow .3s var(--ease),
+              transform .3s var(--ease-spring);
   white-space: nowrap;
   cursor: pointer;
 }
@@ -157,10 +215,33 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
 }
 .btn-dark:hover { background: var(--dark-mid); transform: translateY(-2px); }
 
+/* Secondary CTA — hairline gold, ink text. Quiet next to the rose primary. */
+.btn-gold-outline {
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--gold);
+  box-shadow: inset 0 0 0 0 var(--gold-light);
+  transition: box-shadow .5s var(--ease-spring), color var(--transition), transform var(--transition);
+}
+.btn-gold-outline:hover {
+  box-shadow: inset 0 0 0 30px rgba(232,208,149,.28);
+  transform: translateY(-2px);
+}
+
+/* Tap feedback everywhere — touch has no hover, so the press must answer */
+.btn:active { transform: scale(.97); transition-duration: 80ms; }
+@media (hover: none) {
+  .btn-primary:hover, .btn-outline:hover, .btn-ghost:hover,
+  .btn-dark:hover, .btn-gold-outline:hover { transform: none; }
+}
+
 .btn-sm {
-  min-height: 36px;
+  min-height: 44px;
   padding: 8px 18px;
   font-size: .83rem;
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn-sm { min-height: 36px; }
 }
 
 .btn-icon {

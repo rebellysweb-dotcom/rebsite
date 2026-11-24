@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, memo } from 'react';
+import { useState, memo, useEffect, useRef } from 'react';
 import type { Product, EventProduct } from '@/types';
 import { formatUsd } from '@/lib/utils';
 import { useCartStore } from '@/store/cart';
@@ -17,9 +17,18 @@ interface ProductCardProps {
 
 const lbpFormatter = new Intl.NumberFormat('en-LB');
 
+/**
+ * Product card. 3:4 photograph first, words second.
+ * Desktop (fine pointer): "Add to order" rises over the photo on hover or keyboard focus.
+ * Touch: the button is always visible, and the card answers a press instead of a hover.
+ * Image loading (lazy + blur placeholder) is handled by ProductGallery / next/image.
+ */
 const ProductCard = memo(function ProductCard({ product, lbpRate, eventId }: ProductCardProps) {
   const [added, setAdded] = useState(false);
   const { addItem, openCart } = useCartStore();
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
 
   const isEvent = 'event_id' in product || !!eventId;
 
@@ -34,7 +43,8 @@ const ProductCard = memo(function ProductCard({ product, lbpRate, eventId }: Pro
       slug:             'slug' in product ? product.slug : product.id,
     });
     setAdded(true);
-    setTimeout(() => setAdded(false), 1800);
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => setAdded(false), 1800);
     openCart();
   }
 
@@ -43,38 +53,48 @@ const ProductCard = memo(function ProductCard({ product, lbpRate, eventId }: Pro
       ? `≈ ${lbpFormatter.format(Math.round(product.price_usd * lbpRate))} LL`
       : null;
 
-  // Merge image_urls array with the primary image_url for the gallery.
-  // image_urls takes precedence when populated; falls back to [image_url].
-  const galleryImages: string[] = (() => {
-    const urls = ('image_urls' in product && Array.isArray(product.image_urls) && product.image_urls.length > 0)
+  const galleryImages: string[] =
+    'image_urls' in product && Array.isArray(product.image_urls) && product.image_urls.length > 0
       ? product.image_urls
       : product.image_url ? [product.image_url] : [];
-    return urls;
-  })();
 
   return (
-    <article className={styles.card} aria-label={product.name}>
-      {/* Image gallery */}
+    <article className={styles.card} aria-label={product.name} data-animate="scale-in">
       <div className={styles.imgWrap}>
         <ProductGallery images={galleryImages} alt={product.name} className={styles.gallery} />
 
-        {/* Hover overlay */}
-        <div className={styles.overlay} aria-hidden="true">
-          <span className={styles.overlayText}>View Details</span>
-        </div>
+        {(product.tag || isEvent) && (
+          <div className={styles.tags}>
+            {product.tag && <span className={styles.tag}>{product.tag}</span>}
+            {isEvent && <span className={`${styles.tag} ${styles.tagGold}`}>Event special</span>}
+          </div>
+        )}
 
-        {/* Tags */}
-        <div className={styles.tags}>
-          {product.tag && (
-            <span className={`badge badge-rose ${styles.tagBadge}`}>{product.tag}</span>
+        <button
+          id={`add-to-cart-${product.id}`}
+          type="button"
+          className={`${styles.addBtn} ${added ? styles.added : ''}`}
+          onClick={handleAdd}
+          aria-label={`Add ${product.name} to order`}
+        >
+          {added ? (
+            <>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              Added
+            </>
+          ) : (
+            <>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              Add to order
+            </>
           )}
-          {isEvent && (
-            <span className={`badge badge-gold ${styles.tagBadge}`}>Event Special</span>
-          )}
-        </div>
+        </button>
       </div>
 
-      {/* Body */}
       <div className={styles.body}>
         <h3 className={styles.name}>{product.name}</h3>
 
@@ -82,42 +102,17 @@ const ProductCard = memo(function ProductCard({ product, lbpRate, eventId }: Pro
           <p className={styles.desc}>{product.description}</p>
         )}
 
-        {/* Price */}
-        <div className={styles.priceRow}>
+        <p className={styles.priceRow}>
           <span className={styles.price}>
             {product.price_usd != null ? formatUsd(product.price_usd) : 'Price on request'}
           </span>
           {lbpLine && <span className={styles.lbp}>{lbpLine}</span>}
-        </div>
-
-        {/* Add to Cart */}
-        <button
-          id={`add-to-cart-${product.id}`}
-          className={`btn ${added ? styles.addedBtn : styles.addBtn}`}
-          onClick={handleAdd}
-          aria-label={`Add ${product.name} to cart`}
-        >
-          {added ? (
-            <>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-              Added!
-            </>
-          ) : (
-            <>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-                <path d="M1 1h4l2.68 13.39a2 2 0 001.98 1.61h9.72a2 2 0 001.97-1.61L23 6H6"/>
-              </svg>
-              Add to Cart
-            </>
-          )}
-        </button>
-        <span aria-live="polite" aria-atomic="true" style={{position:"absolute",width:"1px",height:"1px",overflow:"hidden",clip:"rect(0,0,0,0)",whiteSpace:"nowrap"}}>
-          {added ? "Added to cart" : ""}
-        </span>
+        </p>
       </div>
+
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {added ? `${product.name} added to your order` : ''}
+      </span>
     </article>
   );
 });

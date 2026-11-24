@@ -1,7 +1,8 @@
 import type { MetadataRoute } from 'next';
-import { createClient } from '@/lib/supabase/server';
+import { dbQuery } from '@/lib/db';
 
 export const revalidate = 3600
+export const runtime = 'edge';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -44,25 +45,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const supabase = await createClient();
-
     // Dynamic event routes
-    const { data: events } = await supabase
-      .from('events')
-      .select('slug, created_at')
-      .eq('is_active', true);
+    const events = await dbQuery<{ slug: string }>(
+      'SELECT slug FROM events WHERE is_active = 1'
+    );
 
-    const eventRoutes: MetadataRoute.Sitemap =
-      events?.map((event) => ({
-        url: `https://rebellys.com/events/${event.slug}`,
-        lastModified: new Date(event.created_at),
-        changeFrequency: 'daily' as const,
-        priority: 0.85,
-      })) ?? [];
+    const eventRoutes: MetadataRoute.Sitemap = events.map((event) => ({
+      url: `https://rebellys.com/events/${event.slug}`,
+      changeFrequency: 'daily' as const,
+      priority: 0.85,
+    }));
 
     return [...staticRoutes, ...eventRoutes];
   } catch {
-    // If Supabase is unavailable, return static routes only
+    // If the database is unavailable, return static routes only
     return staticRoutes;
   }
 }

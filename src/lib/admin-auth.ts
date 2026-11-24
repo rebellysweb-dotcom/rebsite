@@ -1,29 +1,19 @@
-import { SupabaseClient } from '@supabase/supabase-js';
-import { createAdminClient } from '@/lib/supabase/server';
+import { requireAdmin as betterAuthRequireAdmin } from '@/lib/auth/session';
 
 export interface AdminSession {
   userId: string;
   role: string;
 }
 
+// Wrapper so existing callers don't need to change their import.
+// Delegate to Better Auth session helper.
 export async function requireAdmin(
-  supabase: SupabaseClient
+  request: Request
 ): Promise<AdminSession | null> {
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) return null;
-
-  const adminClient = createAdminClient();
-  const { data: profile, error: profileError } = await adminClient
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (profileError || !profile || profile.role !== 'admin') return null;
-
-  return { userId: user.id, role: profile.role };
+  const result = await betterAuthRequireAdmin(request);
+  if (result.error || !result.user) return null;
+  return {
+    userId: result.user.id,
+    role: (result.user as { role?: string }).role ?? 'admin',
+  };
 }

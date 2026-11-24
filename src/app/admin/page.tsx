@@ -1,12 +1,16 @@
-import { createClient } from '@/lib/supabase/server';
+import { dbQuery, dbQueryOne } from '@/lib/db';
 import Link from 'next/link';
 import type { OrderStatus } from '@/types';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
 
 export const metadata = {
   title: 'Dashboard | Rebellys Admin',
 };
+
+// D1 timestamps are 'YYYY-MM-DD HH:MM:SS' in UTC (datetime('now')).
+const parseD1Date = (s: string) => new Date(s.replace(' ', 'T') + 'Z');
 
 function StatCard({
   label,
@@ -46,30 +50,40 @@ const STATUS_BADGE: Record<OrderStatus, string> = {
   cancelled: 'status-cancelled',
 };
 
+type RecentOrder = {
+  id: string;
+  order_number: string;
+  customer_name: string;
+  order_status: string;
+  payment_status: string;
+  total_usd: number | null;
+  created_at: string;
+};
+
 export default async function AdminDashboardPage() {
-  const supabase = await createClient();
-
-  // Stats
-  const today = new Date().toISOString().slice(0, 10);
-  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
-
   const [
-    { count: pendingCount },
-    { count: todayCount },
-    { data: monthOrders },
-    { data: recentOrders },
+    pendingRow,
+    totalRow,
+    productRow,
+    todayRow,
+    revenueRow,
+    recentOrders,
   ] = await Promise.all([
-    supabase.from('orders').select('*', { count: 'exact', head: true }).eq('order_status', 'pending'),
-    supabase.from('orders').select('*', { count: 'exact', head: true }).gte('created_at', `${today}T00:00:00`),
-    supabase.from('orders').select('total_usd').gte('created_at', monthStart).neq('order_status', 'cancelled'),
-    supabase
-      .from('orders')
-      .select('id, order_number, customer_name, order_status, payment_status, total_usd, created_at')
-      .order('created_at', { ascending: false })
-      .limit(5),
+    dbQueryOne<{ count: number }>("SELECT COUNT(*) as count FROM orders WHERE order_status = 'pending'"),
+    dbQueryOne<{ count: number }>('SELECT COUNT(*) as count FROM orders'),
+    dbQueryOne<{ count: number }>('SELECT COUNT(*) as count FROM products WHERE is_active = 1'),
+    dbQueryOne<{ count: number }>("SELECT COUNT(*) as count FROM orders WHERE created_at >= date('now')"),
+    dbQueryOne<{ total: number }>(
+      "SELECT COALESCE(SUM(total_usd), 0) AS total FROM orders WHERE created_at >= date('now', 'start of month') AND order_status != 'cancelled'"
+    ),
+    dbQuery<RecentOrder>('SELECT * FROM orders ORDER BY created_at DESC LIMIT 5'),
   ]);
 
-  const monthRevenue = (monthOrders ?? []).reduce((sum, o) => sum + (o.total_usd ?? 0), 0);
+  const pendingCount = pendingRow?.count ?? 0;
+  const totalOrders = totalRow?.count ?? 0;
+  const productCount = productRow?.count ?? 0;
+  const todayCount = todayRow?.count ?? 0;
+  const monthRevenue = revenueRow?.total ?? 0;
 
   return (
     <>
@@ -82,8 +96,10 @@ export default async function AdminDashboardPage() {
 
       {/* Stats Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-        <StatCard label="Pending Orders" value={pendingCount ?? 0} icon="⏳" color="var(--rose-500)" />
-        <StatCard label="Orders Today" value={todayCount ?? 0} icon="📦" color="#6d28d9" />
+        <StatCard label="Pending Orders" value={pendingCount} icon="⏳" color="var(--rose-500)" />
+        <StatCard label="Total Orders" value={totalOrders} icon="🧾" color="#0369a1" />
+        <StatCard label="Active Products" value={productCount} icon="🌷" color="#b45309" />
+        <StatCard label="Orders Today" value={todayCount} icon="📦" color="#6d28d9" />
         <StatCard label="Revenue This Month" value={`$${monthRevenue.toFixed(0)}`} icon="💰" color="#059669" />
       </div>
 
@@ -94,7 +110,7 @@ export default async function AdminDashboardPage() {
           <Link href="/admin/orders" className="btn btn-outline btn-sm">View All</Link>
         </div>
 
-        {recentOrders && recentOrders.length > 0 ? (
+        {recentOrders.length > 0 ? (
           <div style={{ overflowX: 'auto' }}>
             <table className="tbl">
               <thead>
@@ -126,7 +142,7 @@ export default async function AdminDashboardPage() {
                     </td>
                     <td style={{ fontWeight: 600 }}>${(order.total_usd ?? 0).toFixed(2)}</td>
                     <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                      {new Date(order.created_at).toLocaleDateString()}
+                      {parseD1Date(order.created_at).toLocaleDateString()}
                     </td>
                   </tr>
                 ))}
