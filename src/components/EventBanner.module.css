@@ -127,9 +127,15 @@
 /* ── Responsive ── */
 @media (max-width: 600px) {
   .desc { display: none; }
-  .inner { flex-wrap: nowrap; }
+  .inner { flex-wrap: nowrap; gap: 8px; }
+  .name { white-space: normal; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.25; }
+  .cta { min-height: 44px; padding: 0 14px; }
 }
 
 @media (max-width: 400px) {
   .cta span { display: none; }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .dismiss { width: 44px; height: 44px; }
 }

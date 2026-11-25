@@ -4,7 +4,8 @@
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 1000;
-  height: var(--nav-h);
+  height: calc(var(--nav-h) + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
   background: transparent;
   transition: background var(--transition), box-shadow var(--transition);
 }
@@ -28,6 +29,8 @@
   max-width: var(--max-w);
   margin: 0 auto;
   padding: 0 var(--px);
+  padding-left: max(var(--px), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--px), env(safe-area-inset-right, 0px));
   height: 100%;
   display: flex;
   align-items: center;
@@ -192,11 +195,15 @@
 /* ── Mobile Menu ── */
 .mobileMenu {
   position: fixed;
-  top: var(--nav-h); left: 0; right: 0;
+  top: calc(var(--nav-h) + env(safe-area-inset-top, 0px)); left: 0; right: 0;
+  max-height: calc(100vh - var(--nav-h));
+  max-height: calc(100dvh - var(--nav-h) - env(safe-area-inset-top, 0px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
   z-index: 995;
   background: rgba(15, 6, 8, 0.97);
   backdrop-filter: blur(20px);
-  padding: 16px 20px 28px;
+  padding: 16px 20px calc(28px + env(safe-area-inset-bottom, 0px));
   display: flex; flex-direction: column; gap: 4px;
   transform: translateY(-10px);
   opacity: 0;
@@ -212,6 +219,7 @@
 
 .mobileLink {
   display: block;
+  min-height: 44px;
   padding: 13px 16px;
   border-radius: var(--radius);
   color: rgba(255, 255, 255, 0.8);
@@ -237,4 +245,16 @@
 
 @media (max-width: 480px) {
   .logoText { font-size: 1.3rem; }
+}
+
+@media (max-width: 360px) {
+  .inner { gap: 12px; }
+  .logo { gap: 6px; min-width: 0; }
+  .logoText { font-size: 1.2rem; }
+  .actions { margin-left: auto; gap: 8px; }
+}
+
+/* Logo link: full-height tap target */
+@media (hover: none) {
+  .logo { min-height: 44px; }
 }

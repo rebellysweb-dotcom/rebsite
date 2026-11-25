@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
+
 // D1 stores booleans as 0/1 and image_urls as a JSON string.
 type ProductRow = Omit<Product, 'is_active' | 'image_urls'> & { is_active: number; image_urls: string };
 const toProduct = (r: ProductRow): Product => ({
@@ -74,7 +75,7 @@ async function ProductGrid() {
 
 function GridSkeleton() {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2.5rem' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '2.5rem' }}>
       {[...Array(6)].map((_, i) => (
         <div key={i} className="card" style={{ height: '400px', background: 'rgba(45,10,30,0.05)', animation: 'pulseText 1.5s infinite' }}></div>
       ))}
@@ -84,7 +85,7 @@ function GridSkeleton() {
 
 export default function CollectionsPage() {
   return (
-    <div style={{ padding: '6rem var(--px) 8rem', background: 'var(--cream)', minHeight: '100vh' }}>
+    <div style={{ padding: '6rem var(--px) 8rem', background: 'var(--cream)', minHeight: '100svh' }}>
       <JsonLd data={getBreadcrumbSchema([
         { name: 'Home', url: 'https://rebellys.com' },
         { name: 'Collections', url: 'https://rebellys.com/collections' },

@@ -17,6 +17,8 @@
   font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: 0.03em;
+  min-height: 44px;
+  white-space: nowrap;
   cursor: pointer;
   transition: var(--transition);
 }
@@ -30,7 +32,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
   gap: 2.5rem;
 }
 
@@ -40,4 +42,12 @@
   background: #fff;
   border-radius: var(--radius-lg);
   color: var(--text-muted);
+}
+
+/* Phones: tabs stay fully visible (3 pills wrap to at most 2 rows), 44px tall */
+@media (max-width: 600px) {
+  .tabs { gap: 0.5rem; margin-bottom: 1.75rem; }
+  .tab { padding: 0.55rem 1.1rem; }
+  .grid { gap: 1.5rem; }
+  .empty { padding: 2rem 1rem; }
 }

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -31,6 +31,13 @@ const inter = Inter({
   variable: "--ff-sans",
   display: "swap",
 });
+
+// viewport-fit=cover lets env(safe-area-inset-*) work for the fixed navbar/drawer on notched phones
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://rebellys.com"),

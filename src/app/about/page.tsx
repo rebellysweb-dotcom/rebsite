@@ -20,9 +20,9 @@ export const revalidate = 3600;
 
 export default function AboutPage() {
   return (
-    <div style={{ padding: '6rem var(--px) 8rem', background: 'var(--cream)', minHeight: '100vh' }}>
+    <div style={{ padding: '6rem var(--px) 8rem', background: 'var(--cream)', minHeight: '100svh' }}>
       <section className="container" aria-label="About Rebelly's">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 'clamp(2.5rem, 8vw, 4rem)', alignItems: 'center' }}>
           
           <div data-animate="fadeLeft" style={{ position: 'relative' }}>
             <div style={{ position: 'relative', width: '100%', aspectRatio: '1/1' }}>

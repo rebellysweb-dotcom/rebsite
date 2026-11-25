@@ -48,25 +48,25 @@ const REVIEWS = [
 
 export default function ReviewsPage() {
   return (
-    <div style={{ padding: '6rem var(--px) 8rem', background: 'var(--cream)', minHeight: '100vh' }}>
+    <div style={{ padding: '6rem var(--px) 8rem', background: 'var(--cream)', minHeight: '100svh' }}>
       <section className="container" aria-label="Customer Reviews">
         <div className="section-header" data-animate="fadeUp">
           <span className="section-tag">What People Say</span>
           <h1 className="section-title">Blooming with<br/><em>Happy Customers</em></h1>
-          <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', marginTop: '1rem', background: '#fff', padding: '1rem 2rem', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-sm)' }}>
+          <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', marginTop: '1rem', background: '#fff', padding: '1rem clamp(1rem, 5vw, 2rem)', maxWidth: '100%', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-sm)' }}>
             <div style={{ color: '#fbbf24', fontSize: '1.5rem', letterSpacing: '2px', marginBottom: '4px' }}>
               ★★★★<span style={{ position: 'relative' }}>★<span style={{ position: 'absolute', left: 0, top: 0, width: '90%', overflow: 'hidden', color: '#fbbf24' }}></span><span style={{ color: '#e5e7eb' }}>★</span></span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: '4px 8px', color: 'var(--text-muted)' }}>
               <strong style={{ fontSize: '1.2rem', color: 'var(--text-main)' }}>4.9</strong>
               <span>Based on 20 Google Reviews</span>
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '2rem' }}>
           {REVIEWS.map((review, i) => (
-            <div key={i} className="card" data-animate="fadeUp" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div key={i} className="card" data-animate="fadeUp" style={{ padding: 'clamp(1.25rem, 5vw, 2rem)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: review.color, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 'bold' }}>

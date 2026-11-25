@@ -24,14 +24,14 @@
 .img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
   transition: transform 0.6s ease;
 }
 
 /* Scale effect on hover — parent card drives it */
 .wrap[data-hovered="true"] .img {
-  transform: scale(1.07);
+  transform: scale(1.04);
 }
 
 /* Fallback */
@@ -102,6 +102,9 @@
   border: none;
   cursor: pointer;
   padding: 0;
+  position: relative;
+  /* the cream frame is light: a soft ring keeps white dots visible on it */
+  box-shadow: 0 0 0 1px rgba(45, 10, 30, 0.25);
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
@@ -110,8 +113,41 @@
   transform: scale(1.35);
 }
 
+/* Touch: keep the 6px dot, grow the tappable area to 44px tall */
+@media (hover: none) {
+  .dots { gap: 0; bottom: 0; left: 0; right: 0; transform: none; justify-content: center; pointer-events: none; }
+  .dot { pointer-events: auto; }
+  .dot {
+    width: auto;
+    min-width: 24px;
+    flex: 0 1 44px;
+    height: 44px;
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+  }
+  .dot::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 8px; height: 8px;
+    margin: -4px 0 0 -4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 0 0 1px rgba(45, 10, 30, 0.3);
+  }
+  .dotActive::before { background: var(--rose-500); box-shadow: 0 0 0 1.5px #fff; }
+  .arrow { width: 44px; height: 44px; opacity: 0.85; }
+  .arrowLeft  { left: 0; }
+  .arrowRight { right: 0; }
+}
+
 /* Responsive */
 @media (max-width: 480px) {
-  .wrap { height: 200px; }
   .arrow { opacity: 0.85; }
+}
+
+/* Narrow touch cards: swipe + dots only, so arrows never sit on the product */
+@media (hover: none) and (max-width: 480px) {
+  .arrow { display: none; }
 }

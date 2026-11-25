@@ -26,13 +26,16 @@ export default function FloatingPetals() {
       '#fecdd3' // Light rose
     ];
     
+    // Decorative only: skip entirely for reduced motion, fewer petals on phones.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const count = window.matchMedia('(max-width: 768px)').matches ? 4 : 8;
     const newPetals = [];
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < count; i++) {
       const size = (0.6 + Math.random() * 1.2) + 'rem';
       newPetals.push({
         id: i,
         symbol: symbols[Math.floor(Math.random() * symbols.length)],
-        left: Math.random() * 100 + 'vw',
+        left: Math.random() * 92 + 'vw',
         top: -(10 + Math.random() * 20) + 'vh', // Start above screen
         duration: (12 + Math.random() * 20) + 's',
         delay: -(Math.random() * 30) + 's',

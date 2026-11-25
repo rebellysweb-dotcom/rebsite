@@ -84,7 +84,7 @@
 .thumb img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .info {
@@ -109,8 +109,8 @@
 }
 
 .remove {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   color: var(--text-muted);
   font-size: 0.75rem;
@@ -206,3 +206,24 @@
 }
 .addOnName { font-size: 0.82rem; font-weight: 600; white-space: nowrap; }
 .addOnPrice { font-size: 0.75rem; opacity: 0.85; }
+
+.addOn { min-height: 44px; }
+.addOnsRow { overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+
+/* Touch: 44px remove target (hit area grows, the visible circle stays 32px) */
+@media (hover: none) and (pointer: coarse) {
+  .remove { position: relative; margin-top: 0; }
+  .remove::after { content: ''; position: absolute; inset: -6px; }
+  .continueBtn { min-height: 44px; }
+}
+
+@media (max-width: 480px) {
+  .addOns { padding: 0.75rem 1rem 0.15rem; }
+  .note { margin-bottom: 10px; }
+  .checkoutBtn { margin-bottom: 8px; }
+}
+/* Very short screens (landscape / 320x568): trim the pinned footer so the list keeps room */
+@media (max-height: 640px) {
+  .note { display: none; }
+  .totals { margin-bottom: 10px; }
+}

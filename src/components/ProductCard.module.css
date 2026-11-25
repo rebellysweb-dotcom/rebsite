@@ -48,10 +48,16 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
+  pointer-events: none;
   transition: var(--transition);
   backdrop-filter: blur(2px);
 }
 .card:hover .overlay { opacity: 1; }
+/* Touch has no hover: never let the overlay (or the sticky :hover) cover the product */
+@media (hover: none) {
+  .overlay { display: none; }
+  .card:hover { transform: none; box-shadow: var(--shadow-card); }
+}
 
 .overlayText {
   color: #fff;
@@ -67,9 +73,12 @@
   position: absolute;
   top: 12px;
   left: 12px;
+  right: 12px;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  pointer-events: none;
+  z-index: 6;
 }
 .tagBadge { font-size: 0.67rem; }
 
@@ -153,7 +162,7 @@
 
 /* ── Responsive ── */
 @media (max-width: 480px) {
-  .imgWrap { height: 200px; }
+  .imgWrap { height: 220px; }
   .body { padding: 16px; }
   .name { font-size: 1.05rem; }
 }

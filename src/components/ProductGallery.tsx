@@ -17,6 +17,7 @@ export default function ProductGallery({ images, alt, className }: ProductGaller
   const [imgErrors, setImgErrors] = useState<Record<number, boolean>>({});
   const [hovered, setHovered] = useState(false);
   const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number>(0);
 
   const validImages = images.filter((_, i) => !imgErrors[i]);
   const total = validImages.length;
@@ -37,12 +38,14 @@ export default function ProductGallery({ images, alt, className }: ProductGaller
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
   }, []);
 
   const onTouchEnd = useCallback((e: React.TouchEvent) => {
     if (touchStartX.current === null || total <= 1) return;
     const dx = e.changedTouches[0].clientX - touchStartX.current;
-    if (Math.abs(dx) > 40) {
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
       setIndex(i => dx < 0 ? (i + 1) % total : (i - 1 + total) % total);
     }
     touchStartX.current = null;
@@ -78,7 +81,7 @@ export default function ProductGallery({ images, alt, className }: ProductGaller
               className={styles.img}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              style={{ objectFit: 'cover' }}
+              style={{ objectFit: 'contain' }}
               placeholder="blur"
               blurDataURL={getBlurDataUrl()}
               onError={() => setImgErrors(prev => ({ ...prev, [i]: true }))}

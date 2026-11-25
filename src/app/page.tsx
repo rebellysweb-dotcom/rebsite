@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   },
 };
 
+
 export const revalidate = 300;
 
 // D1 stores booleans as 0/1 and image_urls as a JSON string.
@@ -40,7 +41,7 @@ async function FeaturedProducts() {
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '2rem' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: '2rem' }}>
       {products?.map((product) => (
         <div key={product.id} data-animate="fadeUp">
           <ProductCard product={product} />
@@ -52,7 +53,7 @@ async function FeaturedProducts() {
 
 function ProductsSkeleton() {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '2rem' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: '2rem' }}>
       {[...Array(4)].map((_, i) => (
         <div key={i} className="card" style={{ height: '350px', background: 'rgba(45,10,30,0.05)', animation: 'pulseText 1.5s infinite' }}></div>
       ))}
@@ -145,21 +146,21 @@ export default function HomePage() {
           <span className="section-tag">What We Do</span>
           <h2 className="section-title">Our <em>Services</em></h2>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-          <div className="card" style={{ padding: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '2rem' }}>
+          <div className="card" style={{ padding: 'clamp(1.25rem, 5vw, 2rem)' }}>
             <h3 style={{ fontFamily: 'var(--ff-display)', fontSize: '1.5rem', marginBottom: '1rem' }}>Weddings & Events</h3>
             <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Make your special day unforgettable with bespoke floral designs tailored to your vision.</p>
-            <Link href="/services" style={{ fontWeight: 600, color: 'var(--rose-500)' }}>Learn More →</Link>
+            <Link href="/services" style={{ fontWeight: 600, color: 'var(--rose-500)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>Learn More →</Link>
           </div>
-          <div className="card" style={{ padding: '2rem' }}>
+          <div className="card" style={{ padding: 'clamp(1.25rem, 5vw, 2rem)' }}>
             <h3 style={{ fontFamily: 'var(--ff-display)', fontSize: '1.5rem', marginBottom: '1rem' }}>Custom Arrangements</h3>
             <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Have something specific in mind? Let our expert florists bring your dream bouquet to life.</p>
-            <Link href="/contact" style={{ fontWeight: 600, color: 'var(--rose-500)' }}>Contact Us →</Link>
+            <Link href="/contact" style={{ fontWeight: 600, color: 'var(--rose-500)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>Contact Us →</Link>
           </div>
-          <div className="card" style={{ padding: '2rem' }}>
+          <div className="card" style={{ padding: 'clamp(1.25rem, 5vw, 2rem)' }}>
             <h3 style={{ fontFamily: 'var(--ff-display)', fontSize: '1.5rem', marginBottom: '1rem' }}>Local Delivery</h3>
             <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>We ensure your flowers arrive fresh and beautiful across Zalka and the surrounding Metn areas.</p>
-            <Link href="/checkout" style={{ fontWeight: 600, color: 'var(--rose-500)' }}>Order Now →</Link>
+            <Link href="/checkout" style={{ fontWeight: 600, color: 'var(--rose-500)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>Order Now →</Link>
           </div>
         </div>
       </section>
@@ -185,7 +186,7 @@ export default function HomePage() {
         <p className="section-subtitle" style={{ margin: '0 auto 2rem' }}>
           Whether it's a celebration or a simple gesture, we're here to help you say it with flowers.
         </p>
-        <Link href="/checkout" className="btn btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem' }}>Start Your Order</Link>
+        <Link href="/checkout" className="btn btn-primary" style={{ padding: '1rem clamp(1.5rem, 8vw, 3rem)', fontSize: '1.1rem' }}>Start Your Order</Link>
       </section>
     </>
   );

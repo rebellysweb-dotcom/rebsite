@@ -174,3 +174,17 @@
   .tagline { max-width: 100%; }
   .bottomInner { flex-direction: column; text-align: center; gap: 6px; }
 }
+
+/* Touch: 44px tap targets without changing the look */
+@media (hover: none) and (pointer: coarse) {
+  .linkList { gap: 0; }
+  .footerLink { padding: 10px 0; min-height: 44px; }
+  .address p { align-items: center; }
+  .address .footerLink { padding: 12px 0; }
+  .socialBtn { min-height: 44px; }
+  .logo { min-height: 44px; }
+}
+@media (max-width: 600px) {
+  .bottomInner { padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); }
+  .address .footerLink { word-break: break-all; }
+}

@@ -71,7 +71,8 @@
 .checkoutProduct img {
   width: 100%;
   aspect-ratio: 4 / 3;
-  object-fit: cover;
+  object-fit: contain;
+  background: var(--cream);
 }
 
 .checkoutProductBody {
@@ -167,11 +168,12 @@
 
 @media (max-width: 900px) {
   .checkoutHeroInner {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .checkoutGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
+  .checkoutItemsCol, .cartPanel { min-width: 0; }
   .cartPanel {
     position: static;
   }
@@ -179,6 +181,20 @@
 
 @media (max-width: 600px) {
   .checkoutProducts {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
+}
+
+@media (max-width: 480px) {
+  .checkoutHero { padding-bottom: 32px; }
+  .checkoutNote { padding: 18px 16px; }
+  .cartPanel { padding: 16px; }
+  .checkoutProductBody { padding: 16px; }
+  .cartItem { flex-wrap: wrap; }
+  .cartItem > div:first-child { flex: 1 1 140px; min-width: 0; }
+  .cartClear { min-height: 44px; min-width: 44px; padding: 0 4px; }
+}
+
+@media (hover: none) {
+  .cartClear { min-height: 44px; min-width: 44px; }
 }

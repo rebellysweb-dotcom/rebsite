@@ -173,7 +173,7 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
                   {suggestions.map(p => (
                     <div key={p.id} style={{ minWidth: '130px', background: 'var(--surface-alt, #fdf6f9)', borderRadius: '10px', padding: '10px', border: '1px solid rgba(233,30,140,.1)', flexShrink: 0 }}>
                       {p.image_url && (
-                        <img src={p.image_url} alt={p.name} style={{ width: '100%', height: '72px', objectFit: 'cover', borderRadius: '6px', marginBottom: '8px' }} loading="lazy" />
+                        <img src={p.image_url} alt={p.name} style={{ width: '100%', height: '72px', objectFit: 'contain', background: 'var(--cream)', borderRadius: '6px', marginBottom: '8px' }} loading="lazy" />
                       )}
                       <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px', lineHeight: 1.3 }}>{p.name}</p>
                       <button
@@ -195,6 +195,9 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
                 <label className="form-label" htmlFor="customer_name">Full Name <span className="required">*</span></label>
                 <input
                   id="customer_name"
+                  name="name"
+                  autoComplete="name"
+                  enterKeyHint="next"
                   type="text"
                   className="form-input"
                   required
@@ -206,6 +209,9 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
                 <label className="form-label" htmlFor="customer_phone">Phone Number (WhatsApp) <span className="required">*</span></label>
                 <input
                   id="customer_phone"
+                  name="tel"
+                  inputMode="tel"
+                  enterKeyHint="next"
                   type="tel"
                   className="form-input"
                   required
@@ -219,6 +225,9 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
                 <label className="form-label" htmlFor="customer_email">Email (for order confirmation)</label>
                 <input
                   id="customer_email"
+                  name="email"
+                  inputMode="email"
+                  enterKeyHint="next"
                   type="email"
                   className="form-input"
                   autoComplete="email"
@@ -261,6 +270,9 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
                   <label className="form-label" htmlFor="delivery_address">Delivery Address / Area</label>
                   <input
                     id="delivery_address"
+                    name="address"
+                    autoComplete="street-address"
+                    enterKeyHint="next"
                     type="text"
                     className="form-input"
                     required={true}
@@ -276,11 +288,13 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
                 <p style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--rose-700)', marginBottom: '12px', letterSpacing: '.04em', textTransform: 'uppercase' }}>
                   📅 Schedule (optional)
                 </p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '12px' }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label" htmlFor="delivery_date">Preferred Date</label>
                     <input
                       id="delivery_date"
+                      name="delivery_date"
+                      autoComplete="off"
                       type="date"
                       className="form-input"
                       min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
@@ -292,6 +306,7 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
                     <label className="form-label" htmlFor="delivery_time">Preferred Time</label>
                     <select
                       id="delivery_time"
+                      name="delivery_time"
                       className="form-input"
                       value={formData.delivery_time}
                       onChange={e => setFormData({ ...formData, delivery_time: e.target.value })}
@@ -340,6 +355,9 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
                 <label className="form-label" htmlFor="notes">Special Notes (Optional)</label>
                 <textarea
                   id="notes"
+                  name="notes"
+                  autoComplete="off"
+                  enterKeyHint="done"
                   className="form-textarea"
                   rows={3}
                   placeholder="Card message, special colors, etc."

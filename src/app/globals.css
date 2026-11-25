@@ -67,6 +67,7 @@ body {
   overflow-x: hidden;
   line-height: 1.6;
   min-height: 100vh;
+  min-height: 100svh;
 }
 
 img  { max-width: 100%; display: block; }
@@ -89,6 +90,7 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100svh;
 }
 .page-shell main { flex: 1; }
 
@@ -390,6 +392,7 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
 .petals-canvas {
   position: fixed; inset: 0;
   pointer-events: none; z-index: 0; overflow: hidden;
+  contain: strict;
 }
 .petal {
   position: absolute; 
@@ -397,6 +400,7 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
   animation: floatPetal linear infinite, swayPetal ease-in-out infinite alternate;
   opacity: .4;
   user-select: none;
+  pointer-events: none;
 }
 @keyframes floatPetal {
   0%   { transform: translateY(-10vh) rotate(0deg); }
@@ -409,7 +413,7 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
 
 /* ── OVERLAY / BACKDROP ───────────────────────────────────── */
 .overlay {
-  position: fixed; inset: 0; z-index: 200;
+  position: fixed; inset: 0; z-index: 1100; /* above the navbar (1000) */
   background: rgba(15,6,8,.6);
   backdrop-filter: blur(4px);
   animation: fadeIn .2s ease;
@@ -418,19 +422,22 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
 
 /* ── DRAWER (Cart + Whish Modal base) ─────────────────────── */
 .drawer {
-  position: fixed; top: 0; right: 0; bottom: 0; z-index: 300;
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 1110;
   width: min(420px, 100vw);
+  height: 100vh; height: 100dvh; max-height: 100dvh;
   background: #fff;
   box-shadow: -8px 0 48px rgba(45,10,30,.2);
   display: flex; flex-direction: column;
   transform: translateX(100%);
-  transition: transform .35s var(--ease);
+  visibility: hidden;
+  transition: transform .35s var(--ease), visibility 0s linear .35s;
   will-change: transform;
 }
-.drawer.open { transform: translateX(0); }
+.drawer.open { transform: translateX(0); visibility: visible; transition: transform .35s var(--ease), visibility 0s; }
 .drawer-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px 24px;
+  padding-top: calc(20px + env(safe-area-inset-top, 0px));
   border-bottom: 1px solid rgba(45,10,30,.08);
   flex-shrink: 0;
 }
@@ -443,11 +450,12 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
   transition: var(--transition);
 }
 .drawer-close:hover { background: rgba(233,30,140,.1); color: var(--rose-700); }
-.drawer-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+.drawer-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 20px 24px; }
 .drawer-body::-webkit-scrollbar { width: 4px; }
 .drawer-body::-webkit-scrollbar-thumb { background: var(--rose-300); border-radius: 4px; }
 .drawer-footer {
   padding: 20px 24px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid rgba(45,10,30,.08);
   flex-shrink: 0;
   background: var(--cream-100);
@@ -455,7 +463,7 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
 
 /* ── MODAL ────────────────────────────────────────────────── */
 .modal-wrap {
-  position: fixed; inset: 0; z-index: 400;
+  position: fixed; inset: 0; z-index: 1120;
   display: flex; align-items: center; justify-content: center; padding: 16px;
 }
 .modal {
@@ -464,6 +472,7 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
   box-shadow: var(--shadow-xl);
   width: min(520px, 100%);
   max-height: 90vh;
+  max-height: 90dvh;
   overflow-y: auto;
   animation: modalIn .3s var(--ease);
 }
@@ -506,7 +515,7 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
 
 /* ── HERO BASE ────────────────────────────────────────────── */
 .hero-section {
-  position: relative; min-height: 100svh;
+  position: relative; min-height: 100vh; min-height: 100svh;
   display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
 .hero-bg {
@@ -520,6 +529,7 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
 .hero-content {
   position: relative; z-index: 2; text-align: center;
   padding: calc(var(--nav-h) + 64px) var(--px) 80px;
+  padding-top: calc(var(--nav-h) + 64px + env(safe-area-inset-top, 0px));
   width: 100%; max-width: 860px; margin: 0 auto;
 }
 @keyframes heroFadeIn {
@@ -603,7 +613,48 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
   .admin-main { padding: 20px 16px; }
 }
 
+@media (max-width: 768px) {
+  /* 16px minimum so iOS Safari does not zoom on focus; 44px tall for thumbs */
+  .form-input, .form-select, .form-textarea { font-size: 16px; min-height: 44px; }
+  .form-textarea { min-height: 100px; }
+  .radio-pill label { min-height: 44px; }
+  .petal { font-size: .9rem !important; opacity: .25; }
+}
+
 @media (max-width: 480px) {
   .btn { min-height: 44px; padding: 11px 22px; font-size: .88rem; }
   .section-header { margin-bottom: 36px; }
+  .drawer-header { padding-left: 16px; padding-right: 16px; }
+  .drawer-body { padding: 16px; }
+  .drawer-footer { padding-left: 16px; padding-right: 16px; }
+  .hero-content { padding: calc(var(--nav-h) + 28px) var(--px) 36px; padding-top: calc(var(--nav-h) + 28px + env(safe-area-inset-top, 0px)); }
+  .hero-badge { font-size: .7rem; letter-spacing: .08em; padding: 5px 14px; margin-bottom: 16px !important; }
+  .hero-content .section-title { font-size: clamp(1.75rem, 8.6vw, 2.2rem); margin-bottom: 12px; }
+  .hero-content .section-subtitle { font-size: .95rem; line-height: 1.6; margin-bottom: 1.25rem !important; }
+  .hero-content .btn { flex: 1 1 100%; }
+}
+
+/* Short phones (e.g. 320x568): keep the hero CTA on the first screen */
+@media (max-height: 640px) and (max-width: 480px) {
+  .hero-badge { display: none; }
+  .hero-content .section-subtitle { margin-bottom: 1rem !important; }
+}
+
+/* Touch targets */
+@media (hover: none) and (pointer: coarse) {
+  .btn-sm { min-height: 44px; }
+  .qty-btn { width: 44px; height: 44px; }
+  .drawer-close { width: 44px; height: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+  [data-animate] { opacity: 1 !important; transform: none !important; }
+  .hero-badge { opacity: 1; }
+  .petals-canvas { display: none; }
 }

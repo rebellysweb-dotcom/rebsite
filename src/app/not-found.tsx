@@ -8,9 +8,9 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--cream)', padding: 'var(--px)' }}>
-      <div style={{ textAlign: 'center', background: '#fff', padding: '4rem 2rem', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)', maxWidth: '600px', width: '100%' }}>
-        <h1 style={{ fontSize: '8rem', fontFamily: 'var(--ff-display)', color: 'var(--rose-200)', lineHeight: 1, margin: 0 }}>404</h1>
+    <div style={{ minHeight: '80svh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--cream)', padding: 'var(--px)' }}>
+      <div style={{ textAlign: 'center', background: '#fff', padding: 'clamp(2rem, 8vw, 4rem) clamp(1.25rem, 5vw, 2rem)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)', maxWidth: '600px', width: '100%' }}>
+        <h1 style={{ fontSize: 'clamp(5rem, 28vw, 8rem)', fontFamily: 'var(--ff-display)', color: 'var(--rose-200)', lineHeight: 1, margin: 0 }}>404</h1>
         <h2 style={{ fontSize: '2rem', fontFamily: 'var(--ff-display)', margin: '1rem 0' }}>Oops! <em>Bloom</em> not found.</h2>
         <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '2rem' }}>
           The page you are looking for might have been moved, renamed, or no longer exists. Let's get you back on track.

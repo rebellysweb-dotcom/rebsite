@@ -57,7 +57,7 @@ export default function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', background: '#fff', padding: '2rem', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)' }}>
+    <form onSubmit={handleSubmit} noValidate className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', background: '#fff', padding: 'clamp(1.25rem, 4vw, 2rem)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)' }}>
       {globalError && (
         <div className="alert alert-error" role="alert" aria-live="assertive">
           {globalError}
@@ -68,6 +68,9 @@ export default function ContactForm() {
         <label htmlFor="name" className="form-label">Full Name <span className="required" aria-hidden="true">*</span></label>
         <input
           id="name"
+          name="name"
+          autoComplete="name"
+          enterKeyHint="next"
           type="text"
           className="form-input"
           value={formData.name}
@@ -85,6 +88,10 @@ export default function ContactForm() {
         <label htmlFor="email" className="form-label">Email Address <span className="required" aria-hidden="true">*</span></label>
         <input
           id="email"
+          name="email"
+          autoComplete="email"
+          inputMode="email"
+          enterKeyHint="next"
           type="email"
           className="form-input"
           value={formData.email}
@@ -102,6 +109,9 @@ export default function ContactForm() {
         <label htmlFor="message" className="form-label">Message <span className="required" aria-hidden="true">*</span></label>
         <textarea
           id="message"
+          name="message"
+          autoComplete="off"
+          enterKeyHint="enter"
           className="form-textarea"
           value={formData.message}
           onChange={(e) => { setFormData({...formData, message: e.target.value}); if(errors.message) setErrors({...errors, message: undefined}); }}
