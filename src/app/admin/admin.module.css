@@ -2,6 +2,94 @@
 
 /* Shell */
 .shell {
+  /* Brand palette: mulberry (#844057) on blush (#faf3f0). Token names kept from the earlier pink scale. */
+  --rose-500:   #844057;   /* brand mulberry; white text 7.4:1 */
+  --rose-400:   #a85f78;   /* decorative fills only, never text */
+  --rose-300:   #d4a3b3;
+  --rose-200:   #f0dce2;   /* very light tint: icon discs, selected pills */
+  --rose-900:   #2e1220;
+  --rose-800:   #4e2132;
+  --rose-700:   #6a2f44;   /* white text 10:1; links and outline buttons */
+  --cream:      #faf3f0;   /* blush */
+  --cream-100:  #fffcfa;   /* near-white blush */
+  --gold:       #b8946a;   /* muted warm clay accent; decorative only */
+  --gold-light: #e6d3bd;
+  --dark:       #1d0f16;
+  --dark-mid:   #2b1822;
+  --text-main:  #2b1620;   /* 15.5:1 on blush */
+  --text-muted: #6a4f5a;   /* 6.7:1 on blush, 7.3:1 on white */
+  --white:      #ffffff;
+
+  /* Typography */
+
+  /* Radii */
+  --radius-sm:  6px;
+  --radius:     10px;
+  --radius-lg:  16px;
+  --radius-xl:  999px;
+
+  /* Shadows */
+  --shadow-sm:   0 2px 12px rgba(132,64,87,.12);
+  --shadow-md:   0 8px 32px rgba(132,64,87,.18);
+  --shadow-lg:   0 20px 60px rgba(132,64,87,.22);
+  --shadow-card: 0 4px 24px rgba(46,18,32,.10);
+  --shadow-xl:   0 32px 80px rgba(46,18,32,.20);
+
+  /* Accessible warm clay for small text on white/blush (5.7:1) — --gold itself is decorative only */
+  --gold-ink:   #7a5a2e;
+  --hairline:   rgba(46,18,32,.10);
+
+  /* Status colours (admin, checkout, forms) — use these, never raw hex */
+  --success:    #2f6b4f;
+  --success-bg: #e8f3ed;
+  --warning:    #8a5a00;
+  --warning-bg: #fbf1dc;
+  --danger:     #b42318;
+  --danger-bg:  #fdecea;
+  --info:       #3a4f7a;
+  --info-bg:    #eaeef6;
+  --surface:    var(--white);
+  --surface-muted: var(--cream-100);
+
+  /* Box separation: white card on cream, visible edge, layered shadow */
+  --surface-photo:  #f6ebe8;                 /* mat behind contained product photos */
+  --surface-admin:  #f1e8e5;                 /* admin canvas, darker than the white cards */
+  --border-strong:  rgba(46,18,32,.18);      /* card / panel / drawer edges */
+  --border-input:   rgba(46,18,32,.52);      /* inputs and controls: 3.4:1 on cream and white */
+  --border-hover:   rgba(106,47,68,.55);     /* hover / selected edge */
+  --text-soft:      #55394a;                 /* small text on tinted surfaces: 9:1 */
+  --card-shadow:
+    0 1px 2px rgba(46,18,32,.08),
+    0 6px 16px -4px rgba(46,18,32,.12),
+    0 18px 36px -18px rgba(46,18,32,.18);
+  --card-shadow-hover:
+    0 2px 4px rgba(46,18,32,.08),
+    0 14px 28px -8px rgba(106,47,68,.22),
+    0 28px 52px -22px rgba(46,18,32,.26);
+  --focus-ring: 0 0 0 3px rgba(132,64,87,.30);
+  --on-accent:  var(--white);
+  --btn-shadow: rgba(132,64,87,.34);
+  --btn-shadow-hover: rgba(132,64,87,.48);
+
+  /* Motion */
+  --ease:       cubic-bezier(.4,0,.2,1);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out:    cubic-bezier(0.0, 0.0, 0.2, 1);
+  --transition: 0.3s var(--ease);
+
+  /* Effects / layering */
+  --blur-nav:   blur(12px) saturate(180%);
+  --canvas-z:   -1;
+
+  /* Scroll-reveal distance (reduced on mobile below) */
+  --reveal-d:   12px;
+
+  /* Fluid type */
+  --fs-body:    16px;
+  --fs-hero:    clamp(40px, 9vw, 84px);
+
+  /* Layout */
+
   display: flex;
   min-height: 100vh;
   background: var(--surface-admin);

@@ -2,9 +2,8 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { useCartStore } from '@/store/cart';
-import Icon from '@/components/icons/Icon';
+import { formatUsd } from '@/lib/utils';
 import styles from './CheckoutClient.module.css';
 
 interface CheckoutClientProps {
@@ -17,7 +16,6 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
   const { items, addItem, updateQuantity, removeItem, clearCart } = useCartStore();
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const [formData, setFormData] = useState({
     customer_name: '',
@@ -28,11 +26,10 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
     delivery_date: '',
     delivery_time: '',
     notes: '',
-    card_message: '',
     payment_method: 'whish' as 'whish' | 'cash',
   });
 
-  // Products not already in cart, shown as suggestions
+  // Products not already in cart — shown as suggestions
   const cartIds = useMemo(() => new Set(items.map(i => i.id)), [items]);
   const suggestions = useMemo(
     () => products.filter(p => !cartIds.has(p.id)).slice(0, 3),
@@ -42,11 +39,10 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) {
-      setError('Please add at least one item to your order.');
+      alert('Please add at least one item to your order.');
       return;
     }
 
-    setError('');
     setLoading(true);
 
     try {
@@ -55,12 +51,12 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          card_message: formData.card_message,
           items: items.map(i => ({
             id: i.id,
             name: i.name,
             quantity: i.quantity,
-            image_url: i.image_url,
+            // The orders API only accepts absolute https image URLs; local /images paths are omitted.
+            image_url: i.image_url?.startsWith('https://') ? i.image_url : null,
             is_event_product: i.is_event_product,
             event_id: i.event_id ?? null,
           })),
@@ -68,7 +64,7 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
       });
 
       const result = (await response.json()) as { error?: string; orderNumber?: string };
-      if (!response.ok) throw new Error(result.error || "Order failed");
+      if (!response.ok) throw new Error(result.error);
 
       const snapshot = {
         orderNumber: result.orderNumber,
@@ -84,57 +80,54 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
       clearCart();
       router.push(`/checkout/success?order=${result.orderNumber}`);
     } catch (err: any) {
-      setError(err.message || 'We could not send your order. Please try again.');
+      alert(err.message || 'Failed to submit order. Please try again.');
       setLoading(false);
     }
   };
 
   return (
-    <main className={styles.page}>
-      <header className={styles.hero}>
-        <div className={`container ${styles.heroInner}`}>
+    <main className="main-site checkout-page">
+      <section className={styles.checkoutHero}>
+        <div className={`container ${styles.checkoutHeroInner}`}>
           <div>
-            <p className={styles.eyebrow}>Order online</p>
-            <h1 className={styles.title}>Build your <em>flower order</em></h1>
-            <p className={styles.lede}>
-              Pick your arrangements, add your details, and send the order. You will get a confirmation email, and our team will call or message to settle the final price.
+            <h1 className="section-title">Build Your <em>Flower Order</em></h1>
+            <p className="section-subtitle" style={{ maxWidth: '680px' }}>
+              Choose your arrangements, fill in delivery details, and place your order — you'll receive a confirmation email and our team will be in touch to finalise everything.
             </p>
           </div>
-          <ol className={styles.steps} aria-label="How ordering works">
-            <li><span className={styles.stepIcon}><Icon name="bag" size={22} /></span>Add items to your order</li>
-            <li><span className={styles.stepIcon}><Icon name="card" size={22} /></span>Fill in your details</li>
-            <li><span className={styles.stepIcon}><Icon name="check" size={22} /></span>Send it and check your email</li>
-            <li><span className={styles.stepIcon}><Icon name="truck" size={22} /></span>We arrange and deliver</li>
-          </ol>
+          <div className={styles.checkoutNote}>
+            <strong>Order Process</strong>
+            <span>1. Add items to your order</span>
+            <span>2. Fill in your details</span>
+            <span>3. Place order — get email confirmation</span>
+            <span>4. Flowers arranged &amp; delivered!</span>
+          </div>
         </div>
-      </header>
+      </section>
 
-      <section className={styles.section}>
-        <div className={`container ${styles.grid}`}>
-          <div>
-            <h2 className={styles.heading}>Select items</h2>
-            <div className={styles.products}>
+      <section className={styles.checkoutSection}>
+        <div className={`container ${styles.checkoutGrid}`}>
+          {/* Products Grid (Left) */}
+          <div className={styles.checkoutItemsCol}>
+            <h2 className={styles.checkoutHeading}>Select Items</h2>
+            <div className={styles.checkoutProducts}>
               {products.map((product) => (
-                <article key={product.id} className={styles.product}>
-                  <div className={styles.productMedia}>
-                    {product.image_url && (
-                      <Image
-                        src={product.image_url}
-                        alt={product.name}
-                        fill
-                        sizes="(min-width: 1280px) 340px, (min-width: 600px) 40vw, 92vw"
-                        className={styles.productImg}
-                      />
-                    )}
-                  </div>
-                  <div className={styles.productBody}>
-                    {product.tag && <span className={styles.tag}>{product.tag}</span>}
-                    <h3 className={styles.productName}>{product.name}</h3>
-                    <p className={styles.productDesc}>{product.description}</p>
-                    <p className={styles.productNote}>Price confirmed on WhatsApp</p>
-                    <button type="button" className={`btn btn-primary ${styles.fullBtn}`} onClick={() => addItem(product)}>
-                      <Icon name="plus" size={18} />
-                      Add to order
+                <article key={product.id} className={styles.checkoutProduct}>
+                  {product.image_url && <img src={product.image_url} alt={product.name} loading="lazy" />}
+                  <div className={styles.checkoutProductBody}>
+                    <span className="card-tag" style={{ display: 'inline-block', fontSize: '.72rem', fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--rose-500)', background: 'rgba(233,30,140,.08)', padding: '3px 10px', borderRadius: 'var(--radius-xl)', marginBottom: '10px' }}>
+                      {product.tag}
+                    </span>
+                    <h3>{product.name}</h3>
+                    <p>{product.description}</p>
+                    <small>{product.price_usd != null ? formatUsd(product.price_usd) : 'Price confirmed by WhatsApp'}</small>
+                    <button 
+                      type="button" 
+                      className="btn btn-primary" 
+                      style={{ width: '100%', justifyContent: 'center' }}
+                      onClick={() => addItem(product)}
+                    >
+                      Add
                     </button>
                   </div>
                 </article>
@@ -142,57 +135,54 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
             </div>
           </div>
 
-          <aside className={styles.panel} aria-label="Your order">
-            <div className={styles.panelHead}>
-              <h2 className={styles.panelTitle}>Your order</h2>
-              <button
-                className={styles.textBtn}
-                type="button"
-                onClick={() => { if (window.confirm('Clear all items from your order?')) clearCart(); }}
-              >
-                <Icon name="trash" size={18} />
-                Clear
-              </button>
+          {/* Cart Panel (Right) */}
+          <div className={styles.cartPanel}>
+            <div className={styles.cartPanelHeader}>
+              <h2 className={styles.checkoutHeading} style={{ marginBottom: 0 }}>Your Order</h2>
+              <button className={styles.cartClear} type="button" onClick={() => { if (window.confirm('Clear all items from your order?')) clearCart(); }}>Clear</button>
             </div>
-
+            
             <div className={styles.cartItems}>
               {items.length === 0 ? (
-                <p className={styles.empty}>Your order is empty. Add an arrangement to begin.</p>
+                <p className={styles.cartEmpty}>Your order is empty. Add one or more flower collections to begin.</p>
               ) : (
                 items.map((item) => (
-                  <div key={item.id} className={styles.cartItem}>
-                    <div className={styles.cartName}>
+                  <div key={item.lineId} className={styles.cartItem}>
+                    <div>
                       <strong>{item.name}</strong>
-                      <span>Price confirmed by the shop</span>
+                      <span>Price confirmed by shop</span>
                     </div>
-                    <div className={styles.qtyRow}>
-                      <div className="qty-ctrl" role="group" aria-label={`Quantity for ${item.name}`}>
-                        <button type="button" className="qty-btn" aria-label={`Decrease quantity of ${item.name}`} disabled={item.quantity <= 1} onClick={() => updateQuantity(item.id, item.quantity - 1)}><Icon name="minus" size={18} /></button>
-                        <span className="qty-val" aria-live="polite">{item.quantity}</span>
-                        <button type="button" className="qty-btn" aria-label={`Increase quantity of ${item.name}`} onClick={() => updateQuantity(item.id, item.quantity + 1)}><Icon name="plus" size={18} /></button>
-                      </div>
-                      <button type="button" className={styles.textBtn} aria-label={`Remove ${item.name}`} onClick={() => removeItem(item.id)}><Icon name="trash" size={18} />Remove</button>
+                    <div className="qty-ctrl">
+                      <button type="button" className="qty-btn" disabled={item.quantity <= 1} onClick={() => updateQuantity(item.lineId, item.quantity - 1)}>−</button>
+                      <span className="qty-val">{item.quantity}</span>
+                      <button type="button" className="qty-btn" onClick={() => updateQuantity(item.lineId, item.quantity + 1)}>+</button>
+                      <button type="button" className="qty-btn" aria-label="Remove item" onClick={() => removeItem(item.lineId)}>✕</button>
                     </div>
                   </div>
                 ))
               )}
             </div>
 
+            {/* Product suggestions */}
             {suggestions.length > 0 && items.length > 0 && (
-              <div className={styles.suggest}>
-                <p className={styles.suggestLabel}>People also add</p>
-                <div className={styles.suggestRow}>
+              <div style={{ marginBottom: '20px' }}>
+                <p style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--rose-500)', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: '10px' }}>
+                  People also add
+                </p>
+                <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
                   {suggestions.map(p => (
-                    <div key={p.id} className={styles.suggestCard}>
+                    <div key={p.id} style={{ minWidth: '130px', background: 'var(--surface-alt, #fdf6f9)', borderRadius: '10px', padding: '10px', border: '1px solid rgba(233,30,140,.1)', flexShrink: 0 }}>
                       {p.image_url && (
-                        <div className={styles.suggestMedia}>
-                          <Image src={p.image_url} alt={p.name} fill sizes="140px" className={styles.productImg} />
-                        </div>
+                        <img src={p.image_url} alt={p.name} style={{ width: '100%', height: '72px', objectFit: 'cover', borderRadius: '6px', marginBottom: '8px' }} loading="lazy" />
                       )}
-                      <p className={styles.suggestName}>{p.name}</p>
-                      <button type="button" className={`btn btn-outline ${styles.suggestBtn}`} onClick={() => addItem(p)}>
-                        <Icon name="plus" size={18} />
-                        Add
+                      <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px', lineHeight: 1.3 }}>{p.name}</p>
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        style={{ width: '100%', fontSize: '0.75rem', padding: '6px 0', justifyContent: 'center' }}
+                        onClick={() => addItem(p)}
+                      >
+                        + Add
                       </button>
                     </div>
                   ))}
@@ -200,69 +190,112 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className={styles.form}>
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="customer_name">Full name <span className={styles.req}>required</span></label>
-                <input id="customer_name" name="name" type="text" className={styles.input} required autoComplete="name" enterKeyHint="next"
+            <form onSubmit={handleSubmit} className={styles.checkoutForm}>
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label className="form-label" htmlFor="customer_name">Full Name <span className="required">*</span></label>
+                <input
+                  id="customer_name"
+                  type="text"
+                  className="form-input"
+                  required
                   value={formData.customer_name}
-                  onChange={e => setFormData({ ...formData, customer_name: e.target.value })} />
+                  onChange={e => setFormData({ ...formData, customer_name: e.target.value })}
+                />
               </div>
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="customer_phone">Phone number, WhatsApp <span className={styles.req}>required</span></label>
-                <input id="customer_phone" name="tel" type="tel" inputMode="tel" enterKeyHint="next" className={styles.input} required autoComplete="tel"
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label className="form-label" htmlFor="customer_phone">Phone Number (WhatsApp) <span className="required">*</span></label>
+                <input
+                  id="customer_phone"
+                  type="tel"
+                  className="form-input"
+                  required
+                  autoComplete="tel"
                   placeholder="+961 XX XXX XXX"
                   value={formData.customer_phone}
-                  onChange={e => setFormData({ ...formData, customer_phone: e.target.value })} />
+                  onChange={e => setFormData({ ...formData, customer_phone: e.target.value })}
+                />
               </div>
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="customer_email">Email, for your confirmation</label>
-                <input id="customer_email" name="email" type="email" inputMode="email" enterKeyHint="next" className={styles.input} autoComplete="email" autoCapitalize="none" spellCheck={false}
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label className="form-label" htmlFor="customer_email">Email (for order confirmation)</label>
+                <input
+                  id="customer_email"
+                  type="email"
+                  className="form-input"
+                  autoComplete="email"
                   placeholder="you@example.com"
                   value={formData.customer_email}
-                  onChange={e => setFormData({ ...formData, customer_email: e.target.value })} />
+                  onChange={e => setFormData({ ...formData, customer_email: e.target.value })}
+                />
               </div>
 
-              <fieldset className={styles.fieldset}>
-                <legend className={styles.label}>Fulfillment <span className={styles.req}>required</span></legend>
-                <div className={styles.choices}>
-                  <div className={styles.choice}>
-                    <input type="radio" id="f-delivery" name="fulfillment" value="delivery" checked={formData.fulfillment === 'delivery'}
-                      onChange={() => setFormData({ ...formData, fulfillment: 'delivery' })} />
-                    <label htmlFor="f-delivery"><Icon name="truck" size={18} />Delivery</label>
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label className="form-label">Fulfillment <span className="required">*</span></label>
+                <div className="radio-group">
+                  <div className="radio-pill">
+                    <input 
+                      type="radio" 
+                      id="f-delivery" 
+                      name="fulfillment" 
+                      value="delivery" 
+                      checked={formData.fulfillment === 'delivery'}
+                      onChange={() => setFormData({ ...formData, fulfillment: 'delivery' })}
+                    />
+                    <label htmlFor="f-delivery">Delivery</label>
                   </div>
-                  <div className={styles.choice}>
-                    <input type="radio" id="f-pickup" name="fulfillment" value="pickup" checked={formData.fulfillment === 'pickup'}
-                      onChange={() => setFormData({ ...formData, fulfillment: 'pickup' })} />
-                    <label htmlFor="f-pickup"><Icon name="pin" size={18} />Store pickup</label>
+                  <div className="radio-pill">
+                    <input 
+                      type="radio" 
+                      id="f-pickup" 
+                      name="fulfillment" 
+                      value="pickup" 
+                      checked={formData.fulfillment === 'pickup'}
+                      onChange={() => setFormData({ ...formData, fulfillment: 'pickup' })}
+                    />
+                    <label htmlFor="f-pickup">Store Pickup</label>
                   </div>
                 </div>
-              </fieldset>
+              </div>
 
               {formData.fulfillment === 'delivery' && (
-                <div className={styles.field}>
-                  <label className={styles.label} htmlFor="delivery_address">Delivery address or area <span className={styles.req}>required</span></label>
-                  <input id="delivery_address" name="address" type="text" enterKeyHint="next" className={styles.input} required autoComplete="street-address"
-                    placeholder="e.g. Zalka, near the church"
+                <div className="form-group" style={{ marginBottom: '16px' }}>
+                  <label className="form-label" htmlFor="delivery_address">Delivery Address / Area</label>
+                  <input
+                    id="delivery_address"
+                    type="text"
+                    className="form-input"
+                    required={true}
+                    placeholder="e.g. Zalka, near the church..."
                     value={formData.delivery_address}
-                    onChange={e => setFormData({ ...formData, delivery_address: e.target.value })} />
+                    onChange={e => setFormData({ ...formData, delivery_address: e.target.value })}
+                  />
                 </div>
               )}
 
-              <fieldset className={styles.schedule}>
-                <legend className={styles.scheduleLegend}>Schedule, optional</legend>
-                <div className={styles.scheduleGrid}>
-                  <div className={styles.field}>
-                    <label className={styles.label} htmlFor="delivery_date">Preferred date</label>
-                    <input id="delivery_date" name="date" type="date" className={styles.input}
+              {/* Scheduling */}
+              <div style={{ marginBottom: '16px', padding: '14px 16px', background: 'rgba(233,30,140,.05)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(233,30,140,.1)' }}>
+                <p style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--rose-700)', marginBottom: '12px', letterSpacing: '.04em', textTransform: 'uppercase' }}>
+                  📅 Schedule (optional)
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" htmlFor="delivery_date">Preferred Date</label>
+                    <input
+                      id="delivery_date"
+                      type="date"
+                      className="form-input"
                       min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
                       value={formData.delivery_date}
-                      onChange={e => setFormData({ ...formData, delivery_date: e.target.value })} />
+                      onChange={e => setFormData({ ...formData, delivery_date: e.target.value })}
+                    />
                   </div>
-                  <div className={styles.field}>
-                    <label className={styles.label} htmlFor="delivery_time">Preferred time</label>
-                    <select id="delivery_time" name="time" className={styles.input}
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" htmlFor="delivery_time">Preferred Time</label>
+                    <select
+                      id="delivery_time"
+                      className="form-input"
                       value={formData.delivery_time}
-                      onChange={e => setFormData({ ...formData, delivery_time: e.target.value })}>
+                      onChange={e => setFormData({ ...formData, delivery_time: e.target.value })}
+                    >
                       <option value="">Any time</option>
                       <option value="Morning (9 AM – 12 PM)">Morning (9 AM – 12 PM)</option>
                       <option value="Afternoon (12 PM – 4 PM)">Afternoon (12 – 4 PM)</option>
@@ -270,56 +303,62 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
                     </select>
                   </div>
                 </div>
-                <p className={styles.hint}>Leave blank for the earliest delivery. The shop confirms the exact time on WhatsApp.</p>
-              </fieldset>
-
-              {items.some(i => i.id === 'addon-card') && (
-                <div className={styles.field}>
-                  <label className={styles.label} htmlFor="card_message">Card message</label>
-                  <textarea id="card_message" name="card_message" className={styles.input} rows={3} maxLength={160}
-                    placeholder="Your message for the greeting card, up to 160 characters"
-                    value={formData.card_message}
-                    onChange={e => setFormData(f => ({ ...f, card_message: e.target.value }))} />
-                  <p className={styles.hint}>{formData.card_message.length}/160</p>
-                </div>
-              )}
-
-              <fieldset className={styles.fieldset}>
-                <legend className={styles.label}>Payment method <span className={styles.req}>required</span></legend>
-                <div className={styles.choices}>
-                  <div className={styles.choice}>
-                    <input type="radio" id="pm-whish" name="payment_method" value="whish" checked={formData.payment_method === 'whish'}
-                      onChange={() => setFormData({ ...formData, payment_method: 'whish' })} />
-                    <label htmlFor="pm-whish"><Icon name="phone" size={18} />Whish</label>
-                  </div>
-                  <div className={styles.choice}>
-                    <input type="radio" id="pm-cash" name="payment_method" value="cash" checked={formData.payment_method === 'cash'}
-                      onChange={() => setFormData({ ...formData, payment_method: 'cash' })} />
-                    <label htmlFor="pm-cash"><Icon name="bag" size={18} />Cash</label>
-                  </div>
-                </div>
-              </fieldset>
-
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="notes">Special notes, optional</label>
-                <textarea id="notes" name="notes" className={styles.input} rows={3}
-                  placeholder="Colours, occasion, anything we should know"
-                  value={formData.notes}
-                  onChange={e => setFormData({ ...formData, notes: e.target.value })} />
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px' }}>
+                  Leave blank for ASAP delivery. The shop will confirm the exact time via WhatsApp.
+                </p>
               </div>
 
-              {error && <p className={styles.error} role="alert">{error}</p>}
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label className="form-label">Payment Method <span className="required">*</span></label>
+                <div className="radio-group">
+                  <div className="radio-pill">
+                    <input
+                      type="radio"
+                      id="pm-whish"
+                      name="payment_method"
+                      value="whish"
+                      checked={formData.payment_method === 'whish'}
+                      onChange={() => setFormData({ ...formData, payment_method: 'whish' })}
+                    />
+                    <label htmlFor="pm-whish">📱 Whish</label>
+                  </div>
+                  <div className="radio-pill">
+                    <input
+                      type="radio"
+                      id="pm-cash"
+                      name="payment_method"
+                      value="cash"
+                      checked={formData.payment_method === 'cash'}
+                      onChange={() => setFormData({ ...formData, payment_method: 'cash' })}
+                    />
+                    <label htmlFor="pm-cash">💵 Cash</label>
+                  </div>
+                </div>
+              </div>
 
-              <button type="submit" className={`btn btn-primary ${styles.fullBtn} ${styles.submit}`} disabled={loading || items.length === 0}>
-                {loading ? <span className="spinner" aria-label="Sending order" /> : (<>Place order<Icon name="arrow-right" size={18} motion="nudge" /></>)}
+              <div className="form-group" style={{ marginBottom: '24px' }}>
+                <label className="form-label" htmlFor="notes">Special Notes (Optional)</label>
+                <textarea
+                  id="notes"
+                  className="form-textarea"
+                  rows={3}
+                  placeholder="Card message, special colors, etc."
+                  value={formData.notes}
+                  onChange={e => setFormData({ ...formData, notes: e.target.value })}
+                ></textarea>
+              </div>
+
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', fontSize: '1rem' }} disabled={loading || items.length === 0}>
+                {loading ? <span className="spinner"></span> : 'Place Order'}
               </button>
-              <p className={styles.hint}>
-                You will receive a confirmation email. Our team will contact you to confirm the details.
+              <p style={{ marginTop: '10px', fontSize: '0.78rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+                You'll receive a confirmation email. Our team will contact you to confirm details.
               </p>
             </form>
-          </aside>
+          </div>
         </div>
       </section>
+
     </main>
   );
 }

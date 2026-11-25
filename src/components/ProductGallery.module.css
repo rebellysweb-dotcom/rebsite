@@ -3,7 +3,7 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: var(--surface-photo);
+  background: var(--cream);
 }
 
 /* Sliding track */
@@ -24,12 +24,8 @@
 .img {
   width: 100%;
   height: 100%;
-  /* the whole product, never cropped: padded inside its mat */
-  object-fit: contain;
-  padding: 5% 4%;
+  object-fit: cover;
   display: block;
-  /* photo backdrops are white: multiply lets the blush mat show through */
-  mix-blend-mode: multiply;
   transition: transform 0.6s ease;
 }
 
@@ -45,7 +41,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--surface-muted);
+  font-size: 3.5rem;
+  background: linear-gradient(135deg, var(--cream), var(--rose-200));
 }
 
 /* Arrows */
@@ -53,29 +50,30 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
+  background: rgba(255, 255, 255, 0.88);
+  border: none;
   border-radius: 50%;
   width: 30px;
   height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 1.3rem;
   line-height: 1;
-  color: var(--rose-800);
+  color: var(--rose-700);
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.2s ease, background 0.2s ease;
   z-index: 5;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   padding: 0;
+  padding-bottom: 2px; /* optical centering for › ‹ */
 }
 
 .arrowLeft  { left: 8px; }
 .arrowRight { right: 8px; }
 
-.arrow:hover { background: var(--rose-200); border-color: var(--border-hover); }
-.arrow:focus-visible { opacity: 1; outline: 2px solid var(--rose-500); outline-offset: 2px; }
+.arrow:hover { background: rgba(255, 255, 255, 1); }
 
 /* Show arrows on card hover */
 .wrap[data-hovered="true"] .arrow { opacity: 1; }
@@ -100,7 +98,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: rgba(45, 10, 30, 0.28);
+  background: rgba(255, 255, 255, 0.55);
   border: none;
   cursor: pointer;
   padding: 0;
@@ -108,26 +106,12 @@
 }
 
 .dotActive {
-  background: var(--rose-700);
+  background: #fff;
   transform: scale(1.35);
 }
 
 /* Responsive */
 @media (max-width: 480px) {
+  .wrap { height: 200px; }
   .arrow { opacity: 0.85; }
-  .img { padding: 4% 2%; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .track, .img, .arrow, .dot { transition: none; }
-  .wrap[data-hovered="true"] .img { transform: none; }
-}
-
-/* Touch: arrows and dots get 44px hit areas without growing the visuals */
-@media (hover: none), (pointer: coarse) {
-  .arrow { width: 34px; height: 34px; }
-  .arrow::after { content: ''; position: absolute; inset: -5px; }
-  .dots { gap: 12px; bottom: 6px; }
-  .dot { position: relative; }
-  .dot::after { content: ''; position: absolute; inset: -19px -7px; }
 }

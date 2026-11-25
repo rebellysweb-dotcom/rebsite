@@ -6,7 +6,7 @@ import Link from 'next/link';
 import type { Order, OrderStatus, PaymentStatus } from '@/types';
 import styles from '../../admin.module.css';
 import { orderBadge } from '../../badges';
-import Icon from '@/components/icons/Icon';
+import Icon from '@/app/admin/_ui/Icon';
 
 const STATUS_OPTIONS: OrderStatus[] = ['pending','confirmed','preparing','ready','delivered','cancelled'];
 const PAYMENT_OPTIONS: PaymentStatus[] = ['pending','confirmed','paid','failed'];

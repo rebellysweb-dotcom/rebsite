@@ -1,19 +1,16 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Suspense, type CSSProperties } from 'react';
+import { Suspense } from 'react';
 import { dbQuery } from '@/lib/db';
 import type { Product } from '@/types';
+import { SHOP } from '@/lib/shop';
 import ProductCard from '@/components/ProductCard';
-import Icon, { type IconName } from '@/components/icons/Icon';
 import { getBlurDataUrl } from '@/lib/utils';
-import { SHOP, whatsappHref } from '@/lib/shop';
-import { photo } from '@/lib/portfolio';
-import styles from './page.module.css';
 
 export const metadata: Metadata = {
   title: 'Fresh Flowers & Bouquets | Rebelly\'s Zalka',
-  description: 'Florist on Saydeh Street, Zalka, since 1993. Wedding and event decoration, bridal bouquets, hotel and home flowers, Christmas baskets, same-day delivery across the Metn. Order by WhatsApp.',
+  description: 'Welcome to Rebelly\'s Flower Shop in Zalka, Lebanon. Discover our fresh bouquets, wedding florals, and event arrangements.',
   alternates: {
     canonical: 'https://rebellys.com/',
   },
@@ -30,63 +27,25 @@ const toProduct = (r: ProductRow): Product => ({
   image_urls: JSON.parse(r.image_urls || '[]'),
 });
 
-const HEADLINE = ['Flowers', 'from', 'Zalka.'];
-
-const CATEGORIES: { name: string; href: string; icon: IconName }[] = [
-  { name: 'Christmas', href: '/collections', icon: 'christmas' },
-  { name: 'New Born',  href: '/collections', icon: 'newborn' },
-  { name: 'Bouquets',  href: '/collections', icon: 'bouquet' },
-  { name: 'Events',    href: '/portfolio',   icon: 'events' },
-];
-
-const TRUST: { label: string; icon: IconName }[] = [
-  { label: 'Since 1993',        icon: 'calendar' },
-  { label: 'Same-day delivery', icon: 'truck' },
-  { label: 'Cash on delivery',  icon: 'bag' },
-  { label: 'WhatsApp orders',   icon: 'whatsapp' },
-];
-
-const WEDDING_STRIP = [photo('wedding-03-1'), photo('wedding-11-1'), photo('wedding-10-1')];
-
-const SERVICES = [
-  {
-    name: 'Hotels and homes',
-    text: 'Entrance pieces, tall vases and table flowers for hotels and private residences.',
-    href: '/services',
-    cta: 'See our services',
-  },
-  {
-    name: 'Custom arrangements',
-    text: 'Send a photo or a colour on WhatsApp and we will build it.',
-    href: '/contact',
-    cta: 'Talk to a florist',
-  },
-  {
-    name: 'Local delivery',
-    text: 'Same-day delivery in Zalka, Antelias, Dbayeh and across the Metn.',
-    href: '/checkout',
-    cta: 'Order for delivery',
-  },
-];
-
 async function FeaturedProducts() {
   const { CATALOG_PRODUCTS } = await import('@/lib/catalog');
   let products: Product[] = CATALOG_PRODUCTS.slice(0, 4);
 
   try {
     const rows = await dbQuery<ProductRow>(
-      'SELECT * FROM products WHERE is_active = 1 ORDER BY sort_order'
+      'SELECT * FROM products WHERE is_active = 1 ORDER BY sort_order LIMIT 4'
     );
-    const dbProducts = rows.map(toProduct).slice(0, 4);
-    if (dbProducts.length) products = dbProducts;
+    if (rows.length) products = rows.map(toProduct);
   } catch {
-    // Fall back to the built-in catalog
+    // D1 unavailable: fall back to the built-in catalog
   }
 
   return (
-    <div className={styles.rail}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '2rem' }}>
       {products?.map((product) => (
-        <ProductCard key={product.id} product={product} />
+        <div key={product.id} data-animate="fadeUp">
+          <ProductCard product={product} />
+        </div>
       ))}
     </div>
   );
@@ -94,9 +53,9 @@ async function FeaturedProducts() {
 
 function ProductsSkeleton() {
   return (
-    <div className={styles.rail} aria-hidden="true">
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '2rem' }}>
       {[...Array(4)].map((_, i) => (
-        <div key={i} className={styles.skeleton} />
+        <div key={i} className="card" style={{ height: '350px', background: 'rgba(45,10,30,0.05)', animation: 'pulseText 1.5s infinite' }}></div>
       ))}
     </div>
   );
@@ -105,162 +64,129 @@ function ProductsSkeleton() {
 export default function HomePage() {
   return (
     <>
-      {/* ── HERO ─────────────────────────────────────────────── */}
-      <section id="hero" className={styles.hero} aria-labelledby="hero-title">
-        <div className={styles.heroText}>
-          <h1 id="hero-title" className={styles.headline} aria-label={HEADLINE.join(' ')}>
-            {HEADLINE.map((word, i) => (
-              <span key={word} className={styles.word} aria-hidden="true">
-                <span className={styles.wordInner} style={{ '--i': i } as CSSProperties}>
-                  {word}
-                </span>
-              </span>
-            ))}
+      {/* HERO SECTION - Now loads instantly */}
+      <section id="hero" className="hero-section" aria-label="Hero">
+        <Image
+          src="/images/shop_interior.jpg"
+          alt="Rebelly's Flower Shop interior"
+          className="hero-bg"
+          fill
+          priority
+          style={{ objectFit: 'cover' }}
+          sizes="100vw"
+          placeholder="blur"
+          blurDataURL={getBlurDataUrl('#1a0910')}
+        />
+        <div className="hero-overlay"></div>
+        <div className="hero-content" data-animate="fadeUp">
+          <div className="hero-badge" style={{ marginBottom: '1.5rem' }}>Est. {SHOP.founded} · Zalka, Lebanon</div>
+          <h1 className="section-title light">
+            Where Every Bloom<br />
+            <em>Tells a Story</em>
           </h1>
-
-          <p className={`${styles.sub} ${styles.fadeIn}`}>
-            Arranged by hand in Zalka since {SHOP.founded}. Weddings, events and bouquets, delivered across the Metn.
+          <p className="section-subtitle" style={{ color: 'var(--cream-100)', margin: '0 auto 2rem' }}>
+            Family-owned, crafted with love. Over 30 years of bringing joy
+            through the finest fresh flowers in Lebanon.
           </p>
-
-          <div className={`${styles.ctas} ${styles.fadeIn}`}>
-            <Link href="/checkout" className="btn btn-primary">
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/collections" className="btn btn-primary">Explore Collections</Link>
+            <Link href="/checkout" className="btn btn-ghost">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.68A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/>
+              </svg>
               Order Now
-              <Icon name="arrow-right" size={18} motion="nudge" />
-            </Link>
-            <Link href="/collections" className="btn btn-gold-outline">
-              <Icon name="christmas" size={18} />
-              Shop Christmas
-            </Link>
-          </div>
-        </div>
-
-        <figure className={styles.arch}>
-          <Image
-            src="/images/products/christmas-basket.jpg"
-            alt="A festive Christmas gift basket with Ksara wine, chocolates, and seasonal greenery"
-            className={styles.archImg}
-            fill
-            priority
-            sizes="(min-width: 768px) 460px, 72vw"
-            placeholder="blur"
-            blurDataURL={getBlurDataUrl()}
-          />
-        </figure>
-      </section>
-
-      {/* ── SHOP BY OCCASION ─────────────────────────────── */}
-      <nav aria-label="Shop by occasion" className={styles.catSection}>
-        <ul className={styles.catGrid}>
-          {CATEGORIES.map((cat) => (
-            <li key={cat.name}>
-              <Link href={cat.href} className={styles.catTile}>
-                <span className={styles.catIcon}><Icon name={cat.icon} size={22} /></span>
-                <span className={styles.catName}>{cat.name}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      <section className={styles.trustStrip} aria-label="Trust signals">
-        <ul className={styles.trustList}>
-          {TRUST.map((t) => (
-            <li key={t.label}>
-              <Icon name={t.icon} size={18} />
-              {t.label}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* ── STORY ────────────────────────────────────────────── */}
-      <section className={styles.section} aria-labelledby="story-title">
-        <div className={styles.story}>
-          <h2 id="story-title" className={styles.h2}>A flower story, since {SHOP.founded}</h2>
-          <div>
-            <p className={styles.storyLede}>
-              Rebelly&apos;s decorates weddings and events, and makes bridal bouquets, vase arrangements and hand bouquets, all from our shop on Saydeh Street in Zalka. Walk in, call, or send us a WhatsApp photo of what you have in mind.
-            </p>
-            <Link href="/about" className={styles.textLink}>
-              Read our story
-              <Icon name="arrow-right" size={18} motion="nudge" />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── WEDDINGS & EVENTS ───────────────────────────────── */}
-      <section className={styles.section} aria-labelledby="weddings-title">
-        <div className={styles.weddingsHead}>
-          <h2 id="weddings-title" className={styles.h2}>Weddings and events</h2>
-          <div>
-            <p className={styles.weddingsText}>
-              With event planners we have decorated weddings and events in Lebanon, the UAE, Saudi Arabia, Qatar and France.
-            </p>
-            <Link href="/portfolio" className={styles.textLink}>
-              See the portfolio
-              <Icon name="arrow-right" size={18} motion="nudge" />
-            </Link>
+      {/* FLORAL DIVIDER */}
+      <div className="floral-divider" aria-hidden="true">
+        <span>✿</span>
+        <span>✿</span>
+        <span>✿</span>
+      </div>
+
+      {/* ABOUT SECTION PREVIEW */}
+      <section className="container" style={{ padding: '5rem var(--px)' }}>
+        <div className="section-header" data-animate="fadeUp">
+          <span className="section-tag">Our Story</span>
+          <h2 className="section-title">Rooted in <em>Passion</em></h2>
+          <p className="section-subtitle">
+            What started as a small neighborhood florist has blossomed into a beloved local landmark. We pour our heart into every arrangement, treating your special moments as our own.
+          </p>
+          <div style={{ marginTop: '2rem' }}>
+            <Link href="/about" className="btn btn-outline">Read Our Full Story</Link>
           </div>
         </div>
-        <ul className={styles.weddingStrip}>
-          {WEDDING_STRIP.map((p) => (
-            <li key={p.id} className={styles.weddingPhoto}>
-              <Image
-                src={p.src}
-                alt={p.alt}
-                width={p.width}
-                height={p.height}
-                className={styles.weddingImg}
-                sizes="(min-width: 900px) 30vw, 92vw"
-              />
-            </li>
-          ))}
-        </ul>
       </section>
 
-      {/* ── FEATURED ─────────────────────────────────────────── */}
-      <section className={styles.section} aria-labelledby="featured-title">
-        <div className={styles.featuredHead}>
-          <h2 id="featured-title" className={styles.h2}>Featured collections</h2>
-          <Link href="/collections" className={styles.textLink}>
-            View all flowers
-            <Icon name="arrow-right" size={18} motion="nudge" />
-          </Link>
+      {/* COLLECTIONS PREVIEW */}
+      <section className="container" style={{ padding: '5rem var(--px)', background: 'var(--cream-100)', borderRadius: 'var(--radius-lg)' }}>
+        <div className="section-header" data-animate="fadeUp">
+          <span className="section-tag">Shop</span>
+          <h2 className="section-title">Featured <em>Collections</em></h2>
+          <p className="section-subtitle">
+            Hand-picked and freshly arranged. Perfect for gifts, home decor, or just because.
+          </p>
         </div>
-
+        
         <Suspense fallback={<ProductsSkeleton />}>
           <FeaturedProducts />
         </Suspense>
-      </section>
 
-      {/* ── SERVICES ─────────────────────────────────────────── */}
-      <section className={styles.section} aria-labelledby="services-title">
-        <h2 id="services-title" className={styles.h2}>Hotels, homes, custom orders, delivery</h2>
-        <ul className={styles.services}>
-          {SERVICES.map((s) => (
-            <li key={s.name} className={`${styles.service} stagger-item`}>
-              <h3 className={styles.serviceName}>{s.name}</h3>
-              <p className={styles.serviceText}>{s.text}</p>
-              <Link href={s.href} className={styles.textLink}>
-                {s.cta}
-                <Icon name="arrow-right" size={18} motion="nudge" />
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* ── CLOSE ────────────────────────────────────────────── */}
-      <section className={`${styles.section} ${styles.close}`} aria-labelledby="close-title">
-        <div>
-          <h2 id="close-title" className={styles.h2}>Need flowers today?</h2>
-          <p>Same-day delivery across the Metn, or message us on WhatsApp and we will put it together.</p>
-          <a href={whatsappHref()} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
-            <Icon name="whatsapp" size={18} />
-            Order on WhatsApp
-          </a>
+        <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+          <Link href="/collections" className="btn btn-primary">View All Products</Link>
         </div>
+      </section>
+
+      {/* SERVICES PREVIEW */}
+      <section className="container" style={{ padding: '5rem var(--px)' }}>
+        <div className="section-header" data-animate="fadeUp">
+          <span className="section-tag">What We Do</span>
+          <h2 className="section-title">Our <em>Services</em></h2>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+          <div className="card" style={{ padding: '2rem' }}>
+            <h3 style={{ fontFamily: 'var(--ff-display)', fontSize: '1.5rem', marginBottom: '1rem' }}>Weddings & Events</h3>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Make your special day unforgettable with bespoke floral designs tailored to your vision.</p>
+            <Link href="/services" style={{ fontWeight: 600, color: 'var(--rose-500)' }}>Learn More →</Link>
+          </div>
+          <div className="card" style={{ padding: '2rem' }}>
+            <h3 style={{ fontFamily: 'var(--ff-display)', fontSize: '1.5rem', marginBottom: '1rem' }}>Custom Arrangements</h3>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Have something specific in mind? Let our expert florists bring your dream bouquet to life.</p>
+            <Link href="/contact" style={{ fontWeight: 600, color: 'var(--rose-500)' }}>Contact Us →</Link>
+          </div>
+          <div className="card" style={{ padding: '2rem' }}>
+            <h3 style={{ fontFamily: 'var(--ff-display)', fontSize: '1.5rem', marginBottom: '1rem' }}>Local Delivery</h3>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>We ensure your flowers arrive fresh and beautiful across Zalka and the surrounding Metn areas.</p>
+            <Link href="/checkout" style={{ fontWeight: 600, color: 'var(--rose-500)' }}>Order Now →</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* REVIEWS PREVIEW */}
+      <section style={{ background: 'var(--dark)', color: 'white', padding: '6rem var(--px)' }}>
+        <div className="container" style={{ textAlign: 'center' }}>
+          <span className="section-tag light">Testimonials</span>
+          <h2 className="section-title light" style={{ marginBottom: '3rem' }}>Loved by <em>Our Community</em></h2>
+          <blockquote style={{ fontSize: '1.4rem', fontFamily: 'var(--ff-serif)', fontStyle: 'italic', maxWidth: '700px', margin: '0 auto 2rem' }}>
+            "Rebelly's never disappoints! The flowers are always so fresh, and the arrangements are absolutely stunning. They truly made my wedding day magical."
+          </blockquote>
+          <p style={{ color: 'var(--rose-300)', fontWeight: 600 }}>— Sarah M.</p>
+          <div style={{ marginTop: '3rem' }}>
+            <Link href="/reviews" className="btn btn-ghost">Read More Reviews</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ORDER CTA */}
+      <section className="container" style={{ padding: '6rem var(--px)', textAlign: 'center' }}>
+        <h2 className="section-title">Ready to bring <em>joy</em>?</h2>
+        <p className="section-subtitle" style={{ margin: '0 auto 2rem' }}>
+          Whether it's a celebration or a simple gesture, we're here to help you say it with flowers.
+        </p>
+        <Link href="/checkout" className="btn btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem' }}>Start Your Order</Link>
       </section>
     </>
   );

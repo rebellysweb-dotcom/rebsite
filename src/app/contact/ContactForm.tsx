@@ -1,8 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import styles from './ContactForm.module.css';
-import Icon from '@/components/icons/Icon';
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
@@ -59,7 +57,7 @@ export default function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className={styles.form}>
+    <form onSubmit={handleSubmit} noValidate className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', background: '#fff', padding: '2rem', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)' }}>
       {globalError && (
         <div className="alert alert-error" role="alert" aria-live="assertive">
           {globalError}
@@ -70,10 +68,7 @@ export default function ContactForm() {
         <label htmlFor="name" className="form-label">Full Name <span className="required" aria-hidden="true">*</span></label>
         <input
           id="name"
-          name="name"
           type="text"
-          autoComplete="name"
-          enterKeyHint="next"
           className="form-input"
           value={formData.name}
           onChange={(e) => { setFormData({...formData, name: e.target.value}); if(errors.name) setErrors({...errors, name: undefined}); }}
@@ -90,13 +85,7 @@ export default function ContactForm() {
         <label htmlFor="email" className="form-label">Email Address <span className="required" aria-hidden="true">*</span></label>
         <input
           id="email"
-          name="email"
           type="email"
-          inputMode="email"
-          autoComplete="email"
-          autoCapitalize="none"
-          spellCheck={false}
-          enterKeyHint="next"
           className="form-input"
           value={formData.email}
           onChange={(e) => { setFormData({...formData, email: e.target.value}); if(errors.email) setErrors({...errors, email: undefined}); }}
@@ -127,7 +116,7 @@ export default function ContactForm() {
       </div>
 
       <button type="submit" className="btn btn-primary" disabled={status === 'submitting'} aria-busy={status === 'submitting'}>
-        {status === 'submitting' ? 'Sending...' : (<>Send Message<Icon name="arrow-right" size={18} motion="nudge" /></>)}
+        {status === 'submitting' ? 'Sending...' : 'Send Message'}
       </button>
     </form>
   );

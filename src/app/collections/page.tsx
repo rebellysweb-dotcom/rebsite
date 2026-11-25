@@ -2,9 +2,8 @@ import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { dbQuery } from '@/lib/db';
 import type { Product } from '@/types';
-import { JsonLd } from '@/components/JsonLd';
 import CollectionsClient from './CollectionsClient';
-import styles from './page.module.css';
+import { JsonLd } from '@/components/JsonLd';
 import { getProductSchema, getBreadcrumbSchema } from '@/lib/structured-data';
 
 export const metadata: Metadata = {
@@ -40,17 +39,17 @@ async function ProductGrid() {
     const rows = await dbQuery<ProductRow>(
       'SELECT * FROM products WHERE is_active = 1 ORDER BY sort_order'
     );
-    const dbProducts = rows.map(toProduct);
-    products = dbProducts.length ? dbProducts : CATALOG_PRODUCTS;
+    products = rows.length ? rows.map(toProduct) : CATALOG_PRODUCTS;
   } catch {
+    // D1 unavailable: fall back to the built-in catalog
     products = CATALOG_PRODUCTS;
   }
 
-  const itemListSchema = products && products.length > 0 ? {
+  const itemListSchema = products.length > 0 ? {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: "Rebelly's Flower Collections",
-    description: 'Christmas gifts, baskets, orchids and bouquets arranged by hand in Zalka',
+    description: 'Browse our premium handcrafted floral arrangements',
     url: 'https://rebellys.com/collections',
     numberOfItems: products.length,
     itemListElement: products.map((p, i) => ({
@@ -63,11 +62,11 @@ async function ProductGrid() {
   return (
     <>
       {itemListSchema && <JsonLd data={itemListSchema} />}
-      {products && products.length > 0 ? (
+      {products.length > 0 ? (
         <CollectionsClient products={products} />
       ) : (
-        <div className={styles.empty}>
-          <p>No products available at the moment. Please check back later!</p>
+        <div style={{ textAlign: 'center', padding: '4rem', background: '#fff', borderRadius: 'var(--radius-lg)' }}>
+          <p style={{ color: 'var(--text-muted)' }}>No products available at the moment. Please check back later!</p>
         </div>
       )}
     </>
@@ -76,9 +75,9 @@ async function ProductGrid() {
 
 function GridSkeleton() {
   return (
-    <div className={styles.skeletonGrid}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2.5rem' }}>
       {[...Array(6)].map((_, i) => (
-        <div key={i} className={styles.skeleton} />
+        <div key={i} className="card" style={{ height: '400px', background: 'rgba(45,10,30,0.05)', animation: 'pulseText 1.5s infinite' }}></div>
       ))}
     </div>
   );
@@ -86,7 +85,7 @@ function GridSkeleton() {
 
 export default function CollectionsPage() {
   return (
-    <div className={styles.page}>
+    <div style={{ padding: '6rem var(--px) 8rem', background: 'var(--cream)', minHeight: '100vh' }}>
       <JsonLd data={getBreadcrumbSchema([
         { name: 'Home', url: 'https://rebellys.com' },
         { name: 'Collections', url: 'https://rebellys.com/collections' },
@@ -96,7 +95,7 @@ export default function CollectionsPage() {
           <span className="section-tag">What We Offer</span>
           <h1 className="section-title">Our Signature<br /><em>Collections</em></h1>
           <p className="section-subtitle">
-            Every arrangement is built by hand in our Zalka shop. Choose one, add it to your order, and we confirm the price on WhatsApp.
+            Handcrafted with the finest blooms, each arrangement is a work of art designed to express what words cannot.
           </p>
         </div>
 

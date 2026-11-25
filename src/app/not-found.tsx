@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import styles from './not-found.module.css';
 
 export const metadata: Metadata = {
   title: "Page Not Found | Rebelly's",
@@ -9,17 +8,16 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <div className={styles.wrap}>
-      <div className={styles.card}>
-        <p className={styles.code}>404</p>
-        <h1 className={styles.title}>This page is not here.</h1>
-        <p className={styles.text}>
-          The link may be old, or the page may have moved. The shop, the collection and our contact details are all one click away.
+    <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--cream)', padding: 'var(--px)' }}>
+      <div style={{ textAlign: 'center', background: '#fff', padding: '4rem 2rem', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)', maxWidth: '600px', width: '100%' }}>
+        <h1 style={{ fontSize: '8rem', fontFamily: 'var(--ff-display)', color: 'var(--rose-200)', lineHeight: 1, margin: 0 }}>404</h1>
+        <h2 style={{ fontSize: '2rem', fontFamily: 'var(--ff-display)', margin: '1rem 0' }}>Oops! <em>Bloom</em> not found.</h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '2rem' }}>
+          The page you are looking for might have been moved, renamed, or no longer exists. Let's get you back on track.
         </p>
-        <div className={styles.actions}>
-          <Link href="/" className="btn btn-primary">Return to home</Link>
-          <Link href="/collections" className="btn btn-outline">Browse flowers</Link>
-        </div>
+        <Link href="/" className="btn btn-primary" style={{ padding: '1rem 2rem' }}>
+          Return to Home
+        </Link>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import { dbQuery, dbQueryOne } from '@/lib/db';
 import Link from 'next/link';
 import styles from './admin.module.css';
 import { orderBadge, paymentBadge } from './badges';
-import Icon from '@/components/icons/Icon';
+import Icon from '@/app/admin/_ui/Icon';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'edge';

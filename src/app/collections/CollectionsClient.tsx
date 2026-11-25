@@ -15,7 +15,10 @@ type TabValue = (typeof TABS)[number]['value'];
 
 export default function CollectionsClient({ products }: { products: Product[] }) {
   const [active, setActive] = useState<TabValue>('all');
-  const visible = active === 'all' ? products : products.filter((p) => p.category === active);
+  // D1 rows have no category column, so fall back to the tag ("Christmas Special" / "New Born").
+  const categoryOf = (p: Product) =>
+    p.category ?? (p.tag === 'New Born' ? 'new-born' : p.tag?.startsWith('Christmas') ? 'christmas' : 'other');
+  const visible = active === 'all' ? products : products.filter((p) => categoryOf(p) === active);
 
   return (
     <>
@@ -40,7 +43,9 @@ export default function CollectionsClient({ products }: { products: Product[] })
       {visible.length > 0 ? (
         <div className={styles.grid}>
           {visible.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <div key={product.id} data-animate="fadeUp">
+              <ProductCard product={product} />
+            </div>
           ))}
         </div>
       ) : (

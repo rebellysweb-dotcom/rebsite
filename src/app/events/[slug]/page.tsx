@@ -6,7 +6,6 @@ import type { Event, EventProduct } from '@/types';
 import ProductCard from '@/components/ProductCard';
 import { JsonLd } from '@/components/JsonLd';
 import { getEventSchema } from '@/lib/structured-data';
-import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'edge';
@@ -34,10 +33,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 async function EventProductsGrid({ event }: { event: Event }) {
+  const eventId = event.id;
   try {
     const rows = await dbQuery<EventProductRow>(
       'SELECT * FROM event_products WHERE event_id = ? AND is_active = 1 ORDER BY sort_order',
-      [event.id]
+      [eventId]
     );
 
     const products = rows.map((r) => ({
@@ -50,16 +50,16 @@ async function EventProductsGrid({ event }: { event: Event }) {
       <>
         <JsonLd data={getEventSchema(event)} />
         {products.length > 0 ? (
-          <div className={styles.grid}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2.5rem' }}>
             {products.map((product) => (
               <div key={product.id} data-animate="fadeUp">
-                <ProductCard product={{ ...product, is_event_product: true }} eventId={event.id} />
+                <ProductCard product={{ ...product, is_event_product: true }} eventId={eventId} />
               </div>
             ))}
           </div>
         ) : (
-          <div className={styles.empty}>
-            <p>No items available in this menu yet.</p>
+          <div style={{ textAlign: 'center', padding: '4rem', background: '#fff', borderRadius: 'var(--radius-lg)' }}>
+            <p style={{ color: 'var(--text-muted)' }}>No items available in this menu yet.</p>
           </div>
         )}
       </>
@@ -71,9 +71,9 @@ async function EventProductsGrid({ event }: { event: Event }) {
 
 function GridSkeleton() {
   return (
-    <div className={styles.grid}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2.5rem' }}>
       {[...Array(4)].map((_, i) => (
-        <div key={i} className={styles.skeleton} />
+        <div key={i} className="card" style={{ height: '400px', background: 'rgba(45,10,30,0.05)', animation: 'pulseText 1.5s infinite' }}></div>
       ))}
     </div>
   );
@@ -93,18 +93,26 @@ export default async function EventMenuPage({ params }: { params: Promise<{ slug
     notFound();
   }
 
-  if (!event) {
+  if (!event || !event.is_active) {
     notFound();
   }
 
   return (
-    <div className={styles.page}>
+    <div style={{ padding: '6rem var(--px) 8rem', background: 'var(--cream)', minHeight: '100vh' }}>
       <div className="container">
-        <div className={styles.banner} style={event.banner_color ? { background: event.banner_color } : undefined} data-animate="fadeIn">
-          <span className={styles.kicker}>Exclusive menu</span>
-          <h1 className={styles.bannerTitle}>{event.name}</h1>
+        <div style={{
+          background: event.banner_color || 'var(--rose-500)',
+          color: '#fff',
+          padding: '3rem',
+          borderRadius: 'var(--radius-lg)',
+          textAlign: 'center',
+          marginBottom: '4rem',
+          boxShadow: 'var(--shadow-md)'
+        }} data-animate="fadeIn">
+          <span style={{ textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.85rem', fontWeight: 600, opacity: 0.9 }}>Exclusive Menu</span>
+          <h1 style={{ fontFamily: 'var(--ff-display)', fontSize: '3rem', margin: '1rem 0' }}>{event.name}</h1>
           {event.description && (
-            <p className={styles.bannerText}>
+            <p style={{ fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto', opacity: 0.9 }}>
               {event.description}
             </p>
           )}

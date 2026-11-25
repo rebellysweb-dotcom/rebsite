@@ -1,36 +1,34 @@
 import type { Metadata } from "next";
-import { Alegreya_SC, Alegreya, Rosario } from "next/font/google";
+import { Playfair_Display, Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import EventBanner from "@/components/EventBanner";
 import ScrollAnimations from "@/components/ScrollAnimations";
-import FloralCanvas from "@/components/FloralCanvas";
 import { JsonLd } from "@/components/JsonLd";
 import { getLocalBusinessSchema } from "@/lib/structured-data";
 import PostHogProvider from "@/components/PostHogProvider";
-import WhatsAppButton from '@/components/WhatsAppButton';
-import StoreOnly from '@/components/StoreOnly';
+import StoreOnly from "@/components/StoreOnly";
+import FloatingPetalsLazy from "@/components/FloatingPetalsLazy";
 
-// Wordmark and display headings: Alegreya SC (small caps). Italic accents: Alegreya. Body and UI: Rosario.
-const alegreyaSC = Alegreya_SC({
+
+const playfair = Playfair_Display({
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  variable: "--font-alegreya-sc",
+  variable: "--ff-display",
   display: "swap",
 });
 
-const alegreya = Alegreya({
+const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  style: ["normal", "italic"],
-  variable: "--font-alegreya",
+  weight: ["300", "400", "600"],
+  variable: "--ff-serif",
   display: "swap",
 });
 
-const rosario = Rosario({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-rosario",
+  variable: "--ff-sans",
   display: "swap",
 });
 
@@ -100,7 +98,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${alegreyaSC.variable} ${alegreya.variable} ${rosario.variable}`}
+      className={`${playfair.variable} ${cormorant.variable} ${inter.variable}`}
     >
       <head>
         {/* GEO meta tags — invisible to users, visible to bots */}
@@ -112,7 +110,6 @@ export default function RootLayout({
         <meta name="DC.description" content="Floral decoration, bouquets and gift arrangements in Zalka, Lebanon, since 1993" />
         <meta name="DC.subject" content="flowers, florist, Zalka, Lebanon, bouquets, weddings, events" />
         <meta name="DC.language" content="en" />
-        {/* hreflang is emitted from metadata.alternates above (en + x-default only) */}
         {/* Scroll-reveal content must stay visible when scripting is off */}
         <noscript>
           <style>{`[data-animate],[data-animate] .stagger-item{opacity:1!important;transform:none!important}`}</style>
@@ -122,7 +119,7 @@ export default function RootLayout({
         <JsonLd data={getLocalBusinessSchema()} />
         <PostHogProvider>
           <ScrollAnimations />
-          <StoreOnly><FloralCanvas /></StoreOnly>
+          <StoreOnly><FloatingPetalsLazy /></StoreOnly>
           <div className="page-shell">
             <StoreOnly>
               <EventBanner />
@@ -131,10 +128,7 @@ export default function RootLayout({
             <main>{children}</main>
             <StoreOnly><Footer /></StoreOnly>
           </div>
-          <StoreOnly>
-            <CartDrawer />
-            <WhatsAppButton />
-          </StoreOnly>
+          <StoreOnly><CartDrawer /></StoreOnly>
         </PostHogProvider>
       </body>
     </html>

@@ -1,52 +1,68 @@
-/* ProductCard.module.css — tokens live in globals.css; nothing is redefined here. */
+/* ProductCard.module.css */
 
 .card {
-  position: relative;
+  background: #fff;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--transition), box-shadow var(--transition);
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-width: 0;
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: var(--card-shadow);
-  /* scale-in entrance comes from [data-animate]; hover only moves the shadow */
-  transition: opacity .6s var(--ease-spring), transform .6s var(--ease-spring),
-              box-shadow .45s var(--ease-spring), border-color .45s var(--ease-spring);
+}
+.card:hover {
+  transform: translateY(-7px);
+  box-shadow: var(--shadow-md);
 }
 
-/* ── Photograph: 3:4, the hero of the card ── */
+/* ── Image ── */
 .imgWrap {
   position: relative;
-  aspect-ratio: 1 / 1;
+  height: 240px;
   overflow: hidden;
-  background: var(--surface-photo);
-  border-bottom: 1px solid var(--border-strong);
+  background: var(--cream);
   flex-shrink: 0;
 }
 
-/* Beat ProductGallery's own fixed heights + its 1.07/600ms hover zoom */
-.imgWrap .gallery {
+.gallery {
   position: absolute;
   inset: 0;
+}
+
+.imgFallback {
+  width: 100%;
   height: 100%;
-}
-.card .imgWrap .gallery img {
-  transition: transform .4s var(--ease-spring);
-  transform: none;
-}
-
-/* Gallery dots move to the top-right so the button owns the bottom edge */
-.imgWrap .gallery [role="tablist"] {
-  top: 14px;
-  bottom: auto;
-  left: auto;
-  right: 14px;
-  transform: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.5rem;
+  background: linear-gradient(135deg, var(--cream), var(--rose-200));
 }
 
-/* ── Tags ── */
+/* Hover overlay */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(45, 10, 30, 0.48);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: var(--transition);
+  backdrop-filter: blur(2px);
+}
+.card:hover .overlay { opacity: 1; }
+
+.overlayText {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  padding-bottom: 2px;
+}
+
+/* Badges */
 .tags {
   position: absolute;
   top: 12px;
@@ -54,174 +70,90 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  z-index: 2;
-  pointer-events: none;
 }
-.tag {
-  padding: 4px 10px;
-  border-radius: var(--radius-xl);
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
-  color: var(--rose-800);
-  font-size: .75rem;
-  font-weight: 600;
-  line-height: 1.4;
-}
-.tagGold { color: var(--gold-ink); }
-
-/* ── Add to order (sits on the photo's lower edge) ── */
-.addBtn {
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 12px;
-  z-index: 3;
-  min-height: 48px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border-radius: var(--radius-xl);
-  background: var(--surface);
-  border: 1.5px solid var(--border-input);
-  color: var(--text-main);
-  font-size: .9rem;
-  font-weight: 600;
-  box-shadow: 0 8px 24px rgba(45, 10, 30, .18);
-  -webkit-backdrop-filter: var(--blur-nav);
-  backdrop-filter: var(--blur-nav);
-  transition: background-color .25s var(--ease), color .25s var(--ease),
-              opacity .35s var(--ease-spring), transform .35s var(--ease-spring);
-}
-.addBtn:focus-visible { outline: 2px solid var(--rose-500); outline-offset: 2px; }
-.addBtn:active { transform: scale(.97); }
-
-.added {
-  background: var(--rose-700);
-  border-color: var(--rose-700);
-  color: var(--white);
-}
+.tagBadge { font-size: 0.67rem; }
 
 /* ── Body ── */
 .body {
+  padding: 20px;
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: 6px;
-  padding: 16px 16px 18px;
-  transition: transform .45s var(--ease-spring);
+  gap: 8px;
 }
 
 .name {
-  font-family: var(--ff-serif);
-  font-size: 1.35rem;
+  font-family: var(--ff-display);
+  font-size: 1.15rem;
   font-weight: 600;
-  line-height: 1.2;
   color: var(--text-main);
-  overflow-wrap: break-word;
-  min-width: 0;
+  line-height: 1.3;
 }
 
 .desc {
+  font-size: 0.87rem;
+  color: var(--text-muted);
+  font-family: var(--ff-serif);
+  line-height: 1.65;
   flex: 1;
-  font-size: .875rem;
-  line-height: 1.55;
-  color: var(--text-soft);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
+/* Price */
 .priceRow {
   display: flex;
   align-items: baseline;
-  flex-wrap: wrap;
   gap: 8px;
+  flex-wrap: wrap;
   margin-top: 4px;
 }
 .price {
-  color: var(--gold-ink);
-  font-size: 1rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: .01em;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--rose-700);
 }
 .lbp {
+  font-size: 0.78rem;
+  color: var(--text-muted);
   font-family: var(--ff-serif);
-  font-size: .85rem;
-  color: var(--text-soft);
 }
 
-/* ── Touch: no hover intent. The card answers the press (photo eases in, edge warms). ── */
-.card:active { border-color: var(--border-hover); }
-.card:active .imgWrap .gallery img { transform: scale(1.025); }
-
-/* ── Fine pointer: reveal on hover / keyboard focus ── */
-@media (hover: hover) and (pointer: fine) {
-  .addBtn {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  .card:hover .addBtn,
-  .card:focus-within .addBtn {
-    opacity: 1;
-    transform: none;
-  }
-  .addBtn:hover { background: var(--rose-700); border-color: var(--rose-700); color: var(--white); }
-  .added { opacity: 1; transform: none; }
-
-  .card:hover {
-    border-color: var(--border-hover);
-    /* shadow bloom: soft, offset, rose-tinted, never a zero-offset halo */
-    box-shadow: var(--card-shadow-hover);
-  }
-  .card:hover .imgWrap .gallery img { transform: scale(1.04); }
-  .card:hover .body { transform: translateY(-4px); }
+/* Buttons */
+.addBtn {
+  width: 100%;
+  margin-top: 8px;
+  background: var(--rose-500);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(233, 30, 140, 0.35);
+  transition: var(--transition);
+  text-decoration: none;
+}
+.addBtn:hover {
+  background: var(--rose-400);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(233, 30, 140, 0.45);
 }
 
-/* ── Compact for 2-column mobile grids (< 560px) ── */
-@media (max-width: 559px) {
-  .body { padding: 9px 10px 12px; gap: 3px; }
-  .name { font-size: .95rem; }
-  .desc { display: none; }
-  .priceRow { margin-top: 2px; }
-  .price { font-size: .88rem; }
-  .addBtn {
-    left: 6px; right: 6px; bottom: 6px;
-    min-height: 36px;
-    font-size: .78rem;
-    gap: 4px;
-    border-radius: 10px;
-  }
-  .addBtn svg { width: 14px; height: 14px; }
-  .tags { top: 6px; left: 6px; gap: 4px; }
-  .tag { padding: 3px 7px; font-size: .68rem; }
+.addedBtn {
+  width: 100%;
+  margin-top: 8px;
+  background: #059669;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(5, 150, 105, 0.35);
+  cursor: default;
+  animation: addedPop 0.3s var(--ease);
+}
+@keyframes addedPop {
+  from { transform: scale(0.97); }
+  to   { transform: scale(1); }
 }
 
-@media (min-width: 768px) {
-  .body { padding: 18px 20px 22px; }
-  .name { font-size: 1.45rem; }
-}
-
-/* ── Touch screens: the button is always visible, so give it its own strip
-   under the photo instead of covering the product ── */
-@media (hover: none), (pointer: coarse) {
-  .imgWrap {
-    --btn-strip: 64px;
-    aspect-ratio: auto;
-    padding-bottom: var(--btn-strip);
-  }
-  .imgWrap::before { content: ''; display: block; aspect-ratio: 1 / 1; }
-  .imgWrap .gallery { inset: 0 0 var(--btn-strip) 0; height: auto; }
-  .addBtn { bottom: 8px; }
-}
-@media ((hover: none) or (pointer: coarse)) and (max-width: 559px) {
-  .imgWrap { --btn-strip: 56px; }
-  .addBtn { bottom: 6px; min-height: 44px; font-size: .82rem; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .card, .body, .addBtn, .card .imgWrap .gallery img { transition: none; }
-  .card:hover .body { transform: none; }
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .imgWrap { height: 200px; }
+  .body { padding: 16px; }
+  .name { font-size: 1.05rem; }
 }

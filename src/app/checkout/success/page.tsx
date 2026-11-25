@@ -3,9 +3,8 @@
 import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { SHOP, whatsappHref } from '@/lib/shop';
 import styles from './SuccessPage.module.css';
-import Icon from '@/components/icons/Icon';
+import { SHOP, telHref, whatsappHref } from '@/lib/shop';
 
 interface OrderSnapshot {
   orderNumber?: string;
@@ -58,11 +57,9 @@ function SuccessContent() {
     return (
       <div className={styles.card}>
         <div className={styles.noOrder}>
-          <h1 className={styles.title}>No order found</h1>
-          <p>Start a new order from the collection.</p>
-          <Link href="/collections" className={`btn btn-primary ${styles.noOrderBtn}`}>
-            Browse collections
-            <Icon name="arrow-right" size={18} motion="nudge" />
+          <p>No order found.</p>
+          <Link href="/collections" className="btn btn-primary" style={{ marginTop: '20px', display: 'inline-block' }}>
+            Browse Collections
           </Link>
         </div>
       </div>
@@ -75,83 +72,109 @@ function SuccessContent() {
 
   return (
     <div className={styles.card}>
-      <p className={styles.eyebrow}>
-        <span className={styles.seal}><Icon name="check" size={18} /></span>
-        Order received
-      </p>
-      <h1 className={styles.title}>Thank you{snapshot.customerName ? `, ${snapshot.customerName}` : ''}.</h1>
-      <p className={styles.subtitle}>
-        Your order is with us. We will be in touch shortly to confirm it.
-      </p>
+      {/* Animated checkmark */}
+      <div className={styles.checkWrap}>
+        <span className={styles.checkmark}>&#10003;</span>
+      </div>
 
+      {/* Title */}
+      <h1 className={styles.title}>Order Successful!</h1>
+
+      {snapshot.customerName && (
+        <p className={styles.subtitle}>
+          Thank you, {snapshot.customerName}! Your order has been placed.
+        </p>
+      )}
+      {!snapshot.customerName && (
+        <p className={styles.subtitle}>
+          Thank you for your order. We&apos;ll be in touch shortly.
+        </p>
+      )}
+
+      {/* Order number */}
       <div className={styles.orderNumRow}>
-        <div>
-          <span className={styles.orderLabel}>Order number</span>
-          <span className={styles.orderNum}>{snapshot.orderNumber}</span>
-        </div>
-        <button type="button" className={styles.copyBtn} onClick={handleCopy}>
-          <Icon name={copied ? 'check' : 'orders'} size={18} />
-          {copied ? 'Copied' : 'Copy'}
+        <span>{snapshot.orderNumber}</span>
+        <button className={styles.copyBtn} onClick={handleCopy} title="Copy order number">
+          {copied ? 'Copied!' : 'Copy'}
         </button>
       </div>
 
+      {/* Items list */}
       {hasItems && (
-        <section className={styles.block} aria-labelledby="items-title">
-          <h2 id="items-title" className={styles.blockTitle}>Items ordered</h2>
+        <div className={styles.nextSteps} style={{ textAlign: 'left', marginTop: '28px' }}>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '12px' }}>Items Ordered</h3>
           <ol className={styles.itemsList}>
             {snapshot.items!.map((item, i) => (
               <li key={i}>
-                {item.name} <span className={styles.qty}>&times; {item.quantity}</span>
+                {item.name} &times; {item.quantity}
               </li>
             ))}
           </ol>
-        </section>
+        </div>
       )}
 
+      {/* Scheduling info */}
       {hasScheduling && (
-        <section className={styles.block} aria-labelledby="schedule-title">
-          <h2 id="schedule-title" className={styles.blockTitle}>Delivery schedule</h2>
+        <div className={styles.nextSteps} style={{ textAlign: 'left', marginTop: '16px' }}>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '8px' }}>Delivery Schedule</h3>
           {snapshot.deliveryDate && (
-            <p className={styles.meta}>Date: <strong>{snapshot.deliveryDate}</strong></p>
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
+              Date: <strong>{snapshot.deliveryDate}</strong>
+            </p>
           )}
           {snapshot.deliveryTime && (
-            <p className={styles.meta}>Time: <strong>{snapshot.deliveryTime}</strong></p>
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+              Time: <strong>{snapshot.deliveryTime}</strong>
+            </p>
           )}
-        </section>
+        </div>
       )}
 
-      <section className={styles.block} aria-labelledby="next-title">
-        <h2 id="next-title" className={styles.blockTitle}>What happens next</h2>
-        <ol className={styles.steps}>
-          <li>Check your email for your order confirmation.</li>
-          <li>Our team will contact you to confirm the final price and delivery details.</li>
-          {isWhish ? (
-            <li>
-              Pay with Whish to <strong>{SHOP.phoneDisplay}</strong> and include order{' '}
-              <strong>{snapshot.orderNumber}</strong>.
-            </li>
-          ) : (
-            <li>Pay cash on {snapshot.fulfillment === 'pickup' ? 'pickup' : 'delivery'}.</li>
-          )}
-        </ol>
-      </section>
+      {/* Payment info */}
+      <div className={styles.whishBox}>
+        <p className={styles.whishTitle}>What happens next?</p>
+        <div className={styles.whishStep}>
+          <span>1.</span>
+          <span>Check your email for your order confirmation</span>
+        </div>
+        <div className={styles.whishStep}>
+          <span>2.</span>
+          <span>Our team will contact you to confirm the final price &amp; delivery details</span>
+        </div>
+        {isWhish && (
+          <div className={styles.whishStep}>
+            <span>3.</span>
+            <span>Pay via Whish to <strong>{SHOP.phoneDisplay}</strong> — include order # <strong>{snapshot.orderNumber}</strong></span>
+          </div>
+        )}
+        {!isWhish && (
+          <div className={styles.whishStep}>
+            <span>3.</span>
+            <span>Pay cash upon {snapshot.fulfillment === 'pickup' ? 'pickup' : 'delivery'}</span>
+          </div>
+        )}
+      </div>
 
-      <p className={styles.help}>
-        Questions?{' '}
-        <a href={whatsappHref(`Hi Rebelly's, my order number is ${snapshot.orderNumber}`)} target="_blank" rel="noopener noreferrer" className={styles.whatsappLink}>
-          <Icon name="whatsapp" size={18} />
-          Message us on WhatsApp
+      {/* WhatsApp link */}
+      <div style={{ marginTop: '28px' }}>
+        <a
+          href={whatsappHref()}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.whatsappLink}
+        >
+          <span>&#128172;</span>
+          <span>Questions? Chat with us</span>
         </a>
-      </p>
+      </div>
 
+      {/* CTA buttons */}
       <div className={styles.actions}>
         <Link href="/collections" className="btn btn-primary">
-          Continue shopping
-          <Icon name="arrow-right" size={18} motion="nudge" />
+          Continue Shopping
         </Link>
         <Link href="/" className="btn btn-outline">
-          <Icon name="arrow-left" size={18} motion="nudge-back" />
-          Back to home
+          Back to Home
         </Link>
       </div>
     </div>
@@ -164,8 +187,8 @@ export default function SuccessPage() {
       <main className={styles.main}>
         <div className="container">
           <Suspense fallback={
-            <div className={styles.loading}>
-              <div className={`spinner spinner-rose ${styles.spin}`} role="status" aria-label="Loading your order" />
+            <div style={{ textAlign: 'center', padding: '4rem' }}>
+              <div className="spinner spinner-rose" style={{ margin: '0 auto' }} />
             </div>
           }>
             <SuccessContent />

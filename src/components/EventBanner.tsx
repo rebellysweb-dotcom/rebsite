@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { Event } from '@/types';
-import Icon from './icons/Icon';
 import styles from './EventBanner.module.css';
 
 export default function EventBanner() {
@@ -15,9 +14,10 @@ export default function EventBanner() {
 
     async function load() {
       try {
+        // First active event (auto-activation dates are handled by the API route)
         const res = await fetch('/api/events/active');
         if (!res.ok) return;
-        const data = await res.json() as { event?: Event | null };
+        const data = (await res.json()) as { event?: Event | null };
         if (!ignore && data?.event) setEvent(data.event);
       } catch {
         // Silently fail — banner is optional
@@ -53,7 +53,7 @@ export default function EventBanner() {
       <div className={`container ${styles.inner}`}>
         {/* Left: icon + copy */}
         <div className={styles.left}>
-          <span className={styles.lead} aria-hidden="true"><Icon name="events" size={22} /></span>
+          <span className={styles.eventIcon} aria-hidden="true">🌸</span>
           <div className={styles.copy}>
             <strong className={styles.name}>{event.name}</strong>
             {event.description && (
@@ -70,7 +70,9 @@ export default function EventBanner() {
             aria-label={`View ${event.name} special menu`}
           >
             {event.button_label ?? 'View Special Menu'}
-            <Icon name="arrow-right" size={18} motion="nudge" />
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
           </Link>
 
           <button
@@ -78,7 +80,9 @@ export default function EventBanner() {
             onClick={() => setDismissed(true)}
             aria-label={`Dismiss ${event.name} banner`}
           >
-            <Icon name="close" size={18} />
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
           </button>
         </div>
       </div>

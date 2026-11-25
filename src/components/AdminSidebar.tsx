@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import Icon, { type IconName } from './icons/Icon';
+import Icon, { type IconName } from '@/app/admin/_ui/Icon';
 import styles from './AdminSidebar.module.css';
 
 const NAV_LINKS: { href: string; label: string; exact: boolean; icon: IconName }[] = [

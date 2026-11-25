@@ -3,7 +3,6 @@
 import { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { getBlurDataUrl } from '@/lib/utils';
-import Icon from './icons/Icon';
 import styles from './ProductGallery.module.css';
 
 interface ProductGalleryProps {
@@ -52,7 +51,7 @@ export default function ProductGallery({ images, alt, className }: ProductGaller
   if (total === 0) {
     return (
       <div className={`${styles.wrap} ${className ?? ''}`}>
-        <div className={styles.fallback} aria-hidden="true" />
+        <div className={styles.fallback} aria-hidden="true">🌸</div>
       </div>
     );
   }
@@ -79,6 +78,7 @@ export default function ProductGallery({ images, alt, className }: ProductGaller
               className={styles.img}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              style={{ objectFit: 'cover' }}
               placeholder="blur"
               blurDataURL={getBlurDataUrl()}
               onError={() => setImgErrors(prev => ({ ...prev, [i]: true }))}
@@ -96,7 +96,7 @@ export default function ProductGallery({ images, alt, className }: ProductGaller
             onClick={prev}
             aria-label="Previous image"
           >
-            <Icon name="arrow-left" size={18} />
+            ‹
           </button>
           <button
             type="button"
@@ -104,7 +104,7 @@ export default function ProductGallery({ images, alt, className }: ProductGaller
             onClick={next}
             aria-label="Next image"
           >
-            <Icon name="arrow-right" size={18} />
+            ›
           </button>
 
           {/* Dots */}

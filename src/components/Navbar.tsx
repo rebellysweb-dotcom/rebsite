@@ -1,193 +1,171 @@
 'use client';
 
-import { useState, useEffect, useRef, type CSSProperties } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCartStore } from '@/store/cart';
 import NavAuth from './NavAuth';
-import LogoMark from './LogoMark';
-import Icon from './icons/Icon';
-import { SHOP, telHref } from '@/lib/shop';
 import styles from './Navbar.module.css';
 
 const NAV_LINKS = [
   { href: '/',            label: 'Home' },
   { href: '/collections', label: 'Shop' },
-  { href: '/portfolio',   label: 'Portfolio' },
   { href: '/services',    label: 'Services' },
   { href: '/about',       label: 'About' },
   { href: '/reviews',     label: 'Reviews' },
   { href: '/contact',     label: 'Contact' },
 ];
 
-const SCROLL_THRESHOLD = 60;
-
 export default function Navbar() {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const storeItems = useCartStore((s) => s.totalItems());
-  // Cart lives in localStorage: render 0 on the server and first client pass, then the real count.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
-  const totalItems = mounted ? storeItems : 0;
+  const [scrolled, setScrolled]   = useState(false);
+  const [menuOpen, setMenuOpen]   = useState(false);
+  const totalItems = useCartStore((s) => s.totalItems());
   const toggleCart = useCartStore((s) => s.toggleCart);
-  const burgerRef = useRef<HTMLButtonElement>(null);
-  const firstLinkRef = useRef<HTMLAnchorElement>(null);
-  const menuRef = useRef<HTMLElement>(null);
 
-  // Closed menu is inert: unreachable by Tab and screen readers.
-  // (Set via the DOM because React 18 has no `inert` prop.)
-  useEffect(() => {
-    const el = menuRef.current as (HTMLElement & { inert?: boolean }) | null;
-    if (el) el.inert = !menuOpen;
-  }, [menuOpen]);
+  const throttle = (fn: () => void, delay: number) => {
+    let last = 0;
+    return () => {
+      const now = Date.now();
+      if (now - last >= delay) {
+        last = now;
+        fn();
+      }
+    };
+  };
 
-  // Scroll state: one rAF-batched passive listener
+  const handleScroll = useCallback(
+    throttle(() => {
+      setScrolled(window.scrollY > 20);
+    }, 100),
+    []
+  );
+
   useEffect(() => {
-    let raf = 0;
-    const read = () => { raf = 0; setScrolled(window.scrollY > SCROLL_THRESHOLD); };
-    const onScroll = () => { if (!raf) raf = requestAnimationFrame(read); };
-    read();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => { window.removeEventListener('scroll', onScroll); if (raf) cancelAnimationFrame(raf); };
-  }, []);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
 
   // Close mobile menu on route change
   useEffect(() => { setMenuOpen(false); }, [pathname]);
 
-  // Lock scroll, move focus in, close on Escape, return focus on close
+  // Lock body scroll when menu open
   useEffect(() => {
-    if (!menuOpen) return;
-    const burger = burgerRef.current;
-    document.body.style.overflow = 'hidden';
-    const focusTimer = window.setTimeout(() => firstLinkRef.current?.focus(), 60);
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
-    window.addEventListener('keydown', onKey);
-    return () => {
-      document.body.style.overflow = '';
-      window.clearTimeout(focusTimer);
-      window.removeEventListener('keydown', onKey);
-      burger?.focus({ preventScroll: true });
-    };
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
   }, [menuOpen]);
 
-  // Close the menu if the viewport grows past the mobile breakpoint
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 901px)');
-    const onChange = () => { if (mq.matches) setMenuOpen(false); };
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
-
   const isHome = pathname === '/';
-  const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname?.startsWith(href));
 
   return (
     <>
       <header
         className={[
           styles.navbar,
-          scrolled || !isHome ? styles.glass : '',
-          menuOpen ? styles.menuIsOpen : '',
+          scrolled ? styles.scrolled : '',
+          !isHome ? styles.solid : '',
         ].join(' ')}
+        aria-label="Site navigation"
       >
         <div className={styles.inner}>
-          <Link href="/" className={styles.logo} aria-label="Rebelly's, home">
-            <LogoMark size={28} className={styles.logoMark} />
+          {/* Logo */}
+          <Link href="/" className={styles.logo} aria-label="Rebelly's Home">
+            <span className={styles.logoFlower} aria-hidden="true">✿</span>
             <span className={styles.logoText}>Rebelly&apos;s</span>
           </Link>
 
-          <nav className={styles.links} aria-label="Main">
+          {/* Desktop nav */}
+          <nav className={styles.links} aria-label="Main menu">
             {NAV_LINKS.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
-                className={[styles.link, isActive(href) ? styles.active : ''].join(' ')}
-                aria-current={isActive(href) ? 'page' : undefined}
+                className={[
+                  styles.link,
+                  pathname === href ? styles.active : '',
+                ].join(' ')}
               >
                 {label}
               </Link>
             ))}
           </nav>
 
+          {/* Right actions */}
           <div className={styles.actions}>
+            {/* Auth (desktop) */}
             <span className={styles.authSlot}>
               <NavAuth />
             </span>
 
+            {/* Cart toggle */}
             <button
               id="nav-cart-btn"
-              type="button"
               className={styles.cartBtn}
               onClick={toggleCart}
-              aria-label={`Open cart, ${totalItems} ${totalItems === 1 ? 'item' : 'items'}`}
+              aria-label={`Open cart (${totalItems} items)`}
             >
-              <Icon name="bag" size={18} className={styles.cartIcon} key={totalItems} />
-              <span className={styles.cartWord}>Cart</span>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 001.98 1.61h9.72a2 2 0 001.97-1.61L23 6H6"/>
+              </svg>
               {totalItems > 0 && (
-                <span className={styles.badge} aria-hidden="true">
+                <span className={styles.badge} aria-live="polite">
                   {totalItems > 99 ? '99+' : totalItems}
                 </span>
               )}
             </button>
 
+            {/* Order CTA — desktop */}
             <Link href="/checkout" className={`${styles.cta} btn btn-primary`}>
-              Order Now
-              <Icon name="arrow-right" size={18} motion="nudge" />
+              <span>Order Now</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
             </Link>
 
+            {/* Mobile hamburger */}
             <button
-              ref={burgerRef}
               id="nav-hamburger"
-              type="button"
               className={styles.hamburger}
               onClick={() => setMenuOpen((v) => !v)}
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={menuOpen}
-              aria-controls="mobile-menu"
             >
-              <Icon name={menuOpen ? 'close' : 'menu'} size={18} />
-              <span className={styles.menuWord}>{menuOpen ? 'Close' : 'Menu'}</span>
+              <span className={menuOpen ? styles.barTop   : ''} />
+              <span className={menuOpen ? styles.barMid   : ''} />
+              <span className={menuOpen ? styles.barBot   : ''} />
             </button>
           </div>
         </div>
       </header>
 
-      {/* Full-screen mobile menu: a translucent sheet that blurs the page behind it */}
+      {/* Mobile menu */}
+      {menuOpen && (
+        <div className={styles.mobileBackdrop} onClick={() => setMenuOpen(false)} aria-hidden="true" />
+      )}
       <nav
-        id="mobile-menu"
         className={[styles.mobileMenu, menuOpen ? styles.mobileOpen : ''].join(' ')}
-        aria-label="Mobile"
+        aria-label="Mobile menu"
         aria-hidden={!menuOpen}
-        ref={menuRef}
+        {...(!menuOpen ? { inert: true } : {})}
       >
-        <ul className={styles.mobileList}>
-          {NAV_LINKS.map(({ href, label }, i) => (
-            <li key={href} style={{ '--i': i } as CSSProperties}>
-              <Link
-                ref={i === 0 ? firstLinkRef : undefined}
-                href={href}
-                className={[styles.mobileLink, isActive(href) ? styles.mobileLinkActive : ''].join(' ')}
-                aria-current={isActive(href) ? 'page' : undefined}
-              >
-                {label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-
-        <div className={styles.mobileFoot} style={{ '--i': NAV_LINKS.length } as CSSProperties}>
-          <Link href="/checkout" className={`${styles.mobileCta} btn btn-primary`}>
-            Order Now
-            <Icon name="arrow-right" size={18} motion="nudge" />
+        {NAV_LINKS.map(({ href, label }) => (
+          <Link
+            key={href}
+            href={href}
+            className={[styles.mobileLink, pathname === href ? styles.mobileLinkActive : ''].join(' ')}
+          >
+            {label}
           </Link>
-          <a href={telHref} className={styles.mobileMeta}>
-            <Icon name="phone" size={18} />
-            {SHOP.phoneDisplay}
-          </a>
-          <NavAuth mobile />
-        </div>
+        ))}
+        <Link
+          href="/checkout"
+          className={`${styles.mobileCta} btn btn-primary`}
+        >
+          🌸 Order Now
+        </Link>
+        <NavAuth mobile />
       </nav>
     </>
   );

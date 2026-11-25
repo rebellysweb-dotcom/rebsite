@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Product } from '@/types';
 import styles from '../admin.module.css';
-import Icon from '@/components/icons/Icon';
+import Icon from '@/app/admin/_ui/Icon';
 
 const EMPTY: Partial<Product> = { name:'', slug:'', tag:'', description:'', image_url:'', image_urls:[], price_usd: undefined, is_active:true, sort_order:0 };
 

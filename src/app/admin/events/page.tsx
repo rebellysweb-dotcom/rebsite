@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Event, EventProduct } from '@/types';
 import styles from '../admin.module.css';
-import Icon from '@/components/icons/Icon';
+import Icon from '@/app/admin/_ui/Icon';
 
 // banner_color feeds <input type="color">, which only accepts a hex value.
 const EMPTY_EVENT = { name:'', slug:'', description:'', banner_color:'#844057', button_label:'', banner_image_url:'', is_active:false, auto_activate_from:'', auto_deactivate_at:'' };
