@@ -16,7 +16,6 @@ export const metadata: Metadata = {
   },
 };
 
-export const runtime = 'edge';
 export const revalidate = 300;
 
 // D1 stores booleans as 0/1 and image_urls as a JSON string.

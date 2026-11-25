@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
+import { isAllowedImageUrl } from '@/lib/images';
 import { dbQueryOne, dbRun } from '@/lib/db';
-import { requireAdmin } from '@/lib/auth/session';
-import { RLS } from '@cloudflare/rls-policies';
+import { guardAdmin } from '@/lib/auth/session';
+import { readJsonBody } from '@/lib/http';
 
-export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -55,41 +55,6 @@ function toProduct(row: ProductRow) {
   return { ...row, image_urls: parseImageUrls(row.image_urls), is_active: !!row.is_active };
 }
 
-function isAllowedImageUrl(url: string): boolean {
-  try {
-    const u = new URL(url);
-    return (
-      u.protocol === 'https:' &&
-      (u.hostname.endsWith('.supabase.co') || u.hostname === 'lh3.googleusercontent.com')
-    );
-  } catch {
-    return false;
-  }
-}
-
-async function readJsonObject(request: Request): Promise<Record<string, unknown> | null> {
-  try {
-    const parsed: unknown = await request.json();
-    return parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)
-      ? (parsed as Record<string, unknown>)
-      : null;
-  } catch {
-    return null;
-  }
-}
-
-// Authentication comes from the verified Better Auth session, not from request headers.
-// The role check goes through the RLS policy.
-async function guardAdmin(request: Request): Promise<NextResponse | null> {
-  const auth = await requireAdmin(request);
-  if (auth.status !== 200) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
-  }
-  if (!RLS.canWriteAdminContent(auth.user.role).allowed) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-  return null;
-}
 
 async function loadProduct(id: string) {
   const row = await dbQueryOne<ProductRow>(`SELECT ${PRODUCT_COLUMNS} FROM products WHERE id = ?`, [id]);
@@ -136,10 +101,9 @@ export async function PATCH(
       return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
     }
 
-    const body = await readJsonObject(request);
-    if (!body) {
-      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
-    }
+    const parsed = await readJsonBody(request);
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.body;
 
     // Column names come only from this fixed allowlist, never from the request.
     const ALLOWED_FIELDS = ['name', 'slug', 'tag', 'description', 'image_url', 'price_usd', 'is_active', 'sort_order'] as const;
@@ -163,8 +127,26 @@ export async function PATCH(
     }
 
     const imageUrl = body.image_url;
-    if (imageUrl && (typeof imageUrl !== 'string' || !isAllowedImageUrl(imageUrl))) {
+    if (imageUrl != null && imageUrl !== '' && !isAllowedImageUrl(imageUrl)) {
       return NextResponse.json({ error: 'image_url must be from an allowed domain' }, { status: 400 });
+    }
+
+    const price = body.price_usd;
+    if (price != null && !(typeof price === 'number' && Number.isFinite(price) && price >= 0 && price <= 100000)) {
+      return NextResponse.json({ error: 'price_usd must be a number between 0 and 100000' }, { status: 400 });
+    }
+    const sortOrder = body.sort_order;
+    if (sortOrder != null && !(typeof sortOrder === 'number' && Number.isInteger(sortOrder) && sortOrder >= 0 && sortOrder <= 100000)) {
+      return NextResponse.json({ error: 'sort_order must be an integer between 0 and 100000' }, { status: 400 });
+    }
+    for (const [field, max] of [['name', 200], ['tag', 100], ['description', 5000]] as const) {
+      const v = body[field];
+      if (v != null && (typeof v !== 'string' || v.length > max)) {
+        return NextResponse.json({ error: `${field} must be a string up to ${max} characters` }, { status: 400 });
+      }
+    }
+    if (body.name !== undefined && (body.name === null || body.name === '')) {
+      return NextResponse.json({ error: 'name cannot be empty' }, { status: 400 });
     }
 
     sets.push("updated_at = datetime('now')");

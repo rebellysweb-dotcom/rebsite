@@ -24,7 +24,7 @@ export default function AdminSettingsPage() {
     setLoading(true);
     try {
       const res = await fetch('/api/admin/settings');
-      const data = await res.json();
+      const data = (await res.json()) as { settings?: Partial<SiteSettings> };
       if (data.settings) {
         setSettings(data.settings);
         setOriginal(data.settings);
@@ -49,7 +49,7 @@ export default function AdminSettingsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings),
       });
-      const data = await res.json();
+      const data = (await res.json()) as { settings?: Partial<SiteSettings>; error?: string };
       if (data.settings) {
         setSettings(data.settings);
         setOriginal(data.settings);

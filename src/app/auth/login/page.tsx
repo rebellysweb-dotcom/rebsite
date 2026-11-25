@@ -9,12 +9,34 @@ export const metadata: Metadata = {
   description: 'Log in to your Rebelly\'s account to manage your orders and profile.',
 };
 
+// True for backslashes and ASCII control characters (tab, CR, LF, NUL, DEL ...).
+function hasUnsafeChar(s: string): boolean {
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    if (c <= 0x1f || c === 0x7f || c === 0x5c) return true;
+  }
+  return false;
+}
+
+// Server-side: no window, so resolve against a fixed dummy origin and require it to stay unchanged.
+// Backslashes, tabs, CR/LF and other control characters are rejected before parsing.
 function safeRedirect(value: string | string[] | undefined): string {
   const raw = Array.isArray(value) ? value[0] : value;
-  if (typeof raw === 'string' && raw.startsWith('/') && !raw.startsWith('//')) {
-    return raw;
+  const fallback = '/account';
+  if (typeof raw !== 'string' || raw.length > 2000) return fallback;
+  if (hasUnsafeChar(raw) || !raw.startsWith('/') || raw.startsWith('//')) return fallback;
+  // Browsers strip tab/CR/LF even when percent-encoded ("/%09/evil.test" becomes "//evil.test"), so check the decoded form too.
+  let decoded: string;
+  try { decoded = decodeURIComponent(raw); } catch { return fallback; }
+  if (hasUnsafeChar(decoded) || decoded.startsWith('//')) return fallback;
+  const base = 'http://redirect.invalid';
+  try {
+    const url = new URL(raw, base);
+    if (url.origin !== base) return fallback;
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return fallback;
   }
-  return '/account';
 }
 
 export default async function LoginPage({

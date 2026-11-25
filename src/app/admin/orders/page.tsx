@@ -32,7 +32,7 @@ export default function AdminOrdersPage() {
         ...(search && { search }),
       });
       const res = await fetch(`/api/admin/orders?${params}`);
-      const data = await res.json();
+      const data = (await res.json()) as { orders?: Order[]; total?: number; pages?: number };
       setOrders(data.orders ?? []);
       setTotal(data.total ?? 0);
       setPages(data.pages ?? 1);
@@ -53,7 +53,7 @@ export default function AdminOrdersPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
       });
-      const data = await res.json();
+      const data = (await res.json()) as { order?: Partial<Order> };
       if (data.order) {
         setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, ...data.order } : o)));
       }

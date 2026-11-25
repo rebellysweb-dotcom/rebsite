@@ -8,7 +8,6 @@ import { JsonLd } from '@/components/JsonLd';
 import { getEventSchema } from '@/lib/structured-data';
 
 export const dynamic = 'force-dynamic';
-export const runtime = 'edge';
 
 // D1 stores booleans as 0/1 and image_urls as a JSON string.
 type EventRow = Omit<Event, 'is_active' | 'event_products'> & { is_active: number };

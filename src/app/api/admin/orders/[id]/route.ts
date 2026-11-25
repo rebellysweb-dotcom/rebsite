@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import { dbQuery, dbQueryOne, dbRun } from '@/lib/db';
-import { requireAdmin } from '@/lib/auth/session';
-import { RLS } from '@cloudflare/rls-policies';
+import { guardAdmin } from '@/lib/auth/session';
 
-export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -72,18 +70,6 @@ function toOrder(row: OrderRow, items: OrderItemRow[]) {
   };
 }
 
-// Authentication comes from the verified Better Auth session, not from request headers.
-// The role check goes through the RLS policy.
-async function guardAdmin(request: Request): Promise<NextResponse | null> {
-  const auth = await requireAdmin(request);
-  if (auth.status !== 200) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
-  }
-  if (!RLS.canWriteAdminContent(auth.user.role).allowed) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-  return null;
-}
 
 async function readJsonObject(request: Request): Promise<Record<string, unknown> | null> {
   try {

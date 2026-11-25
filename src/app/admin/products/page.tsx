@@ -25,7 +25,7 @@ export default function AdminProductsPage() {
   const load = useCallback(async () => {
     setLoading(true);
     const r = await fetch('/api/admin/products');
-    const d = await r.json();
+    const d = (await r.json()) as { products?: Product[] };
     setProducts(d.products ?? []);
     setLoading(false);
   }, []);

@@ -4,10 +4,30 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './login.module.css';
 
-// Only same-origin relative paths. Blocks protocol-relative and absolute URLs.
+// True for backslashes and ASCII control characters (tab, CR, LF, NUL, DEL ...).
+function hasUnsafeChar(s: string): boolean {
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    if (c <= 0x1f || c === 0x7f || c === 0x5c) return true;
+  }
+  return false;
+}
+
+// Only same-origin paths. Parsed with URL so tricks like "/%09/evil.test" or "/\evil.test" resolve
+// to another origin and are rejected. Control characters and backslashes are refused outright.
 function safeRedirect(value: string | null): string {
-  if (value && value.startsWith('/') && !value.startsWith('//')) return value;
-  return '/admin';
+  if (!value || hasUnsafeChar(value) || !value.startsWith('/') || value.startsWith('//')) return '/admin';
+  // Browsers strip tab/CR/LF even when percent-encoded ("/%09/evil.test" becomes "//evil.test"), so check the decoded form too.
+  let decoded: string;
+  try { decoded = decodeURIComponent(value); } catch { return '/admin'; }
+  if (hasUnsafeChar(decoded) || decoded.startsWith('//')) return '/admin';
+  try {
+    const url = new URL(value, window.location.origin);
+    if (url.origin !== window.location.origin) return '/admin';
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return '/admin';
+  }
 }
 
 export default function AdminLoginPage() {

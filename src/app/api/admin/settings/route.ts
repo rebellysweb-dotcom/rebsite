@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { dbQueryOne, dbRun } from '@/lib/db';
-import { RLS } from '../../../../../cloudflare/rls-policies';
+import { guardAdmin } from '@/lib/auth/session';
+import { readJsonBody, isValidEmail } from '@/lib/http';
 
-export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 const SETTINGS_COLUMNS =
@@ -15,6 +15,12 @@ const ALLOWED_FIELDS = [
 ] as const;
 
 type AllowedField = (typeof ALLOWED_FIELDS)[number];
+
+const PHONE_RE = /^\d{7,15}$/;
+const MAX_LEN: Record<AllowedField, number> = {
+  lbp_rate: 20, whish_number: 15, whatsapp_number: 15,
+  shop_phone: 30, shop_address: 300, shop_email: 254,
+};
 
 interface SettingsRow {
   id: string;
@@ -31,13 +37,8 @@ interface SettingsRow {
 // GET /api/admin/settings
 export async function GET(request: Request) {
   try {
-    // TODO(auth): x-user-role is a stub. Replace with the role from the verified JWT once auth lands;
-    // middleware must strip and overwrite any client-supplied x-user-role, or this check is spoofable.
-    const userRole = request.headers.get('x-user-role') ?? 'customer';
-    // Same admin-only gate the Supabase requireAdmin() enforced on this GET.
-    if (!RLS.canWriteAdminContent(userRole).allowed) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    const denied = await guardAdmin(request);
+    if (denied) return denied;
 
     // site_settings is a singleton row
     const settings = await dbQueryOne<SettingsRow>(
@@ -58,23 +59,46 @@ export async function GET(request: Request) {
 // PATCH /api/admin/settings
 export async function PATCH(request: Request) {
   try {
-    // TODO(auth): x-user-role is a stub. See GET above.
-    const userRole = request.headers.get('x-user-role') ?? 'customer';
-    if (!RLS.canWriteAdminContent(userRole).allowed) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    const denied = await guardAdmin(request);
+    if (denied) return denied;
 
-    const body = await request.json();
+    const parsed = await readJsonBody(request);
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.body;
 
     const updates: Partial<Record<AllowedField, string | number>> = {};
     for (const field of ALLOWED_FIELDS) {
-      if (field in body) {
-        const value = body[field];
-        if (typeof value !== 'string' && typeof value !== 'number') {
-          return NextResponse.json({ error: `${field} must be a string or number` }, { status: 400 });
-        }
-        updates[field] = value;
+      if (!(field in body)) continue;
+      const value = body[field];
+      if (typeof value !== 'string' && typeof value !== 'number') {
+        return NextResponse.json({ error: `${field} must be a string or number` }, { status: 400 });
       }
+      const text = String(value).trim();
+      if (typeof value === 'number' && !Number.isFinite(value)) {
+        return NextResponse.json({ error: `${field} must be a finite number` }, { status: 400 });
+      }
+      if (text.length > MAX_LEN[field]) {
+        return NextResponse.json({ error: `${field} must be at most ${MAX_LEN[field]} characters` }, { status: 400 });
+      }
+      if (field === 'lbp_rate') {
+        const rate = Number(text);
+        if (!Number.isFinite(rate) || rate <= 0 || rate > 100_000_000) {
+          return NextResponse.json({ error: 'lbp_rate must be a positive number' }, { status: 400 });
+        }
+      }
+      let stored: string | number = typeof value === 'number' ? value : text;
+      if (field === 'whatsapp_number' || field === 'whish_number') {
+        // Accept "+961 76-585-028" style input, store digits only (7-15, no + prefix).
+        const digits = text.replace(/[\s\-()]/g, '').replace(/^\+/, '');
+        stored = digits;
+        if (!(field === 'whish_number' && digits === '') && !PHONE_RE.test(digits)) {
+          return NextResponse.json({ error: `${field} must be digits only, 7-15 chars` }, { status: 400 });
+        }
+      }
+      if (field === 'shop_email' && text !== '' && !isValidEmail(text)) {
+        return NextResponse.json({ error: 'shop_email is invalid' }, { status: 400 });
+      }
+      updates[field] = stored;
     }
 
     const columns = (Object.keys(updates) as AllowedField[]);
@@ -82,13 +106,8 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
     }
 
-    const PHONE_RE = /^\d{7,15}$/
-    if ('whatsapp_number' in body && !PHONE_RE.test(String(body.whatsapp_number))) {
-      return NextResponse.json({ error: 'whatsapp_number must be digits only, 7-15 chars' }, { status: 400 });
-    }
-
     // Column names come only from ALLOWED_FIELDS; values are bound parameters.
-    // The Supabase `.eq('id', 1)` does not apply: D1 ids are TEXT UUIDs, so target the singleton row by subquery.
+    // D1 ids are TEXT UUIDs, so target the singleton row by subquery.
     const setSql = columns.map((c) => `${c} = ?`).join(', ');
     const result = await dbRun(
       `UPDATE site_settings SET ${setSql}, updated_at = datetime('now') WHERE id = (SELECT id FROM site_settings LIMIT 1)`,

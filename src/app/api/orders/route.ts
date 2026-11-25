@@ -1,31 +1,15 @@
 import { NextResponse } from 'next/server';
 import { sendOrderConfirmationEmail, sendAdminNewOrderEmail } from '@/lib/resend';
 import { dbQuery, dbQueryOne, dbRun } from '@/lib/db';
-import { RLS } from '../../../../cloudflare/rls-policies';
-import type { Order } from '@/types';
+import { RLS } from '@cloudflare/rls-policies';
+import { getSessionUserId } from '@/lib/auth/session';
+import { readJsonBody, isValidEmail, stripControl } from '@/lib/http';
+import { hit, rateLimitIp } from '@/lib/rate-limit';
+import { isAllowedImageUrl } from '@/lib/images';
+import { ADD_ONS } from '@/lib/catalog';
+import type { Order, OrderItem } from '@/types';
 
-export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
-
-// TODO: Replace with Upstash Redis for persistence across Lambda cold starts
-// npm i @upstash/ratelimit @upstash/redis + set UPSTASH_REDIS_REST_URL/TOKEN in Vercel env
-// Simple in-memory rate limiter — ephemeral per Lambda warm instance.
-// Prevents trivial scripted abuse; a persistent store (Upstash KV) would cover cold starts.
-const _ipBucket = new Map<string, { count: number; ts: number }>();
-const RATE_MAX = 5;
-const RATE_WINDOW_MS = 60_000;
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const slot = _ipBucket.get(ip);
-  if (!slot || now - slot.ts > RATE_WINDOW_MS) {
-    _ipBucket.set(ip, { count: 1, ts: now });
-    return true;
-  }
-  if (slot.count >= RATE_MAX) return false;
-  slot.count++;
-  return true;
-}
 
 const ORDER_COLUMNS =
   'id, order_number, user_id, customer_name, customer_email, customer_phone, fulfillment, delivery_address, delivery_area, delivery_date, delivery_time, occasion, card_message, notes, payment_method, payment_status, order_status, total_usd, whatsapp_sent, email_sent, created_at, updated_at';
@@ -40,7 +24,7 @@ function toOrder(row: OrderRow) {
   return { ...row, whatsapp_sent: !!row.whatsapp_sent, email_sent: !!row.email_sent };
 }
 
-// Random hex from the Web Crypto API (Edge-safe; replaces Node's randomBytes).
+// Random hex from the Web Crypto API (works on Workers).
 function randomHex(bytes: number): string {
   return Array.from(crypto.getRandomValues(new Uint8Array(bytes)), (b) =>
     b.toString(16).padStart(2, '0')
@@ -49,166 +33,160 @@ function randomHex(bytes: number): string {
     .toUpperCase();
 }
 
-// Optional text column: strings are kept, anything else is stored as NULL.
-const optText = (v: unknown): string | null => (typeof v === 'string' ? v : null);
+// Optional text column: strings are trimmed and length-capped, anything else is stored as NULL.
+const optText = (v: unknown, max: number): string | null =>
+  typeof v === 'string' && v.trim() !== '' ? v.trim().slice(0, max) : null;
+
+const MAX_ITEMS = 50;
+const MAX_QTY_PER_ITEM = 100;
+const MAX_TOTAL_QTY = 200;
+
+// Add-ons are stored as inactive products (hidden from the shop but orderable). Only these exact ids qualify.
+const ADD_ON_IDS: string[] = ADD_ONS.map((a) => a.id);
+
+const bad = (error: string, status = 400) => NextResponse.json({ error }, { status });
+
+interface CartLine {
+  id: string;
+  quantity: number;
+  isEvent: boolean;
+}
+
+interface CatalogRow {
+  id: string;
+  name: string;
+  price_usd: number | null;
+  image_url: string | null;
+  event_id?: string;
+}
 
 export async function POST(request: Request) {
   try {
-    // H-2: Rate limit by IP
-    const ip =
-      request.headers.get('x-real-ip') ??
-      request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
-      'unknown';
-    if (!checkRateLimit(ip)) {
-      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    // Rate limit: keyed ONLY on CF-Connecting-IP; durable (D1 counter) with optional CF binding in front.
+    if (!(await rateLimitIp(request, 'orders-min', { limit: 5, windowSec: 60 }))) {
+      return bad('Too many requests', 429);
+    }
+    if (!(await rateLimitIp(request, 'orders-hour', { limit: 30, windowSec: 3600 }))) {
+      return bad('Too many requests', 429);
     }
 
-    // Content-Type guard
-    const contentType = request.headers.get('content-type') || '';
-    if (!contentType.includes('application/json')) {
-      return NextResponse.json(
-        { error: 'Content-Type must be application/json' },
-        { status: 400 }
-      );
-    }
-
-    const body = await request.json();
-
+    const parsed = await readJsonBody(request);
+    if (!parsed.ok) return parsed.response;
     const {
-      items,
-      customer_name,
-      customer_email,
-      customer_phone,
-      fulfillment,
-      delivery_address,
-      delivery_area,
-      delivery_date,
-      delivery_time,
-      occasion,
-      card_message,
-      notes,
-      payment_method,
-      // total_usd intentionally NOT accepted from client — computed server-side (H-1)
-    } = body;
+      items, customer_name, customer_email, customer_phone, fulfillment,
+      delivery_address, delivery_area, delivery_date, delivery_time,
+      occasion, card_message, notes, payment_method,
+      // total_usd and user ids are intentionally NOT accepted from the client (computed / session-derived)
+    } = parsed.body;
 
-    // TODO(auth): x-user-id must be set by the auth middleware. Until middleware strips any
-    // client-supplied x-user-id and writes its own value, a caller can attach an order to any user.
-    const userId: string | null = request.headers.get('x-user-id') ?? null;
+    // User id comes from the Better Auth session or stays null (guest checkout).
+    const userId = await getSessionUserId(request);
     if (!RLS.canWriteOrder(userId !== null).allowed) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      return bad('Forbidden', 403);
     }
 
-    // Email validation
-    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
-    if (customer_email !== null && customer_email !== undefined) {
-      if (typeof customer_email !== 'string' || !EMAIL_RE.test(customer_email) || customer_email.length > 254) {
-        return NextResponse.json({ error: 'customer_email is invalid' }, { status: 400 })
+    if (customer_email !== null && customer_email !== undefined && customer_email !== '' && !isValidEmail(customer_email)) {
+      return bad('customer_email is invalid');
+    }
+    if (typeof customer_name !== 'string' || customer_name.trim().length < 1 || customer_name.length > 100) {
+      return bad('customer_name must be a string between 1 and 100 characters');
+    }
+    if (typeof customer_phone !== 'string' || customer_phone.trim().length < 1 || customer_phone.length > 30) {
+      return bad('customer_phone must be a string between 1 and 30 characters');
+    }
+    if (typeof fulfillment !== 'string' || !['delivery', 'pickup'].includes(fulfillment)) {
+      return bad('fulfillment must be one of: delivery, pickup');
+    }
+    if (typeof payment_method !== 'string' || !['whish', 'cash', 'card', 'transfer'].includes(payment_method)) {
+      return bad('payment_method must be one of: whish, cash, card, transfer');
+    }
+    for (const [field, value, max] of [
+      ['delivery_address', delivery_address, 300],
+      ['delivery_area', delivery_area, 100],
+      ['delivery_date', delivery_date, 32],
+      ['delivery_time', delivery_time, 50],
+      ['occasion', occasion, 100],
+      ['card_message', card_message, 500],
+      ['notes', notes, 1000],
+    ] as const) {
+      if (typeof value === 'string' && value.length > max) {
+        return bad(`${field} must be at most ${max} characters`);
       }
     }
 
-    // Input validation
-    if (typeof customer_name !== 'string' || customer_name.length < 1 || customer_name.length > 200) {
-      return NextResponse.json(
-        { error: 'customer_name must be a string between 1 and 200 characters' },
-        { status: 400 }
-      );
-    }
-    if (typeof customer_phone !== 'string' || customer_phone.length < 1 || customer_phone.length > 30) {
-      return NextResponse.json(
-        { error: 'customer_phone must be a string between 1 and 30 characters' },
-        { status: 400 }
-      );
-    }
-    if (!['delivery', 'pickup'].includes(fulfillment)) {
-      return NextResponse.json(
-        { error: 'fulfillment must be one of: delivery, pickup' },
-        { status: 400 }
-      );
-    }
-    if (!['whish', 'cash', 'card', 'transfer'].includes(payment_method)) {
-      return NextResponse.json(
-        { error: 'payment_method must be one of: whish, cash, card, transfer' },
-        { status: 400 }
-      );
-    }
-    if (!Array.isArray(items) || items.length === 0 || items.length > 50) {
-      return NextResponse.json(
-        { error: 'items must be a non-empty array with at most 50 items' },
-        { status: 400 }
-      );
-    }
-    for (const item of items) {
-      if (typeof item.id !== 'string' || !item.id) {
-        return NextResponse.json({ error: 'Each item must have a valid id' }, { status: 400 });
-      }
-      if (!Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 100) {
-        return NextResponse.json(
-          { error: 'item.quantity must be an integer between 1 and 100' },
-          { status: 400 }
-        );
-      }
-    }
-    // Validated before any write (the Supabase version wrote the order first, then rejected bad items).
-    for (const item of items) {
-      if (typeof item.name !== 'string' || item.name.length < 1 || item.name.length > 200) {
-        return NextResponse.json({ error: 'item.name must be a string between 1 and 200 characters' }, { status: 400 })
-      }
-      if (item.image_url) {
-        // Allowed: the site's own product photos (/images/...) or an https image
-        // on the configured R2 public host. Anything else is rejected.
-        const img = String(item.image_url)
-        const isLocal = /^\/images\/[A-Za-z0-9/_.-]+$/.test(img) && !img.includes('..')
-        let isR2 = false
-        const r2Host = process.env.R2_PUBLIC_HOST
-        if (!isLocal && r2Host) {
-          try {
-            const u = new URL(img)
-            isR2 = u.protocol === 'https:' && u.hostname === r2Host
-          } catch { /* not a URL */ }
-        }
-        if (!isLocal && !isR2) {
-          return NextResponse.json({ error: 'item image_url must be a site image path' }, { status: 400 })
-        }
-      }
+    if (!Array.isArray(items) || items.length === 0 || items.length > MAX_ITEMS) {
+      return bad(`items must be a non-empty array with at most ${MAX_ITEMS} items`);
     }
 
-    // H-1: Look up actual prices server-side — client-supplied price_usd is ignored
-    const regularItems = items.filter((i: { is_event_product?: boolean }) => !i.is_event_product);
-    const eventItems   = items.filter((i: { is_event_product?: boolean }) =>  i.is_event_product);
-    const priceMap = new Map<string, number | null>();
-
-    if (regularItems.length > 0) {
-      const products = await dbQuery<{ id: string; price_usd: number | null }>(
-        'SELECT id, price_usd FROM products WHERE id IN (' + regularItems.map(() => '?').join(',') + ')',
-        regularItems.map((i: { id: string }) => i.id)
-      );
-      products.forEach((p) => priceMap.set(p.id, p.price_usd));
-    }
-    if (eventItems.length > 0) {
-      const eventProducts = await dbQuery<{ id: string; price_usd: number | null }>(
-        'SELECT id, price_usd FROM event_products WHERE id IN (' + eventItems.map(() => '?').join(',') + ')',
-        eventItems.map((i: { id: string }) => i.id)
-      );
-      eventProducts.forEach((p) => priceMap.set(p.id, p.price_usd));
-    }
-
-    // Reject any item ID not in our catalog
-    for (const item of items) {
-      if (!priceMap.has(item.id)) {
-        return NextResponse.json({ error: `Unknown product: ${item.id}` }, { status: 400 });
+    // Validate every line, then merge duplicates (same id + kind) BEFORE applying the caps.
+    const merged = new Map<string, CartLine>();
+    for (const raw of items as unknown[]) {
+      if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) return bad('Each item must be an object');
+      const item = raw as Record<string, unknown>;
+      if (typeof item.id !== 'string' || !item.id || item.id.length > 64) return bad('Each item must have a valid id');
+      const qty = item.quantity;
+      if (typeof qty !== 'number' || !Number.isInteger(qty) || qty < 1 || qty > MAX_QTY_PER_ITEM) {
+        return bad(`item.quantity must be an integer between 1 and ${MAX_QTY_PER_ITEM}`);
       }
+      const isEvent = item.is_event_product === true;
+      const key = `${isEvent ? 'e' : 'p'}:${item.id}`;
+      const line = merged.get(key);
+      if (line) line.quantity += qty;
+      else merged.set(key, { id: item.id, quantity: qty, isEvent });
+    }
+    const lines = [...merged.values()];
+    let totalQty = 0;
+    for (const line of lines) {
+      if (line.quantity > MAX_QTY_PER_ITEM) return bad(`item.quantity must be at most ${MAX_QTY_PER_ITEM} per product`);
+      totalQty += line.quantity;
+    }
+    if (totalQty > MAX_TOTAL_QTY) return bad(`Total quantity must be at most ${MAX_TOTAL_QTY}`);
+
+    // Look up name, price and image from the DB. Client name/price/image/event_id are never used.
+    const regular = lines.filter((l) => !l.isEvent);
+    const event = lines.filter((l) => l.isEvent);
+    const catalog = new Map<string, CatalogRow>();
+
+    if (regular.length > 0) {
+      const rows = await dbQuery<CatalogRow>(
+        `SELECT id, name, price_usd, image_url FROM products
+         WHERE id IN (${regular.map(() => '?').join(',')})
+           AND (is_active = 1 OR id IN (${ADD_ON_IDS.map(() => '?').join(',')}))`,
+        [...regular.map((l) => l.id), ...ADD_ON_IDS]
+      );
+      rows.forEach((r) => catalog.set(`p:${r.id}`, r));
+    }
+    if (event.length > 0) {
+      const rows = await dbQuery<CatalogRow>(
+        `SELECT id, name, price_usd, image_url, event_id FROM event_products
+         WHERE is_active = 1 AND id IN (${event.map(() => '?').join(',')})`,
+        event.map((l) => l.id)
+      );
+      rows.forEach((r) => catalog.set(`e:${r.id}`, r));
     }
 
-    // Compute total server-side from verified prices
-    const total_usd = items.reduce(
-      (sum: number, item: { id: string; quantity: number }) =>
-        sum + (priceMap.get(item.id) ?? 0) * item.quantity,
-      0
-    );
+    const orderItems: OrderItem[] = [];
+    let total_usd = 0;
+    for (const line of lines) {
+      const row = catalog.get(`${line.isEvent ? 'e' : 'p'}:${line.id}`);
+      if (!row) return bad('One or more items are unavailable');
+      total_usd += (row.price_usd ?? 0) * line.quantity;
+      orderItems.push({
+        id: row.id,
+        name: row.name,
+        price_usd: row.price_usd,
+        quantity: line.quantity,
+        image_url: isAllowedImageUrl(row.image_url) ? row.image_url : null,
+        is_event_product: line.isEvent,
+        event_id: row.event_id ?? undefined,
+      });
+    }
 
     // L-1: Cryptographically random order number suffix
-    const dateStr   = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const order_number = `REB-${dateStr}-${randomHex(4)}`;
+
+    const email = typeof customer_email === 'string' && customer_email !== '' ? customer_email.trim() : null;
 
     // Insert order (18 columns, 18 placeholders)
     const orderId = crypto.randomUUID();
@@ -219,17 +197,17 @@ export async function POST(request: Request) {
           orderId,
           order_number,
           userId,
-          customer_name,
-          optText(customer_email),
-          customer_phone,
+          stripControl(customer_name),
+          email,
+          stripControl(customer_phone),
           fulfillment,
-          optText(delivery_address),
-          optText(delivery_area),
-          optText(delivery_date),
-          optText(delivery_time),
-          optText(occasion),
-          optText(card_message),
-          optText(notes),
+          optText(delivery_address, 300),
+          optText(delivery_area, 100),
+          optText(delivery_date, 32),
+          optText(delivery_time, 50),
+          optText(occasion, 100),
+          optText(card_message, 500),
+          optText(notes, 1000),
           payment_method,
           'pending',
           'pending',
@@ -238,7 +216,7 @@ export async function POST(request: Request) {
       );
     } catch (orderError) {
       console.error('Order insertion error:', orderError);
-      return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
+      return bad('Failed to create order', 500);
     }
 
     const orderRow = await dbQueryOne<OrderRow>(
@@ -247,26 +225,23 @@ export async function POST(request: Request) {
     );
     if (!orderRow) {
       console.error('Order read-back failed for id:', orderId);
-      return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
+      return bad('Failed to create order', 500);
     }
 
-    // Insert order items with server-verified prices, one statement per item
+    // Insert order items from DB-derived values, one statement per item
     try {
-      for (const item of items as {
-        id: string; name: string; quantity: number;
-        image_url?: string; is_event_product?: boolean; event_id?: string;
-      }[]) {
+      for (const item of orderItems) {
         await dbRun(
           'INSERT INTO order_items (id, order_id, name, price_usd, quantity, image_url, is_event_product, event_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
           [
             crypto.randomUUID(),
             orderId,
             item.name,
-            priceMap.get(item.id) ?? null,
+            item.price_usd,
             item.quantity,
-            item.image_url ?? null,
+            item.image_url,
             item.is_event_product ? 1 : 0,
-            item.event_id || null,
+            item.event_id ?? null,
           ]
         );
       }
@@ -274,14 +249,16 @@ export async function POST(request: Request) {
       console.error('Order items insertion error:', itemsError);
       // Roll back: ON DELETE CASCADE removes any order_items already written
       await dbRun('DELETE FROM orders WHERE id = ?', [orderId]);
-      return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
+      return bad('Failed to create order', 500);
     }
 
-    // Send emails (non-blocking — failures don't cancel the order)
-    const fullOrder: Order = { ...toOrder(orderRow), items };
+    // Emails (non-blocking; failures don't cancel the order). The customer email is capped per recipient
+    // per hour so the endpoint cannot be used to spam a third party.
+    const fullOrder: Order = { ...toOrder(orderRow), items: orderItems };
     const adminEmail = process.env.ADMIN_EMAIL || 'info@rebellys.com';
+    const mayEmailCustomer = email ? await hit('order-email', email.toLowerCase(), { limit: 3, windowSec: 3600 }) : false;
     const [emailResult, adminResult] = await Promise.allSettled([
-      sendOrderConfirmationEmail(fullOrder),
+      mayEmailCustomer ? sendOrderConfirmationEmail(fullOrder) : Promise.resolve(false),
       sendAdminNewOrderEmail(fullOrder, adminEmail),
     ]);
 
@@ -303,6 +280,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('API Orders Error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return bad('Internal server error', 500);
   }
 }

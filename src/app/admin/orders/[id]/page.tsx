@@ -31,9 +31,9 @@ export default function AdminOrderDetailPage() {
 
   useEffect(() => {
     fetch(`/api/admin/orders/${id}`)
-      .then(r => r.json())
+      .then(r => r.json() as Promise<{ order?: Order }>)
       .then(d => {
-        setOrder(d.order);
+        setOrder(d.order ?? null);
         setOrderStatus(d.order?.order_status ?? 'pending');
         setPaymentStatus(d.order?.payment_status ?? 'pending');
       })
@@ -46,7 +46,7 @@ export default function AdminOrderDetailPage() {
       method:'PATCH', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ order_status: orderStatus, payment_status: paymentStatus }),
     });
-    const d = await res.json();
+    const d = (await res.json()) as { order?: Order };
     if (d.order) setOrder(d.order);
     setSaving(false);
   };
@@ -57,7 +57,7 @@ export default function AdminOrderDetailPage() {
       method:'PATCH', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ whatsapp_sent: !order.whatsapp_sent }),
     });
-    const d = await res.json();
+    const d = (await res.json()) as { order?: Order };
     if (d.order) setOrder(d.order);
   };
 

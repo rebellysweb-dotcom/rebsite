@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
+import { isAllowedImageUrl } from '@/lib/images';
 import { dbQuery, dbQueryOne, dbRun } from '@/lib/db';
-import { requireAdmin } from '@/lib/auth/session';
-import { RLS } from '@cloudflare/rls-policies';
+import { guardAdmin } from '@/lib/auth/session';
 
-export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -75,18 +74,6 @@ function toEventProduct(row: EventProductRow) {
   return { ...row, image_urls: parseImageUrls(row.image_urls), is_active: !!row.is_active };
 }
 
-function isAllowedImageUrl(url: string): boolean {
-  try {
-    const u = new URL(url);
-    return (
-      u.protocol === 'https:' &&
-      (u.hostname.endsWith('.supabase.co') || u.hostname === 'lh3.googleusercontent.com')
-    );
-  } catch {
-    return false;
-  }
-}
-
 async function readJsonObject(request: Request): Promise<Record<string, unknown> | null> {
   try {
     const parsed: unknown = await request.json();
@@ -98,18 +85,6 @@ async function readJsonObject(request: Request): Promise<Record<string, unknown>
   }
 }
 
-// Authentication comes from the verified Better Auth session, not from request headers.
-// The role check goes through the RLS policy.
-async function guardAdmin(request: Request): Promise<NextResponse | null> {
-  const auth = await requireAdmin(request);
-  if (auth.status !== 200) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
-  }
-  if (!RLS.canWriteAdminContent(auth.user.role).allowed) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-  return null;
-}
 
 async function loadEventWithProducts(id: string) {
   const event = await dbQueryOne<EventRow>(`SELECT ${EVENT_COLUMNS} FROM events WHERE id = ?`, [id]);
@@ -193,6 +168,11 @@ export async function PATCH(
     const bannerColor = body.banner_color;
     if (bannerColor !== undefined && (typeof bannerColor !== 'string' || !HEX_COLOR_RE.test(bannerColor))) {
       return NextResponse.json({ error: 'banner_color must be a valid hex color' }, { status: 400 });
+    }
+
+    const bannerImage = body.banner_image_url;
+    if (bannerImage != null && bannerImage !== '' && !isAllowedImageUrl(bannerImage)) {
+      return NextResponse.json({ error: 'image_url must be from an allowed domain' }, { status: 400 });
     }
 
     const result = await dbRun(`UPDATE events SET ${sets.join(', ')} WHERE id = ?`, [...values, id]);

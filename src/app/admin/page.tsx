@@ -1,11 +1,12 @@
+import { headers } from 'next/headers';
 import { dbQuery, dbQueryOne } from '@/lib/db';
+import { assertAdminPage } from '@/lib/auth/session';
 import Link from 'next/link';
 import styles from './admin.module.css';
 import { orderBadge, paymentBadge } from './badges';
 import Icon from '@/app/admin/_ui/Icon';
 
 export const dynamic = 'force-dynamic';
-export const runtime = 'edge';
 
 export const metadata = {
   title: "Dashboard | Rebelly's Admin",
@@ -42,6 +43,9 @@ type RecentOrder = {
 };
 
 export default async function AdminDashboardPage() {
+  // The layout gate runs in parallel with this page, so guard here before any query.
+  await assertAdminPage(await headers());
+
   const [
     pendingRow,
     totalRow,

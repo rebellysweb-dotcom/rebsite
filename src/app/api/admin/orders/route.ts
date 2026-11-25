@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { dbQuery, dbQueryOne } from '@/lib/db';
-import { RLS } from '../../../../../cloudflare/rls-policies';
+import { guardAdmin } from '@/lib/auth/session';
 
-export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 const ORDER_COLUMNS =
@@ -51,12 +50,8 @@ interface ItemRow {
 // GET /api/admin/orders?page=1&limit=20&status=pending&search=REB-
 export async function GET(request: Request) {
   try {
-    // TODO(auth): x-user-role is a stub. Replace with the role from the verified JWT once auth lands;
-    // middleware must strip and overwrite any client-supplied x-user-role, or this check is spoofable.
-    const userRole = request.headers.get('x-user-role') ?? 'customer';
-    if (!RLS.canReadAllOrders(userRole).allowed) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    const denied = await guardAdmin(request);
+    if (denied) return denied;
 
     const { searchParams } = new URL(request.url);
     const page = (() => {
@@ -100,7 +95,7 @@ export async function GET(request: Request) {
       [...params, limit, from]
     );
 
-    // Second query replaces the Supabase `order_items(*)` embed.
+    // Items are loaded in a second query.
     const orderIds = rows.map((r) => r.id);
     const itemRows =
       orderIds.length > 0

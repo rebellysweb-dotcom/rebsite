@@ -5,7 +5,6 @@ import CheckoutClient from './CheckoutClient';
 import { CATALOG_PRODUCTS } from '@/lib/catalog';
 
 export const dynamic = 'force-dynamic';
-export const runtime = 'edge';
 
 export const metadata: Metadata = {
   title: 'Order Flowers | Rebelly\'s Flower Shop Zalka',

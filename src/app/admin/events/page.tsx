@@ -32,7 +32,7 @@ export default function AdminEventsPage() {
   const loadEvents = useCallback(async () => {
     setLoading(true);
     const r = await fetch('/api/admin/events');
-    const d = await r.json();
+    const d = (await r.json()) as { events?: Event[] };
     setEvents(d.events ?? []);
     setLoading(false);
   }, []);
@@ -43,7 +43,7 @@ export default function AdminEventsPage() {
   const loadProducts = async (eventId: string) => {
     setLoadingProducts(true);
     const r = await fetch(`/api/admin/events/${eventId}/products`);
-    const d = await r.json();
+    const d = (await r.json()) as { products?: EventProduct[] };
     setEventProducts(d.products ?? []);
     setLoadingProducts(false);
   };

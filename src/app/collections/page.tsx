@@ -21,7 +21,6 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = 'force-dynamic';
-export const runtime = 'edge';
 
 // D1 stores booleans as 0/1 and image_urls as a JSON string.
 type ProductRow = Omit<Product, 'is_active' | 'image_urls'> & { is_active: number; image_urls: string };

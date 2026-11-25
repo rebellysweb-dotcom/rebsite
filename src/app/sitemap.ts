@@ -2,7 +2,6 @@ import type { MetadataRoute } from 'next';
 import { dbQuery } from '@/lib/db';
 
 export const revalidate = 3600
-export const runtime = 'edge';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [

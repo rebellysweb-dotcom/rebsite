@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { dbQueryOne } from '@/lib/db';
 
-export const runtime = 'edge';
 
 export async function GET(_req: NextRequest) {
   try {
