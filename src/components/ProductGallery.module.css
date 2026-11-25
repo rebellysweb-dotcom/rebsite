@@ -122,3 +122,12 @@
   .track, .img, .arrow, .dot { transition: none; }
   .wrap[data-hovered="true"] .img { transform: none; }
 }
+
+/* Touch: arrows and dots get 44px hit areas without growing the visuals */
+@media (hover: none), (pointer: coarse) {
+  .arrow { width: 34px; height: 34px; }
+  .arrow::after { content: ''; position: absolute; inset: -5px; }
+  .dots { gap: 12px; bottom: 6px; }
+  .dot { position: relative; }
+  .dot::after { content: ''; position: absolute; inset: -19px -7px; }
+}

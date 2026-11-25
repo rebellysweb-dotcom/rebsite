@@ -1,12 +1,21 @@
 .tabs {
   display: flex;
-  flex-wrap: wrap;
   gap: 10px;
-  margin: 0 0 clamp(24px, 4vw, 40px);
+  margin: 0 calc(var(--px) * -1) clamp(24px, 4vw, 40px);
+  padding: 4px var(--px);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--px);
+  -webkit-overflow-scrolling: touch;
 }
+.tabs::-webkit-scrollbar { display: none; }
 
 .tab {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  white-space: nowrap;
   min-height: 44px;
   padding: 10px 20px;
   border: 1.5px solid var(--border-input);
@@ -28,7 +37,7 @@
 }
 
 @media (min-width: 768px) {
-  .tabs { justify-content: center; }
+  .tabs { justify-content: center; flex-wrap: wrap; margin-left: 0; margin-right: 0; padding: 0; overflow: visible; }
   .tab { flex: 0 0 auto; }
 }
 
@@ -39,7 +48,7 @@
 /* ── Product grid: 2 cols on mobile, scales up ── */
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(8px, 2vw, 14px);
 }
 @media (min-width: 560px) {

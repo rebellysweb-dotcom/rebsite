@@ -359,7 +359,8 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--text-main);
-  font-size: .92rem;
+  font-size: 1rem; /* 16px: no iOS focus zoom */
+  min-height: 46px;
   box-shadow: inset 0 1px 2px rgba(46,18,32,.06);
   transition: border-color var(--transition), box-shadow var(--transition);
 }
@@ -530,7 +531,7 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
 
 /* ── OVERLAY / BACKDROP ───────────────────────────────────── */
 .overlay {
-  position: fixed; inset: 0; z-index: 200;
+  position: fixed; inset: 0; z-index: 1100; /* above the fixed navbar (1000) */
   background: rgba(15,6,8,.6);
   backdrop-filter: blur(4px);
   animation: fadeIn .2s ease;
@@ -539,8 +540,9 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
 
 /* ── DRAWER (Cart + Whish Modal base) ─────────────────────── */
 .drawer {
-  position: fixed; top: 0; right: 0; bottom: 0; z-index: 300;
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 1200;
   width: min(420px, 100vw);
+  height: 100dvh;
   background: var(--white);
   border-left: 1px solid var(--border-strong);
   box-shadow: none;
@@ -572,7 +574,7 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
   transition: var(--transition);
 }
 .drawer-close:hover { background: var(--rose-200); border-color: var(--border-hover); color: var(--rose-800); }
-.drawer-body { flex: 1; overflow-y: auto; padding: 20px 24px; background: var(--cream); }
+.drawer-body { flex: 1; min-height: 120px; overflow-y: auto; overscroll-behavior: contain; padding: 20px 24px; background: var(--cream); }
 .drawer-body::-webkit-scrollbar { width: 4px; }
 .drawer-body::-webkit-scrollbar-thumb { background: var(--rose-300); border-radius: 4px; }
 .drawer-footer {
@@ -580,6 +582,12 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
   border-top: 1px solid var(--border-strong);
   flex-shrink: 0;
   background: var(--surface-photo);
+}
+@media (max-width: 600px) {
+  .drawer-header { padding: 12px 16px; }
+  .drawer-title { font-size: 1.3rem; }
+  .drawer-body { padding: 14px 16px; }
+  .drawer-footer { padding: 14px 16px calc(14px + env(safe-area-inset-bottom)); }
 }
 
 /* ── MODAL ────────────────────────────────────────────────── */
@@ -740,4 +748,9 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
 @media (max-width: 480px) {
   .btn { min-height: 44px; padding: 11px 22px; font-size: .88rem; }
   .section-header { margin-bottom: 36px; }
+}
+
+/* Touch: quantity steppers meet the 44px target */
+@media (hover: none), (pointer: coarse) {
+  .qty-btn { width: 44px; height: 44px; }
 }

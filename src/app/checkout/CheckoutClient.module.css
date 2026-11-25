@@ -8,6 +8,7 @@
   border-bottom: 1px solid var(--border-strong);
 }
 .heroInner {
+  grid-template-columns: minmax(0, 1fr);
   display: grid;
   gap: 32px;
 }
@@ -80,6 +81,7 @@
 .section { padding: 40px 0 80px; }
 .grid {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 48px;
   align-items: start;
 }
@@ -94,10 +96,11 @@
 /* Products */
 .products {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
 }
 .product {
+  min-width: 0;
   background: var(--surface);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
@@ -156,6 +159,7 @@
 
 /* Order panel */
 .panel {
+  min-width: 0;
   background: var(--surface);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
@@ -342,7 +346,7 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.5; }
   text-transform: uppercase;
   color: var(--gold-ink);
 }
-.scheduleGrid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.scheduleGrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 
 .error {
   padding: 12px 14px;

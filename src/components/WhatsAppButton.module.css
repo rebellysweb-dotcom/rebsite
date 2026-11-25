@@ -28,6 +28,12 @@
 .btn:hover .icon { transform: rotate(-8deg) scale(1.08); }
 @media (prefers-reduced-motion: reduce) { .icon { transition: none; } .btn:hover .icon { transform: none; } }
 
+/* Phones: a round icon-only button so it never covers a CTA or the last line of a page */
+@media (max-width: 599px) {
+  .btn { width: 52px; height: 52px; min-height: 52px; padding: 0; border-radius: 50%; right: max(14px, env(safe-area-inset-right)); bottom: max(14px, env(safe-area-inset-bottom)); }
+  .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+}
+
 @media (min-width: 768px) {
   .btn { right: 24px; bottom: 24px; padding: 0 24px; }
 }

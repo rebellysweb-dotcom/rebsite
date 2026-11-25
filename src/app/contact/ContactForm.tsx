@@ -70,7 +70,10 @@ export default function ContactForm() {
         <label htmlFor="name" className="form-label">Full Name <span className="required" aria-hidden="true">*</span></label>
         <input
           id="name"
+          name="name"
           type="text"
+          autoComplete="name"
+          enterKeyHint="next"
           className="form-input"
           value={formData.name}
           onChange={(e) => { setFormData({...formData, name: e.target.value}); if(errors.name) setErrors({...errors, name: undefined}); }}
@@ -87,7 +90,13 @@ export default function ContactForm() {
         <label htmlFor="email" className="form-label">Email Address <span className="required" aria-hidden="true">*</span></label>
         <input
           id="email"
+          name="email"
           type="email"
+          inputMode="email"
+          autoComplete="email"
+          autoCapitalize="none"
+          spellCheck={false}
+          enterKeyHint="next"
           className="form-input"
           value={formData.email}
           onChange={(e) => { setFormData({...formData, email: e.target.value}); if(errors.email) setErrors({...errors, email: undefined}); }}

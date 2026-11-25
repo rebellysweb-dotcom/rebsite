@@ -203,20 +203,20 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
             <form onSubmit={handleSubmit} className={styles.form}>
               <div className={styles.field}>
                 <label className={styles.label} htmlFor="customer_name">Full name <span className={styles.req}>required</span></label>
-                <input id="customer_name" name="name" type="text" className={styles.input} required autoComplete="name"
+                <input id="customer_name" name="name" type="text" className={styles.input} required autoComplete="name" enterKeyHint="next"
                   value={formData.customer_name}
                   onChange={e => setFormData({ ...formData, customer_name: e.target.value })} />
               </div>
               <div className={styles.field}>
                 <label className={styles.label} htmlFor="customer_phone">Phone number, WhatsApp <span className={styles.req}>required</span></label>
-                <input id="customer_phone" name="tel" type="tel" className={styles.input} required autoComplete="tel"
+                <input id="customer_phone" name="tel" type="tel" inputMode="tel" enterKeyHint="next" className={styles.input} required autoComplete="tel"
                   placeholder="+961 XX XXX XXX"
                   value={formData.customer_phone}
                   onChange={e => setFormData({ ...formData, customer_phone: e.target.value })} />
               </div>
               <div className={styles.field}>
                 <label className={styles.label} htmlFor="customer_email">Email, for your confirmation</label>
-                <input id="customer_email" name="email" type="email" className={styles.input} autoComplete="email"
+                <input id="customer_email" name="email" type="email" inputMode="email" enterKeyHint="next" className={styles.input} autoComplete="email" autoCapitalize="none" spellCheck={false}
                   placeholder="you@example.com"
                   value={formData.customer_email}
                   onChange={e => setFormData({ ...formData, customer_email: e.target.value })} />
@@ -241,7 +241,7 @@ export default function CheckoutClient({ products }: CheckoutClientProps) {
               {formData.fulfillment === 'delivery' && (
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor="delivery_address">Delivery address or area <span className={styles.req}>required</span></label>
-                  <input id="delivery_address" name="address" type="text" className={styles.input} required autoComplete="street-address"
+                  <input id="delivery_address" name="address" type="text" enterKeyHint="next" className={styles.input} required autoComplete="street-address"
                     placeholder="e.g. Zalka, near the church"
                     value={formData.delivery_address}
                     onChange={e => setFormData({ ...formData, delivery_address: e.target.value })} />

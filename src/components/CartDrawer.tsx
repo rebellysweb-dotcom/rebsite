@@ -78,7 +78,7 @@ export default function CartDrawer() {
       <div
         ref={drawerRef}
         id="cart-drawer"
-        className={`drawer ${isOpen ? 'open' : ''} ${styles.drawer}`}
+        className={['drawer', isOpen ? 'open' : '', styles.drawer].filter(Boolean).join(' ')}
         role="dialog"
         aria-modal="true"
         aria-label="Shopping cart"

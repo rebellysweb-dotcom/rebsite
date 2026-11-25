@@ -221,3 +221,22 @@
 @media (prefers-reduced-motion: reduce) {
   .addonTile, .addonTile:hover { transition: none; transform: none; }
 }
+
+/* Phones: compact chrome so the item list keeps room, even at 320x568 */
+@media (max-width: 600px) {
+  .list { gap: 10px; }
+  .addOnsSection { padding: 10px 16px 0; }
+  .addOnsLabel { margin-bottom: 8px; }
+  .addOnsRow { padding-bottom: 10px; scroll-snap-type: x proximity; margin-right: -16px; padding-right: 16px; }
+  .addonTile { scroll-snap-align: start; min-height: 56px; padding: 8px; gap: 2px; }
+  .addonIcon, .addonThumb { width: 28px; height: 28px; }
+  .totals { margin-bottom: 4px; }
+  .note { margin-bottom: 10px; }
+  .checkoutBtn { margin-bottom: 4px; }
+  .continueBtn { min-height: 44px; }
+}
+@media (max-width: 600px) and (max-height: 640px) {
+  .note { display: none; }
+  .addOnsLabel { display: none; }
+  .addOnsSection { padding-top: 8px; }
+}

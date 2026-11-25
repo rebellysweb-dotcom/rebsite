@@ -217,8 +217,8 @@
   .addBtn { bottom: 8px; }
 }
 @media ((hover: none) or (pointer: coarse)) and (max-width: 559px) {
-  .imgWrap { --btn-strip: 48px; }
-  .addBtn { bottom: 6px; }
+  .imgWrap { --btn-strip: 56px; }
+  .addBtn { bottom: 6px; min-height: 44px; font-size: .82rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

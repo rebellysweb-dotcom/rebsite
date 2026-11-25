@@ -1,5 +1,5 @@
 .page {
-  padding: calc(var(--nav-h) + 3rem) var(--px) 8rem;
+  padding: calc(var(--nav-h) + 2.5rem) 0 calc(6rem + env(safe-area-inset-bottom));
   min-height: 100dvh;
 }
 .empty {

@@ -3,17 +3,28 @@
 /* ── Filters: set type with an underline, not chips ── */
 .filters {
   display: flex;
-  flex-wrap: wrap;
   gap: 4px 28px;
-  margin-bottom: 40px;
-  padding-bottom: 14px;
+  margin-bottom: 32px;
+  padding-bottom: 6px;
   border-bottom: 1px solid var(--hairline);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+}
+.filters::-webkit-scrollbar { display: none; }
+@media (min-width: 768px) {
+  .filters { flex-wrap: wrap; overflow: visible; margin-bottom: 40px; padding-bottom: 14px; mask-image: none; -webkit-mask-image: none; }
 }
 .filter {
   position: relative;
   display: inline-flex;
   align-items: baseline;
   gap: 8px;
+  flex: 0 0 auto;
+  white-space: nowrap;
   min-height: 44px;
   padding: 0;
   font-family: var(--ff-display);
@@ -51,18 +62,18 @@
 
 /* ── Masonry: CSS columns keep each photo at its own proportions ── */
 .grid {
-  column-count: 1;
-  column-gap: 16px;
+  column-count: 2;
+  column-gap: 10px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
-@media (min-width: 560px) { .grid { column-count: 2; column-gap: 18px; } }
+@media (min-width: 560px) { .grid { column-gap: 18px; } }
 @media (min-width: 1000px) { .grid { column-count: 3; column-gap: 22px; } }
 
 .cell {
   break-inside: avoid;
-  margin: 0 0 16px;
+  margin: 0 0 10px;
 }
 @media (min-width: 560px) { .cell { margin-bottom: 18px; } }
 @media (min-width: 1000px) { .cell { margin-bottom: 22px; } }
@@ -151,7 +162,7 @@
 .ctrl:hover { background: var(--rose-500); border-color: var(--rose-500); }
 .ctrl:active { transform: scale(.94); }
 .ctrl:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
-.close { top: 16px; right: 16px; }
+.close { top: max(16px, env(safe-area-inset-top)); right: 16px; }
 .prev, .next { top: 50%; margin-top: -24px; }
 .prev { left: 12px; }
 .next { right: 12px; }
@@ -182,4 +193,14 @@
   .tile:hover .img { transform: none; }
   .tile:hover .trim { transform: scale(1.05); }
   .dialog[open] { animation: none; }
+}
+
+/* Phones: previous / next sit at the bottom corners, where a thumb rests */
+@media (max-width: 599px) {
+  .stage { padding: calc(72px + env(safe-area-inset-top)) 12px calc(88px + env(safe-area-inset-bottom)); }
+  .photo { max-height: calc(100dvh - 180px); max-width: 100%; }
+  .prev, .next { top: auto; margin-top: 0; bottom: max(16px, env(safe-area-inset-bottom)); }
+  .prev { left: 16px; }
+  .next { right: 16px; }
+  .counter { bottom: max(30px, calc(env(safe-area-inset-bottom) + 14px)); }
 }

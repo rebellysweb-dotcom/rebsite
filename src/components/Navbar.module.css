@@ -285,6 +285,16 @@
   .cartWord, .menuWord { letter-spacing: .02em; }
 }
 
+/* 320-360px: the Cart word gives way to the bag icon and count so Menu stays on screen */
+@media (max-width: 360px) {
+  .logoText { font-size: 1.25rem; }
+  .logoMark { width: 30px; height: 30px; }
+  .cartWord { display: none; }
+  .cartBtn { padding: 0 12px; gap: 0; }
+  .badge { margin-left: 6px; }
+  .hamburger { padding: 0 12px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .navbar, .link::after, .mobileMenu, .cartIcon,
   .mobileList li, .mobileFoot { transition: none; }
