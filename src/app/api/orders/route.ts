@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { sendOrderConfirmationEmail, sendAdminNewOrderEmail } from '@/lib/resend';
-import { dbQuery, dbQueryOne, dbRun } from '@/lib/db';
+import { dbQuery, dbQueryOne, dbRun, dbBatch } from '@/lib/db';
 import { RLS } from '@cloudflare/rls-policies';
 import { getSessionUserId } from '@/lib/auth/session';
 import { readJsonBody, isValidEmail, stripControl } from '@/lib/http';
@@ -44,6 +44,9 @@ const MAX_TOTAL_QTY = 200;
 // Add-ons are stored as inactive products (hidden from the shop but orderable). Only these exact ids qualify.
 const ADD_ON_IDS: string[] = ADD_ONS.map((a) => a.id);
 
+// Optional Idempotency-Key header: 8-128 chars of [A-Za-z0-9._:-]. Anything else is rejected, not ignored.
+const IDEMPOTENCY_KEY_RE = /^[A-Za-z0-9._:-]{8,128}$/;
+
 const bad = (error: string, status = 400) => NextResponse.json({ error }, { status });
 
 interface CartLine {
@@ -84,6 +87,25 @@ export async function POST(request: Request) {
     if (!RLS.canWriteOrder(userId !== null).allowed) {
       return bad('Forbidden', 403);
     }
+
+    // Idempotency: the same key (from the same user, or guest) returns the original order, creates nothing, sends no email.
+    const rawKey = request.headers.get('idempotency-key');
+    const idempotencyKey = rawKey === null ? null : rawKey.trim();
+    if (idempotencyKey !== null && !IDEMPOTENCY_KEY_RE.test(idempotencyKey)) {
+      return bad('Idempotency-Key must be 8-128 characters of letters, digits, . _ : -');
+    }
+    const replayOrder = async () => {
+      if (idempotencyKey === null) return null;
+      const prior = await dbQueryOne<OrderRow>(
+        `SELECT ${ORDER_COLUMNS} FROM orders WHERE idempotency_key = ? AND user_id IS ?`,
+        [idempotencyKey, userId]
+      );
+      return prior
+        ? NextResponse.json({ success: true, orderNumber: prior.order_number, order: toOrder(prior), replayed: true })
+        : null;
+    };
+    const prior = await replayOrder();
+    if (prior) return prior;
 
     if (customer_email !== null && customer_email !== undefined && customer_email !== '' && !isValidEmail(customer_email)) {
       return bad('customer_email is invalid');
@@ -188,52 +210,38 @@ export async function POST(request: Request) {
 
     const email = typeof customer_email === 'string' && customer_email !== '' ? customer_email.trim() : null;
 
-    // Insert order (18 columns, 18 placeholders)
+    // Order + items + read-back in ONE atomic D1 batch: all rows are written or none are.
     const orderId = crypto.randomUUID();
+    let orderRow: OrderRow | null = null;
     try {
-      await dbRun(
-        'INSERT INTO orders (id, order_number, user_id, customer_name, customer_email, customer_phone, fulfillment, delivery_address, delivery_area, delivery_date, delivery_time, occasion, card_message, notes, payment_method, payment_status, order_status, total_usd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [
-          orderId,
-          order_number,
-          userId,
-          stripControl(customer_name),
-          email,
-          stripControl(customer_phone),
-          fulfillment,
-          optText(delivery_address, 300),
-          optText(delivery_area, 100),
-          optText(delivery_date, 32),
-          optText(delivery_time, 50),
-          optText(occasion, 100),
-          optText(card_message, 500),
-          optText(notes, 1000),
-          payment_method,
-          'pending',
-          'pending',
-          total_usd,
-        ]
-      );
-    } catch (orderError) {
-      console.error('Order insertion error:', orderError);
-      return bad('Failed to create order', 500);
-    }
-
-    const orderRow = await dbQueryOne<OrderRow>(
-      `SELECT ${ORDER_COLUMNS} FROM orders WHERE id = ?`,
-      [orderId]
-    );
-    if (!orderRow) {
-      console.error('Order read-back failed for id:', orderId);
-      return bad('Failed to create order', 500);
-    }
-
-    // Insert order items from DB-derived values, one statement per item
-    try {
-      for (const item of orderItems) {
-        await dbRun(
-          'INSERT INTO order_items (id, order_id, name, price_usd, quantity, image_url, is_event_product, event_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-          [
+      const results = await dbBatch<OrderRow>([
+        {
+          sql: 'INSERT INTO orders (id, order_number, user_id, idempotency_key, customer_name, customer_email, customer_phone, fulfillment, delivery_address, delivery_area, delivery_date, delivery_time, occasion, card_message, notes, payment_method, payment_status, order_status, total_usd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          params: [
+            orderId,
+            order_number,
+            userId,
+            idempotencyKey,
+            stripControl(customer_name),
+            email,
+            stripControl(customer_phone),
+            fulfillment,
+            optText(delivery_address, 300),
+            optText(delivery_area, 100),
+            optText(delivery_date, 32),
+            optText(delivery_time, 50),
+            optText(occasion, 100),
+            optText(card_message, 500),
+            optText(notes, 1000),
+            payment_method,
+            'pending',
+            'pending',
+            total_usd,
+          ],
+        },
+        ...orderItems.map((item) => ({
+          sql: 'INSERT INTO order_items (id, order_id, name, price_usd, quantity, image_url, is_event_product, event_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          params: [
             crypto.randomUUID(),
             orderId,
             item.name,
@@ -242,13 +250,20 @@ export async function POST(request: Request) {
             item.image_url,
             item.is_event_product ? 1 : 0,
             item.event_id ?? null,
-          ]
-        );
-      }
-    } catch (itemsError) {
-      console.error('Order items insertion error:', itemsError);
-      // Roll back: ON DELETE CASCADE removes any order_items already written
-      await dbRun('DELETE FROM orders WHERE id = ?', [orderId]);
+          ],
+        })),
+        { sql: `SELECT ${ORDER_COLUMNS} FROM orders WHERE id = ?`, params: [orderId] },
+      ]);
+      orderRow = results[results.length - 1].results[0] ?? null;
+    } catch (orderError) {
+      // A concurrent request with the same Idempotency-Key won the UNIQUE race: return its order instead.
+      const raced = await replayOrder().catch(() => null);
+      if (raced) return raced;
+      console.error('Order batch insert error:', orderError);
+      return bad('Failed to create order', 500);
+    }
+    if (!orderRow) {
+      console.error('Order read-back failed for id:', orderId);
       return bad('Failed to create order', 500);
     }
 

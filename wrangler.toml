@@ -8,6 +8,8 @@ assets = { directory = ".open-next/assets", binding = "ASSETS" }
 binding = "DB"
 database_name = "rebellys-db"
 database_id = "REPLACE_WITH_D1_DATABASE_ID"
+# Numbered SQL migrations (wrangler d1 migrations apply). Replaces the old schema.d1.sql snapshot.
+migrations_dir = "cloudflare/migrations"
 
 [[r2_buckets]]
 binding = "IMAGES"

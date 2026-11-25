@@ -11,7 +11,12 @@
     "cf:dev": "npx wrangler dev --compatibility-date=2024-09-23",
     "cf:deploy": "npx wrangler deploy",
     "cf:d1:create": "npx wrangler d1 create rebellys-db",
-    "cf:d1:migrate": "npx wrangler d1 execute rebellys-db --file=./cloudflare/schema.d1.sql",
+    "cf:d1:migrate:local": "npx wrangler d1 migrations apply rebellys-db --local",
+    "cf:d1:migrate": "npx wrangler d1 migrations apply rebellys-db --remote",
+    "cf:d1:seed:gen": "node scripts/gen-seed.mjs",
+    "cf:d1:seed:local": "npx wrangler d1 execute rebellys-db --local --file=./cloudflare/seed.d1.sql",
+    "cf:d1:seed": "npx wrangler d1 execute rebellys-db --remote --file=./cloudflare/seed.d1.sql",
+    "cf:admin:create": "node scripts/create-admin.mjs",
     "cf:r2:create": "npx wrangler r2 bucket create rebellys-images"
   },
   "dependencies": {

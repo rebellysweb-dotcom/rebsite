@@ -62,7 +62,7 @@ export async function hit(name: string, id: string, rule: RateRule): Promise<boo
 /** Optional Cloudflare ratelimit binding (burst guard, period must be 10 or 60 s). */
 async function bindingAllows(id: string): Promise<boolean> {
   try {
-    const binding = (getEnv() as unknown as { RATE_LIMITER?: RateLimitBinding }).RATE_LIMITER;
+    const binding = ((await getEnv()) as unknown as { RATE_LIMITER?: RateLimitBinding }).RATE_LIMITER;
     if (!binding) return true;
     const { success } = await binding.limit({ key: id });
     return success;
