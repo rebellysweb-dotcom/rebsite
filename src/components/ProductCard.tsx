@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, memo } from 'react';
+import { useState, useId, memo } from 'react';
 import type { Product, EventProduct } from '@/types';
 import { formatUsd } from '@/lib/utils';
 import { useCartStore } from '@/store/cart';
+import { relevantAddOns } from '@/lib/storefront';
 import ProductGallery from './ProductGallery';
 import styles from './ProductCard.module.css';
 
@@ -19,6 +20,8 @@ const lbpFormatter = new Intl.NumberFormat('en-LB');
 
 const ProductCard = memo(function ProductCard({ product, lbpRate, eventId }: ProductCardProps) {
   const [added, setAdded] = useState(false);
+  const [open, setOpen] = useState(false);
+  const detailsId = useId();
   const { addItem, openCart } = useCartStore();
 
   const isEvent = 'event_id' in product || !!eventId;
@@ -79,7 +82,34 @@ const ProductCard = memo(function ProductCard({ product, lbpRate, eventId }: Pro
         <h3 className={styles.name}>{product.name}</h3>
 
         {'description' in product && product.description && (
-          <p className={styles.desc}>{product.description}</p>
+          <p className={`${styles.desc} ${open ? styles.descOpen : ''}`}>{product.description}</p>
+        )}
+
+        {!isEvent && (
+          <>
+            <button
+              type="button"
+              className={styles.detailsBtn}
+              aria-expanded={open}
+              aria-controls={detailsId}
+              onClick={() => setOpen((o) => !o)}
+            >
+              {open ? 'Hide details' : 'Details & add-ons'}
+            </button>
+            {open && (
+              <div id={detailsId} className={styles.details}>
+                <p className={styles.detailsLine}>
+                  Arranged by hand at our Zalka shop. Delivery or pickup; we confirm the total and timing by phone or WhatsApp.
+                </p>
+                <p className={styles.detailsLine}>
+                  <strong>Add in your cart:</strong>{' '}
+                  {relevantAddOns([product.id]).list
+                    .map((a) => `${a.name} ${a.price_usd === 0 ? '(free)' : `+$${a.price_usd}`}`)
+                    .join(' · ')}
+                </p>
+              </div>
+            )}
+          </>
         )}
 
         {/* Price */}

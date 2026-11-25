@@ -3,6 +3,7 @@ import { dbQuery } from '@/lib/db';
 
 export const revalidate = 3600
 
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     {

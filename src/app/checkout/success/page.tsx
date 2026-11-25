@@ -5,10 +5,16 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import styles from './SuccessPage.module.css';
 import { SHOP, telHref, whatsappHref } from '@/lib/shop';
+import { formatUsd } from '@/lib/utils';
+import { DELIVERY_NOTE } from '@/lib/storefront';
 
 interface OrderSnapshot {
   orderNumber?: string;
-  items?: { name: string; quantity: number }[];
+  items?: { name: string; quantity: number; priceUsd?: number | null }[];
+  subtotalUsd?: number;
+  customerPhone?: string;
+  hasEmail?: boolean;
+  cardMessage?: string;
   paymentMethod?: string;
   customerName?: string;
   fulfillment?: string;
@@ -57,7 +63,8 @@ function SuccessContent() {
     return (
       <div className={styles.card}>
         <div className={styles.noOrder}>
-          <p>No order found.</p>
+          <p>We could not find an order on this screen.</p>
+          <p style={{ fontSize: '0.95rem' }}>If you just placed one, we have it. Call or WhatsApp us on <a href={telHref} style={{ color: 'var(--rose-700)', fontWeight: 600 }}>{SHOP.phoneDisplay}</a>.</p>
           <Link href="/collections" className="btn btn-primary" style={{ marginTop: '20px', display: 'inline-block' }}>
             Browse Collections
           </Link>
@@ -78,23 +85,23 @@ function SuccessContent() {
       </div>
 
       {/* Title */}
-      <h1 className={styles.title}>Order Successful!</h1>
+      <h1 className={styles.title}>Order received</h1>
 
       {snapshot.customerName && (
         <p className={styles.subtitle}>
-          Thank you, {snapshot.customerName}! Your order has been placed.
+          Thank you, {snapshot.customerName}. We have your order and will confirm it with you shortly.
         </p>
       )}
       {!snapshot.customerName && (
         <p className={styles.subtitle}>
-          Thank you for your order. We&apos;ll be in touch shortly.
+          Thank you for your order. We will confirm it with you shortly.
         </p>
       )}
 
       {/* Order number */}
       <div className={styles.orderNumRow}>
         <span>{snapshot.orderNumber}</span>
-        <button className={styles.copyBtn} onClick={handleCopy} title="Copy order number">
+        <button className={styles.copyBtn} onClick={handleCopy} style={{ minHeight: '44px', minWidth: '44px' }} aria-label="Copy order number">
           {copied ? 'Copied!' : 'Copy'}
         </button>
       </div>
@@ -107,16 +114,30 @@ function SuccessContent() {
             {snapshot.items!.map((item, i) => (
               <li key={i}>
                 {item.name} &times; {item.quantity}
+                {item.priceUsd != null && (item.priceUsd === 0 ? ' · Free' : ` · ${formatUsd(item.priceUsd * item.quantity)}`)}
               </li>
             ))}
           </ol>
+          {typeof snapshot.subtotalUsd === 'number' && snapshot.subtotalUsd > 0 && (
+            <p style={{ fontSize: '0.9rem', marginTop: '12px', fontWeight: 600 }}>
+              Items subtotal: {formatUsd(snapshot.subtotalUsd)}
+              <span style={{ display: 'block', fontWeight: 400, color: 'var(--text-muted)' }}>
+                {snapshot.fulfillment === 'pickup' ? 'Pickup, no delivery fee.' : DELIVERY_NOTE} We confirm the final total by phone.
+              </span>
+            </p>
+          )}
+          {snapshot.cardMessage && (
+            <p style={{ fontSize: '0.9rem', marginTop: '12px', color: 'var(--text-muted)' }}>
+              Card message: <em>{snapshot.cardMessage}</em>
+            </p>
+          )}
         </div>
       )}
 
       {/* Scheduling info */}
       {hasScheduling && (
         <div className={styles.nextSteps} style={{ textAlign: 'left', marginTop: '16px' }}>
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '8px' }}>Delivery Schedule</h3>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '8px' }}>{snapshot.fulfillment === 'pickup' ? 'Pickup' : 'Delivery'} wish</h3>
           {snapshot.deliveryDate && (
             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
               Date: <strong>{snapshot.deliveryDate}</strong>
@@ -135,36 +156,50 @@ function SuccessContent() {
         <p className={styles.whishTitle}>What happens next?</p>
         <div className={styles.whishStep}>
           <span>1.</span>
-          <span>Check your email for your order confirmation</span>
+          <span>We call or WhatsApp {snapshot.customerPhone ? <strong>{snapshot.customerPhone}</strong> : 'you'} to confirm the final total, {snapshot.fulfillment === 'pickup' ? 'and when it will be ready' : 'the delivery fee and the time'}.</span>
         </div>
+        {isWhish ? (
+          <div className={styles.whishStep}>
+            <span>2.</span>
+            {/* TODO(owner): confirm the Whish number and when to pay. Until then this shows the shop number, as before. */}
+            <span>After we confirm, pay with Whish to <strong>{SHOP.phoneDisplay}</strong>. Write order # <strong>{snapshot.orderNumber}</strong> in the note.</span>
+          </div>
+        ) : (
+          <div className={styles.whishStep}>
+            <span>2.</span>
+            <span>Pay cash when you {snapshot.fulfillment === 'pickup' ? 'collect it' : 'receive it'}.</span>
+          </div>
+        )}
         <div className={styles.whishStep}>
-          <span>2.</span>
-          <span>Our team will contact you to confirm the final price &amp; delivery details</span>
+          <span>3.</span>
+          <span>{snapshot.fulfillment === 'pickup' ? `Collect it at ${SHOP.address}.` : 'We deliver it to you.'}</span>
         </div>
-        {isWhish && (
+        {snapshot.hasEmail && (
           <div className={styles.whishStep}>
-            <span>3.</span>
-            <span>Pay via Whish to <strong>{SHOP.phoneDisplay}</strong> — include order # <strong>{snapshot.orderNumber}</strong></span>
+            <span>&#9993;</span>
+            <span>A copy of your order is on its way to your email.</span>
           </div>
         )}
-        {!isWhish && (
-          <div className={styles.whishStep}>
-            <span>3.</span>
-            <span>Pay cash upon {snapshot.fulfillment === 'pickup' ? 'pickup' : 'delivery'}</span>
-          </div>
-        )}
+        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '8px' }}>
+          Tip: take a screenshot of this page. Your order number is {snapshot.orderNumber}.
+        </p>
       </div>
 
-      {/* WhatsApp link */}
-      <div style={{ marginTop: '28px' }}>
+      {/* WhatsApp + call, with the order number pre-filled */}
+      <div style={{ marginTop: '28px', display: 'flex', gap: '12px 24px', justifyContent: 'center', flexWrap: 'wrap' }}>
         <a
-          href={whatsappHref()}
+          href={whatsappHref(`Hello Rebelly's, about my order ${snapshot.orderNumber}: `)}
           target="_blank"
           rel="noopener noreferrer"
           className={styles.whatsappLink}
+          style={{ minHeight: '44px' }}
         >
-          <span>&#128172;</span>
-          <span>Questions? Chat with us</span>
+          <span aria-hidden="true">&#128172;</span>
+          <span>Message us on WhatsApp</span>
+        </a>
+        <a href={telHref} className={styles.whatsappLink} style={{ minHeight: '44px', color: 'var(--rose-700)' }}>
+          <span aria-hidden="true">&#128222;</span>
+          <span>Call {SHOP.phoneDisplay}</span>
         </a>
       </div>
 

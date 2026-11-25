@@ -8,13 +8,13 @@ import { getProductSchema, getBreadcrumbSchema } from '@/lib/structured-data';
 
 export const metadata: Metadata = {
   title: 'Flower Collections | Bouquets & Gift Boxes in Zalka',
-  description: 'Christmas gifts, baskets, orchid arrangements and bouquets from Rebelly\'s, arranged by hand in Zalka for delivery across the Metn or pickup on Saydeh Street.',
+  description: 'Christmas gifts, baskets, orchid arrangements and bouquets from Rebelly\'s, arranged by hand in Zalka, for delivery or pickup on Saydeh Street. Prices in USD.',
   alternates: {
     canonical: 'https://rebellys.com/collections',
   },
   openGraph: {
     title: 'Flower Collections | Bouquets & Gift Boxes in Zalka',
-    description: 'Christmas gifts, baskets, orchid arrangements and bouquets from Rebelly\'s, arranged by hand in Zalka for delivery across the Metn or pickup on Saydeh Street.',
+    description: 'Christmas gifts, baskets, orchid arrangements and bouquets from Rebelly\'s, arranged by hand in Zalka, for delivery or pickup on Saydeh Street. Prices in USD.',
     images: [{ url: 'https://rebellys.com/images/og.jpg', width: 1200, height: 630, alt: "Rebelly's flower collections" }],
     type: 'website',
   },
@@ -31,7 +31,7 @@ const toProduct = (r: ProductRow): Product => ({
   image_urls: JSON.parse(r.image_urls || '[]'),
 });
 
-async function ProductGrid() {
+async function ProductGrid({ cat, band }: { cat?: string; band?: string }) {
   const { CATALOG_PRODUCTS } = await import('@/lib/catalog');
   let products: Product[] = [...CATALOG_PRODUCTS];
 
@@ -63,7 +63,7 @@ async function ProductGrid() {
     <>
       {itemListSchema && <JsonLd data={itemListSchema} />}
       {products.length > 0 ? (
-        <CollectionsClient products={products} />
+        <CollectionsClient products={products} initialCategory={cat} initialBand={band} />
       ) : (
         <div style={{ textAlign: 'center', padding: '4rem', background: '#fff', borderRadius: 'var(--radius-lg)' }}>
           <p style={{ color: 'var(--text-muted)' }}>No products available at the moment. Please check back later!</p>
@@ -83,7 +83,8 @@ function GridSkeleton() {
   );
 }
 
-export default function CollectionsPage() {
+export default async function CollectionsPage({ searchParams }: { searchParams: Promise<{ cat?: string; price?: string }> }) {
+  const { cat, price } = await searchParams;
   return (
     <div style={{ padding: '6rem var(--px) 8rem', background: 'var(--cream)', minHeight: '100svh' }}>
       <JsonLd data={getBreadcrumbSchema([
@@ -95,12 +96,12 @@ export default function CollectionsPage() {
           <span className="section-tag">What We Offer</span>
           <h1 className="section-title">Our Signature<br /><em>Collections</em></h1>
           <p className="section-subtitle">
-            Handcrafted with the finest blooms, each arrangement is a work of art designed to express what words cannot.
+            Seasonal gifts arranged by hand in Zalka. Pick one, add a card or balloon, and we confirm everything by phone or WhatsApp. Pay with Whish or cash.
           </p>
         </div>
 
         <Suspense fallback={<GridSkeleton />}>
-          <ProductGrid />
+          <ProductGrid cat={cat} band={price} />
         </Suspense>
       </div>
     </div>

@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import type { Product } from '@/types';
 import ProductCard from '@/components/ProductCard';
+import { categoryOf, inBand, PRICE_BANDS, type PriceBand } from '@/lib/storefront';
+import { formatUsd } from '@/lib/utils';
 import styles from './CollectionsClient.module.css';
 
 const TABS = [
@@ -13,24 +15,42 @@ const TABS = [
 
 type TabValue = (typeof TABS)[number]['value'];
 
-export default function CollectionsClient({ products }: { products: Product[] }) {
-  const [active, setActive] = useState<TabValue>('all');
-  // D1 rows have no category column, so fall back to the tag ("Christmas Special" / "New Born").
-  const categoryOf = (p: Product) =>
-    p.category ?? (p.tag === 'New Born' ? 'new-born' : p.tag?.startsWith('Christmas') ? 'christmas' : 'other');
-  const visible = active === 'all' ? products : products.filter((p) => categoryOf(p) === active);
+interface Props {
+  products: Product[];
+  initialCategory?: string;
+  initialBand?: string;
+}
+
+export default function CollectionsClient({ products, initialCategory, initialBand }: Props) {
+  const [active, setActive] = useState<TabValue>(
+    TABS.some((t) => t.value === initialCategory) ? (initialCategory as TabValue) : 'all'
+  );
+  const [band, setBand] = useState<PriceBand>(
+    PRICE_BANDS.some((b) => b.value === initialBand) ? (initialBand as PriceBand) : 'any'
+  );
+
+  const inCategory = (p: Product) => active === 'all' || categoryOf(p) === active;
+  const visible = products.filter((p) => inCategory(p) && inBand(p.price_usd, band));
+
+  // Price range of what is currently in the category (real catalog data only).
+  const inCat = products.filter(inCategory);
+  const prices = inCat.map((p) => p.price_usd).filter((n): n is number => n != null);
+  const range = prices.length
+    ? Math.min(...prices) === Math.max(...prices)
+      ? formatUsd(prices[0])
+      : `${formatUsd(Math.min(...prices))} – ${formatUsd(Math.max(...prices))}`
+    : null;
 
   return (
     <>
-      <div className={styles.tabs} role="tablist" aria-label="Filter collections">
+      <div className={styles.tabs} role="group" aria-label="Filter by collection">
         {TABS.map((tab) => {
           const selected = tab.value === active;
           return (
             <button
               key={tab.value}
               type="button"
-              role="tab"
-              aria-selected={selected}
+              aria-pressed={selected}
               className={`${styles.tab} ${selected ? styles.tabActive : ''}`}
               onClick={() => setActive(tab.value)}
             >
@@ -39,6 +59,28 @@ export default function CollectionsClient({ products }: { products: Product[] })
           );
         })}
       </div>
+
+      <div className={`${styles.tabs} ${styles.bandTabs}`} role="group" aria-label="Filter by budget">
+        {PRICE_BANDS.map((b) => {
+          const selected = b.value === band;
+          return (
+            <button
+              key={b.value}
+              type="button"
+              aria-pressed={selected}
+              className={`${styles.tab} ${styles.tabSm} ${selected ? styles.tabActive : ''}`}
+              onClick={() => setBand(b.value)}
+            >
+              {b.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <p className={styles.count} aria-live="polite">
+        {visible.length} {visible.length === 1 ? 'gift' : 'gifts'}
+        {range && band === 'any' ? ` · ${range}` : ''}
+      </p>
 
       {visible.length > 0 ? (
         <div className={styles.grid}>
@@ -50,7 +92,15 @@ export default function CollectionsClient({ products }: { products: Product[] })
         </div>
       ) : (
         <div className={styles.empty}>
-          <p>No products in this collection yet.</p>
+          <p>Nothing in this budget for that collection.</p>
+          <button
+            type="button"
+            className={`${styles.tab} ${styles.tabActive}`}
+            style={{ marginTop: '1rem' }}
+            onClick={() => { setBand('any'); setActive('all'); }}
+          >
+            Show all gifts
+          </button>
         </div>
       )}
     </>

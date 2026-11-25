@@ -4,11 +4,19 @@ import { useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useCartStore } from '@/store/cart';
 import { formatUsd } from '@/lib/utils';
-import { ADD_ONS } from '@/lib/catalog';
+import { CATALOG_PRODUCTS } from '@/lib/catalog';
+import AddOnPicker from './AddOnPicker';
+import { GOOGLE, DELIVERY_NOTE } from '@/lib/storefront';
+import { SHOP, whatsappHref } from '@/lib/shop';
 import styles from './CartDrawer.module.css';
 
+const xmasPrices = CATALOG_PRODUCTS.filter((p) => p.category === 'christmas').map((p) => p.price_usd);
+const nbPrices = CATALOG_PRODUCTS.filter((p) => p.category === 'new-born').map((p) => p.price_usd);
+const minXmas = Math.min(...xmasPrices);
+const nbPrice = Math.min(...nbPrices);
+
 export default function CartDrawer() {
-  const { items, isOpen, closeCart, addItem, removeItem, updateQuantity, totalItems, totalUsd } =
+  const { items, isOpen, closeCart, removeItem, updateQuantity, totalItems, totalUsd } =
     useCartStore();
 
   // Load the saved cart from localStorage once, after the first render (no hydration mismatch).
@@ -99,14 +107,27 @@ export default function CartDrawer() {
             <div className={styles.empty}>
               <div className={styles.emptyIcon} aria-hidden="true">🌷</div>
               <p className={styles.emptyText}>Your cart is empty</p>
-              <p className={styles.emptySub}>Browse our collections and add something beautiful.</p>
+              <p className={styles.emptySub}>
+                Christmas gifts from ${minXmas}, newborn gifts at ${nbPrice}. Arranged by hand in Zalka since {SHOP.founded}.
+              </p>
               <Link
                 href="/collections"
                 className={`btn btn-primary ${styles.shopBtn}`}
                 onClick={closeCart}
               >
-                Browse Flowers
+                Shop Christmas Specials
               </Link>
+              <Link
+                href="/collections?cat=new-born"
+                className={`btn btn-outline ${styles.shopBtn}`}
+                style={{ marginTop: 0 }}
+                onClick={closeCart}
+              >
+                New Born Gifts
+              </Link>
+              <p className={styles.emptySub} style={{ fontSize: '0.8rem' }}>
+                Not sure what to choose? <a href={whatsappHref("Hello Rebelly's, I need help choosing flowers.")} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--rose-500)', fontWeight: 600 }}>Ask us on WhatsApp</a>
+              </p>
             </div>
           ) : (
             <ul className={styles.list} aria-label="Cart items">
@@ -129,9 +150,11 @@ export default function CartDrawer() {
                       <span className="badge badge-rose" style={{ marginBottom: 4 }}>Event</span>
                     )}
                     <p className={styles.price}>
-                      {item.price_usd != null
-                        ? formatUsd(item.price_usd * item.quantity)
-                        : 'Price on request'}
+                      {item.price_usd === 0
+                        ? 'Free'
+                        : item.price_usd != null
+                          ? formatUsd(item.price_usd * item.quantity)
+                          : 'Price on request'}
                     </p>
 
                     {/* Quantity controls */}
@@ -170,53 +193,20 @@ export default function CartDrawer() {
           )}
         </div>
 
-        {/* Add-ons */}
-        {items.length > 0 && (
-          <div className={styles.addOns}>
-            <p className={styles.addOnsLabel}>Add a finishing touch</p>
-            <div className={styles.addOnsRow}>
-              {ADD_ONS.map((ao) => {
-                const active = items.some((i) => i.lineId === ao.id);
-                return (
-                  <button
-                    key={ao.id}
-                    type="button"
-                    className={`${styles.addOn} ${active ? styles.addOnActive : ''}`}
-                    onClick={() =>
-                      active
-                        ? removeItem(ao.id)
-                        : addItem({
-                            id: ao.id,
-                            name: ao.name,
-                            price_usd: ao.price_usd,
-                            image_url: 'imageUrl' in ao ? ao.imageUrl : null,
-                            is_event_product: false,
-                            slug: ao.slug,
-                          })
-                    }
-                    aria-pressed={active}
-                    aria-label={`${active ? 'Remove' : 'Add'} ${ao.name}`}
-                  >
-                    <span className={styles.addOnName}>{active ? '✓ ' : ''}{ao.name}</span>
-                    <span className={styles.addOnPrice}>{ao.price_usd === 0 ? 'Free' : `+$${ao.price_usd}`}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        {/* Add-ons: one tap, with prices */}
+        {items.length > 0 && <AddOnPicker />}
 
         {/* Footer — only when items exist */}
         {items.length > 0 && (
           <div className="drawer-footer">
             <div className={styles.totals}>
-              <span className={styles.totalLabel}>Estimated Total</span>
+              <span className={styles.totalLabel}>Subtotal</span>
               <span className={styles.totalValue}>
-                {totalUsd() > 0 ? formatUsd(totalUsd()) : 'Confirm at checkout'}
+                {totalUsd() > 0 ? formatUsd(totalUsd()) : 'Free'}
               </span>
             </div>
             <p className={styles.note}>
-              Final price, delivery fee &amp; availability confirmed by our team via WhatsApp.
+              {DELIVERY_NOTE} We confirm everything by phone or WhatsApp before you pay (Whish or cash).
             </p>
             <Link
               href="/checkout"
@@ -234,6 +224,9 @@ export default function CartDrawer() {
             >
               Continue Shopping
             </button>
+            <p className={styles.note} style={{ textAlign: 'center', margin: '10px 0 0' }}>
+              Rebelly&apos;s, Zalka since {SHOP.founded} · <a href={GOOGLE.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--rose-500)', fontWeight: 600 }}>{GOOGLE.rating}★ on Google ({GOOGLE.count})</a>
+            </p>
           </div>
         )}
       </div>

@@ -51,7 +51,7 @@
   font-family: var(--ff-display);
   font-size: 2.2rem;
   margin-bottom: 12px;
-  background: linear-gradient(135deg, var(--rose-600), var(--rose-400));
+  background: linear-gradient(135deg, var(--rose-500), var(--rose-400));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -70,7 +70,7 @@
   gap: 14px;
   font-size: 1.4rem;
   font-weight: 700;
-  color: var(--rose-600);
+  color: var(--rose-500);
   letter-spacing: 2px;
   margin-bottom: 8px;
 }
@@ -82,7 +82,7 @@
   padding: 4px 12px;
   border-radius: 999px;
   border: 1.5px solid var(--rose-500);
-  color: var(--rose-600);
+  color: var(--rose-500);
   background: transparent;
   cursor: pointer;
   letter-spacing: 0.5px;

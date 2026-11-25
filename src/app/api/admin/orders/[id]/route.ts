@@ -13,7 +13,8 @@ const ORDER_ITEM_COLUMNS =
 
 // Order status values are copied from the app's validation. See the note on payment_status below.
 const ALLOWED_ORDER_STATUSES = ['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'] as const;
-const ALLOWED_PAYMENT_STATUSES = ['pending', 'paid', 'failed', 'refunded'] as const;
+// Matches the D1 CHECK constraint and the admin UI ("confirmed" = Whish transfer seen, not yet reconciled).
+const ALLOWED_PAYMENT_STATUSES = ['pending', 'confirmed', 'paid', 'failed', 'refunded'] as const;
 
 interface OrderRow {
   id: string;

@@ -198,3 +198,75 @@
 @media (hover: none) {
   .cartClear { min-height: 44px; min-width: 44px; }
 }
+
+/* ── Order panel additions (same pink/cream language) ── */
+.checkoutForm { margin-top: 8px; }
+.checkoutForm :global(.form-input),
+.checkoutForm :global(.form-textarea) { font-size: 16px; min-height: 44px; }
+.checkoutForm :global(.form-textarea) { min-height: 80px; }
+.formHeading {
+  font-family: var(--ff-display);
+  font-size: 1.25rem;
+  margin: 8px 0 14px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(45,10,30,.08);
+}
+.fieldset { border: 0; padding: 0; margin: 0 0 16px; min-width: 0; }
+.fieldset legend { padding: 0; margin-bottom: 6px; }
+.fieldset :global(.radio-pill label) { min-height: 44px; }
+.help {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-top: 6px;
+}
+.schedule {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  background: rgba(233,30,140,.05);
+  border-radius: var(--radius-md, var(--radius));
+  border: 1px solid rgba(233,30,140,.1);
+}
+.scheduleTitle {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--rose-700);
+  margin-bottom: 12px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.addOnsWrap { margin: -12px -4px 16px; }
+.addOnsWrap > div { border-top: 0; padding-left: 4px; padding-right: 4px; }
+.totals {
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin: 0 0 18px;
+  font-size: 0.9rem;
+}
+.totals div { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; }
+.totals dt { color: var(--text-muted); }
+.totals dd { font-weight: 700; color: var(--rose-700); text-align: right; margin: 0; }
+.submitError {
+  background: #fef2f2;
+  border: 1.5px solid #dc2626;
+  color: #991b1b;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-size: 0.9rem;
+  margin-bottom: 14px;
+}
+.reassure { margin-top: 14px; font-size: 0.82rem; color: var(--text-muted); text-align: center; line-height: 1.55; }
+.reassure p { margin-bottom: 6px; }
+.reassure a { color: var(--rose-700); font-weight: 600; text-decoration: underline; padding: 10px 2px; display: inline-block; }
+
+@media (max-width: 900px) {
+  /* Phones: the order form comes before the long product list once there is something in the order */
+  .cartPanelFirst { order: -1; }
+}
+
+@media (max-width: 900px) {
+  /* Phones: get to the order panel faster; the same steps are repeated beside the submit button */
+  .checkoutNote { display: none; }
+  .checkoutHero { padding-bottom: 24px; }
+}

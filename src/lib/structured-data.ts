@@ -74,36 +74,49 @@ export function getLocalBusinessSchema() {
   };
 }
 
+const SITE = 'https://rebellys.com';
+const absUrl = (u: string) => (u.startsWith('http') ? u : `${SITE}${u.startsWith('/') ? '' : '/'}${u}`);
+
+// Product + Offer for one catalog item. No aggregateRating or review on purpose: there is no
+// per-product review data. Availability is InStock because items listed in the shop are orderable;
+// TODO(owner): if an item can sell out, drive availability from real stock instead of a constant.
 export function getProductSchema(product: {
+  id?: string;
   name: string;
   description?: string | null;
   image_url?: string | null;
+  image_urls?: string[] | null;
   price_usd?: number | null;
   slug: string;
+  tag?: string | null;
 }) {
+  const images = (product.image_urls && product.image_urls.length ? product.image_urls : [product.image_url])
+    .filter((u): u is string => !!u)
+    .map(absUrl);
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
+    ...(product.id ? { sku: product.id } : {}),
     description:
       product.description ??
-      `Premium floral arrangement — ${product.name} by Rebelly's Flower Shop`,
-    image:
-      product.image_url ?? 'https://rebellys.com/images/og.jpg',
-    url: `https://rebellys.com/collections`,
+      `Floral arrangement: ${product.name} by Rebelly's Flower Shop`,
+    image: images.length ? images : [`${SITE}/images/og.jpg`],
+    url: `${SITE}/collections`,
+    ...(product.tag ? { category: product.tag } : {}),
     brand: { '@type': 'Brand', name: "Rebelly's" },
-    offers: product.price_usd
-      ? {
-          '@type': 'Offer',
-          price: product.price_usd,
-          priceCurrency: 'USD',
-          availability: 'https://schema.org/InStock',
-          seller: {
-            '@type': 'Organization',
-            name: "Rebelly's Flower Shop",
-          },
-        }
-      : undefined,
+    offers:
+      product.price_usd != null && product.price_usd > 0
+        ? {
+            '@type': 'Offer',
+            url: `${SITE}/collections`,
+            price: product.price_usd.toFixed(2),
+            priceCurrency: 'USD',
+            availability: 'https://schema.org/InStock',
+            itemCondition: 'https://schema.org/NewCondition',
+            seller: { '@type': 'Organization', name: "Rebelly's Flower Shop" },
+          }
+        : undefined,
   };
 }
 

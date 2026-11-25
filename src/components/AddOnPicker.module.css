@@ -1,0 +1,55 @@
+/* Same add-on chips as the original cart drawer (pink outline, cream fill, rounded corners). */
+.addOns {
+  padding: 0.9rem 1.25rem 0.25rem;
+  border-top: 1px solid rgba(233, 30, 140, 0.12);
+}
+.addOnsLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--rose-500);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.2rem;
+  text-transform: uppercase;
+}
+.hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+}
+.addOnsRow {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  padding-bottom: 0.6rem;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.addOn {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 0.55rem 0.8rem;
+  min-height: 44px;
+  background: var(--cream, #fdf6f0);
+  border: 1.5px solid rgba(233, 30, 140, 0.2);
+  border-radius: var(--radius-lg, 16px);
+  font-family: inherit;
+  color: var(--text-main, #2d0a1e);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.addOn:hover { border-color: var(--rose-500); }
+.addOnActive {
+  background: var(--rose-500);
+  border-color: var(--rose-500);
+  color: #fff;
+}
+.addOnName { font-size: 0.82rem; font-weight: 600; white-space: nowrap; }
+.addOnPrice { font-size: 0.75rem; opacity: 0.85; }
+
+@media (max-width: 480px) {
+  .addOns { padding: 0.75rem 1rem 0.15rem; }
+}

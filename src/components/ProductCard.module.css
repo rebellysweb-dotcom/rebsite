@@ -111,6 +111,42 @@
   overflow: hidden;
 }
 
+.descOpen {
+  display: block;
+  -webkit-line-clamp: none;
+  overflow: visible;
+}
+
+/* Details toggle: text link in the same rose as the other links */
+.detailsBtn {
+  align-self: flex-start;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--rose-500);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.details {
+  background: var(--cream);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+.detailsLine {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin-bottom: 6px;
+}
+.detailsLine:last-child { margin-bottom: 0; }
+
 /* Price */
 .priceRow {
   display: flex;
