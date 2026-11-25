@@ -154,13 +154,20 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'item.name must be a string between 1 and 200 characters' }, { status: 400 })
       }
       if (item.image_url) {
-        try {
-          const u = new URL(item.image_url)
-          if (u.protocol !== 'https:' || !u.hostname.endsWith('.supabase.co')) {
-            return NextResponse.json({ error: 'item image_url must be a Supabase storage URL' }, { status: 400 })
-          }
-        } catch {
-          return NextResponse.json({ error: 'item image_url is not a valid URL' }, { status: 400 })
+        // Allowed: the site's own product photos (/images/...) or an https image
+        // on the configured R2 public host. Anything else is rejected.
+        const img = String(item.image_url)
+        const isLocal = /^\/images\/[A-Za-z0-9/_.-]+$/.test(img) && !img.includes('..')
+        let isR2 = false
+        const r2Host = process.env.R2_PUBLIC_HOST
+        if (!isLocal && r2Host) {
+          try {
+            const u = new URL(img)
+            isR2 = u.protocol === 'https:' && u.hostname === r2Host
+          } catch { /* not a URL */ }
+        }
+        if (!isLocal && !isR2) {
+          return NextResponse.json({ error: 'item image_url must be a site image path' }, { status: 400 })
         }
       }
     }

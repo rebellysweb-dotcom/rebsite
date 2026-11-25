@@ -10,7 +10,9 @@ export default function ScrollAnimations() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
+            // Data attribute, not a class: React owns className, and changing it
+            // before a streamed segment hydrates causes a hydration mismatch.
+            entry.target.setAttribute('data-revealed', '');
             io.unobserve(entry.target);
           }
         });
@@ -26,7 +28,7 @@ export default function ScrollAnimations() {
     if (!mainEl) return () => io.disconnect();
 
     const mutationObserver = new MutationObserver(() => {
-      mainEl.querySelectorAll('[data-animate]:not(.visible)').forEach((el) => io.observe(el));
+      mainEl.querySelectorAll('[data-animate]:not([data-revealed])').forEach((el) => io.observe(el));
     });
 
     mutationObserver.observe(mainEl, { childList: true, subtree: true });

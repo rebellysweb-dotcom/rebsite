@@ -101,7 +101,7 @@ h1,h2,h3,h4,h5,p,a,button,span,strong,label { overflow-wrap: break-word; }
 [data-animate="fadeLeft"]  { transform: translateX(-48px); }
 [data-animate="fadeRight"] { transform: translateX(48px); }
 [data-animate="fadeIn"]    { transform: scale(.97); }
-[data-animate].visible { opacity: 1; transform: none; }
+[data-animate][data-revealed] { opacity: 1; transform: none; }
 
 /* ── BUTTONS ──────────────────────────────────────────────── */
 .btn {
